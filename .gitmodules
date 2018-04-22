@@ -1,0 +1,6 @@
+[submodule "src/lib"]
+	path = src/lib
+	url = git@github.com:CSGOPorts/p2go_lib.git
+[submodule "src/thirdparty"]
+	path = src/thirdparty
+	url = git@github.com:CSGOPorts/p2go_thirdparty.git
