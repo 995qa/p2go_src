@@ -1,0 +1,56 @@
+creategameprojects text eol=lf
+createallprojects text eol=lf
+xcode_ccache_wrapper text eol=lf
+vpc text eol=lf
+vpc_linux binary
+vpc_osx binary
+
+*.sh text eol=lf
+*.bat text eol=lf
+*.txt text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.H text eol=lf
+*.cc text eol=lf
+*.cpp text eol=lf
+*.vpc text eol=lf
+*.vgc text eol=lf
+*.nut text eol=lf
+*.awk text eol=lf
+*.pl text eol=lf
+*.py text eol=lf
+*.xcconfig text eol=lf
+*.vcd text eol=lf
+*.vbsp text eol=lf
+*.proto text eol=lf
+*.inc text eol=lf
+*.fxc text eol=lf
+*.vsh text eol=lf
+*.lst text eol=lf
+*.mm text eol=lf
+*.cfg text eol=lf
+*.res text eol=lf
+*.rc text eol=crlf
+*.def text eol=lf
+*.vmt text eol=lf
+*.inl text eol=lf
+*.asm text eol=lf
+
+# CMAKE
+*.cmake text eol=lf
+
+.gitignore text eol=lf
+sourcesdk_def.mak text eol=lf
+smdlexp.mak text eol=lf
+README text eol=lf
+CONTRIBUTING text eol=lf
+LICENSE text eol=lf
+
+*.exe binary
+protoc binary
+ccache binary
+
+gtest_output_test_golden_lin.txt binary
+mod_*_english.txt binary
+
+

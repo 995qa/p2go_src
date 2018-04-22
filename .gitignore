@@ -1,0 +1,108 @@
+# Files to ignore when considering what GIT should commit.
+
+# Visual Studio 
+*.suo
+*.user
+*.sln.docstates
+*.obj
+*.pch
+*.tlog
+*.log
+*.scc
+*.exp
+*.ilk
+*.lastbuildstate
+*.pdb
+ipch
+*.sdf
+*.opensdf
+*.idb
+*.vcxproj
+*.project
+*.sln
+.vs/
+*.filters
+*.vpc_crc
+*.sentinel
+*.dll
+*.vcxproj.FileListAbsolute.txt
+UpgradeLog.htm
+
+# CMAKE
+*.aps
+build/
+build-*/
+
+# Windows explorer files
+Thumbs.db
+
+# Some crap
+*.exe
+*.patch
+*.diff
+*.zip
+*.7z
+*.rar
+*.bz2
+*.mp3
+*.mp4
+
+# nano crap
+*.bak
+
+# Images
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.vtf
+*.tga
+*.tiff
+*.psd
+*.xcf
+*.svg
+
+# Shaders
+filestocopy.txt
+fxctmp9_tmp/
+makefile.stdshader_dx9_20b
+makefile.stdshader_dx9_20b.*
+makefile.stdshader_dx9_30
+uniquefilestocopy.txt
+vcslist.txt
+inclist.txt
+shaders/
+
+# Visual Studio Release
+Release/
+Release_*/
+
+# Visual Studio Debug
+Debug/
+Debug_*/
+
+# OSX/Linux build products
+*.mak
+*.mak.vpc_crc
+*.xcodeproj/
+obj*/
+!devtools/*.mak
+!utils/smdlexp/smdlexp.mak
+
+# Specific Source build products
+/mp/game
+
+# shader files
+*.tmp
+
+# QTCreator
+.qtc_clangd/
+*.config
+*.includes
+*.cflags
+*.cxxflags
+*.files
+*.creator
+
+
+
