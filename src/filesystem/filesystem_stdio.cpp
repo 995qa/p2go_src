@@ -791,7 +791,7 @@ void CFileSystem_Stdio::FreeOptimalReadBuffer( void *p )
 //-----------------------------------------------------------------------------
 // Purpose: low-level filesystem wrapper
 //-----------------------------------------------------------------------------
-FILE *CFileSystem_Stdio::FS_fopen( const char *filename, const char *options, unsigned flags, int64 *size, CFileLoadInfo *pInfo )
+FILE *CFileSystem_Stdio::FS_fopen( const char *filenameT, const char *options, unsigned flags, int64 *size, CFileLoadInfo *pInfo )
 {
 	if( ShouldFailIo() )
 		return NULL;
@@ -801,6 +801,9 @@ FILE *CFileSystem_Stdio::FS_fopen( const char *filename, const char *options, un
 	if ( pInfo )
 		pInfo->m_bLoadedFromSteamCache = false;
 
+	char filename[ MAX_PATH ];
+
+	CBaseFileSystem::FixUpPath ( filenameT, filename, sizeof( filename ) );
 
 #ifdef _WIN32
 	if ( CWin32ReadOnlyFile::CanOpen( filename, options ) )
@@ -964,10 +967,14 @@ char *CFileSystem_Stdio::FS_fgets( char *dest, int destSize, FILE *fp )
 //			pmode - 
 // Output : int
 //-----------------------------------------------------------------------------
-int CFileSystem_Stdio::FS_chmod( const char *path, int pmode )
+int CFileSystem_Stdio::FS_chmod( const char *pathT, int pmode )
 {
-	if ( !path )
+	if ( !pathT )
 		return -1;
+
+	char path[ MAX_PATH ];
+
+	CBaseFileSystem::FixUpPath ( pathT, path, sizeof( path ) );
 
 	int rt = _chmod( path, pmode );
 #if defined( LINUX )
@@ -986,12 +993,16 @@ int CFileSystem_Stdio::FS_chmod( const char *path, int pmode )
 //-----------------------------------------------------------------------------
 // Purpose: low-level filesystem wrapper
 //-----------------------------------------------------------------------------
-int CFileSystem_Stdio::FS_stat( const char *path, struct _stat *buf )
+int CFileSystem_Stdio::FS_stat( const char *pathT, struct _stat *buf )
 {
-	if ( !path )
+	if ( !pathT )
 	{
 		return -1;
 	}
+
+	char path[ MAX_PATH ];
+
+	CBaseFileSystem::FixUpPath ( pathT, path, sizeof( path ) );
 
 	int rt;
 #ifdef _PS3
@@ -1038,8 +1049,12 @@ int CFileSystem_Stdio::FS_stat( const char *path, struct _stat *buf )
 //-----------------------------------------------------------------------------
 // Purpose: low-level filesystem wrapper
 //-----------------------------------------------------------------------------
-HANDLE CFileSystem_Stdio::FS_FindFirstFile(const char *findname, WIN32_FIND_DATA *dat)
+HANDLE CFileSystem_Stdio::FS_FindFirstFile(const char *findnameT, WIN32_FIND_DATA *dat)
 {
+	char findname[ MAX_PATH ];
+
+	CBaseFileSystem::FixUpPath ( findnameT, findname, sizeof( findname ) );
+
 	return ::FindFirstFile(const_cast<char *>(findname), dat);
 }
 

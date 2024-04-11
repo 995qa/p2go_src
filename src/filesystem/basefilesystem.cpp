@@ -1044,8 +1044,11 @@ void CBaseFileSystem::LogAccessToFile( char const *accesstype, char const *fullp
 //			*options - 
 // Output : FILE
 //-----------------------------------------------------------------------------
-FILE *CBaseFileSystem::Trace_FOpen( const char *filename, const char *options, unsigned flags, int64 *size, CFileLoadInfo *pInfo )
+FILE *CBaseFileSystem::Trace_FOpen( const char *filenameT, const char *options, unsigned flags, int64 *size, CFileLoadInfo *pInfo )
 {
+	char filename[MAX_PATH];
+	FixUpPath ( filenameT, filename, sizeof( filename ) );
+
 	if ( m_NonexistingFilesExtensions.GetNumStrings() )
 	{
 		if ( char const *pszExt = V_GetFileExtension( filename ) )
@@ -4275,9 +4278,15 @@ FileHandle_t CBaseFileSystem::FindFileInSearchPaths(
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-FileHandle_t CBaseFileSystem::OpenForRead( const char *pFileName, const char *pOptions, unsigned flags, const char *pathID, char **ppszResolvedFilename )
+FileHandle_t CBaseFileSystem::OpenForRead( const char *pFileNameT, const char *pOptions, unsigned flags, const char *pathID, char **ppszResolvedFilename )
 {
 	VPROF( "CBaseFileSystem::OpenForRead" );
+
+	char pFileNameBuff[MAX_PATH];
+	const char *pFileName = pFileNameBuff;
+
+	FixUpPath ( pFileNameT, pFileNameBuff, sizeof( pFileNameBuff ) );
+
 	return FindFileInSearchPaths( pFileName, pOptions, pathID, flags, ppszResolvedFilename, true );
 }
 
@@ -6063,13 +6072,18 @@ bool CBaseFileSystem::IsDirectory( const char *pFileName, const char *pathID )
 // Purpose: 
 // Input  : *path - 
 //-----------------------------------------------------------------------------
-void CBaseFileSystem::CreateDirHierarchy( const char *pRelativePath, const char *pathID )
+void CBaseFileSystem::CreateDirHierarchy( const char *pRelativePathT, const char *pathID )
 {	
-	CHECK_DOUBLE_SLASHES( pRelativePath );
-
 	// Allow for UNC-type syntax to specify the path ID.
 	char tempPathID[MAX_PATH];
- 	ParsePathID( pRelativePath, pathID, tempPathID );
+ 	ParsePathID( pRelativePathT, pathID, tempPathID );
+
+	char pRelativePathBuff[ MAX_PATH ];
+	const char *pRelativePath = pRelativePathBuff;
+
+	FixUpPath ( pRelativePathT, pRelativePathBuff, sizeof( pRelativePathBuff ) );
+
+	CHECK_DOUBLE_SLASHES( pRelativePath );
 
 	char szScratchFileName[MAX_PATH];
 	if ( !Q_IsAbsolutePath( pRelativePath ) )
@@ -6262,10 +6276,10 @@ const char *CBaseFileSystem::FindFirstEx( const char *pWildCard, const char *pPa
 }
 
 
-const char *CBaseFileSystem::FindFirstHelper( const char *pWildCard, const char *pPathID, FileFindHandle_t *pHandle, int *pFoundStoreID )
+const char *CBaseFileSystem::FindFirstHelper( const char *pWildCardT, const char *pPathID, FileFindHandle_t *pHandle, int *pFoundStoreID )
 {
 	VPROF_BUDGET( "CBaseFileSystem::FindFirst", VPROF_BUDGETGROUP_OTHER_FILESYSTEM );
- 	Assert( pWildCard );
+ 	Assert( pWildCardT );
  	Assert( pHandle );
 
 	FileFindHandle_t hTmpHandle = m_FindData.AddToTail();
@@ -6275,6 +6289,11 @@ const char *CBaseFileSystem::FindFirstHelper( const char *pWildCard, const char 
 	{
 		pFindData->m_FilterPathID = g_PathIDTable.AddString( pPathID );
 	}
+
+	char pWildCard[ MAX_PATH ];
+
+	FixUpPath ( pWildCardT, pWildCard, sizeof( pWildCard ) );
+
 	int maxlen = strlen( pWildCard ) + 1;
 	pFindData->wildCardString.AddMultipleToTail( maxlen );
 	Q_strncpy( pFindData->wildCardString.Base(), pWildCard, maxlen );
@@ -6566,6 +6585,63 @@ void CBaseFileSystem::GetLocalCopy( const char *pFileName )
 	// do nothing. . everything is local.
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Fixes up Path names.  Will fix up platform specific slashes, remove
+//          any ../ or ./, fix //s, and lowercase anything under the directory
+//          that the game is installed to.  We expect all files to be lower cased
+//          there - especially on Linux (where case sensitivity is the norm). 
+//
+// Input  : *pFileName - Original name to convert
+//          *pFixedUpFileName - a buffer to put the converted filename into
+//          sizeFixedUpFileName - the size of the above buffer in chars 
+//-----------------------------------------------------------------------------
+bool CBaseFileSystem::FixUpPath( const char *pFileName, char *pFixedUpFileName, int sizeFixedUpFileName )
+{
+	//  If appropriate fixes up the filename to ensure that it's handled properly by the system.
+	//
+	V_strncpy( pFixedUpFileName, pFileName, sizeFixedUpFileName );
+	V_FixSlashes( pFixedUpFileName, CORRECT_PATH_SEPARATOR );
+//	V_RemoveDotSlashes( pFixedUpFileName, CORRECT_PATH_SEPARATOR, true );
+	V_FixDoubleSlashes( pFixedUpFileName );
+
+	if ( !V_IsAbsolutePath( pFixedUpFileName ) )
+	{
+		V_strlower( pFixedUpFileName );
+	}
+	else
+	{
+		//  Get the BASE_PATH, skip past  - if necessary, and lowercase the rest
+		//  Not just yet...
+
+
+		int iBaseLength = 0;
+		char pBaseDir[MAX_PATH];
+
+		//  Need to get "BASE_PATH" from the filesystem paths, and then check this name against it.
+		//
+		iBaseLength = GetSearchPath( "BASE_PATH", true, pBaseDir, sizeof( pBaseDir ) );
+		if ( iBaseLength )
+		{
+			//  If the first part of the pFixedUpFilename is pBaseDir
+			//  then lowercase the part after that.
+			if ( *pBaseDir && (iBaseLength+1 < V_strlen( pFixedUpFileName ) ) && (0 != V_strncmp( pBaseDir, pFixedUpFileName, iBaseLength ) )  )
+			{
+				V_strlower( &pFixedUpFileName[iBaseLength-1] );
+			}
+		}
+	}
+
+//	Msg("CBaseFileSystem::FixUpPath: Converted %s to %s\n", pFileName, pFixedUpFileName);  // too noisy
+
+#ifdef NEVER // Useful if you're trying to see why your file may not be found (if you have a mixed case file)
+	if (strncmp(pFixedUpFileName, pFileName, 256))
+	{
+		printf("FixUpPath->Converting %s to %s\n",pFileName, pFixedUpFileName);
+	}
+#endif // NEVER
+	return true;
+}
+
 #ifdef SUPPORT_VPK
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -6612,6 +6688,12 @@ const char *CBaseFileSystem::RelativePathToFullPath( const char *pFileName, cons
 	V_strncpy( lowercasedname, pFileName, 255 );
 	V_strnlwr( lowercasedname, 255 );
 	pFileName = lowercasedname;
+#elif defined( POSIX ) // SanyaSho: 2013MERGE
+	// Convert filename to lowercase.  All files in the
+	// game logical filesystem must be accessed by lowercase name
+	char szLowercaseFilename[ MAX_PATH ];
+	FixUpPath( pFileName, szLowercaseFilename, sizeof( szLowercaseFilename ) );
+	pFileName = szLowercaseFilename;
 #endif
 
 	// Fill in the default in case it's not found...

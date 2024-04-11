@@ -589,6 +589,8 @@ public:
 
 	virtual void				GetLocalCopy( const char *pFileName );
 
+	virtual  bool                           FixUpPath( const char *pFileName, char *pFixedUpFileName, int sizeFixedUpFileName );
+
 	virtual FileNameHandle_t	FindOrAddFileName( char const *pFileName );
 	virtual FileNameHandle_t	FindFileName( char const *pFileName );
 	virtual bool				String( const FileNameHandle_t& handle, char *buf, int buflen );
@@ -837,8 +839,10 @@ public:
 				pFileSystem->m_SearchPathsMutex.Lock();
 				CopySearchPaths( pFileSystem->m_SearchPaths );
 				pFileSystem->m_SearchPathsMutex.Unlock();
-				V_strncpy( m_Filename, *ppszFilename, sizeof( m_Filename ) );
-				V_FixSlashes( m_Filename );
+
+				pFileSystem->FixUpPath ( *ppszFilename, m_Filename, sizeof( m_Filename ) );
+				//V_strncpy( m_Filename, *ppszFilename, sizeof( m_Filename ) );
+				//V_FixSlashes( m_Filename );
 			}
 			else
 			{
