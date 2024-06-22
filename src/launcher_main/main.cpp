@@ -85,6 +85,28 @@ extern "C" { __declspec( dllexport ) int AmdPowerXpressRequestHighPerformance = 
 
 #ifdef WIN32
 
+static void WaitForDebuggerConnect( LPSTR lpCmdLine, int time )
+{
+	if( strstr( lpCmdLine, "-wait_for_debugger" ) )
+	{
+		DWORD startTick = GetTickCount64();
+		DWORD timeoutMS = time * 1000;
+
+		printf( "\nArg -wait_for_debugger found.\nWaiting %dsec for debugger...\n", time );
+
+		while( GetTickCount64() - startTick < timeoutMS )
+		{
+			if( IsDebuggerPresent() )
+			{
+				printf( "Debugger connected...\n\n" );
+				return;
+			}
+
+			Sleep( 100 );
+		}
+	}
+}
+
 static char *GetBaseDir( const char *pszBuffer )
 {
 	static char	basedir[ MAX_PATH ];
@@ -171,6 +193,8 @@ int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 		LocalFree(pszError);
 		return 0;
 	}
+
+	WaitForDebuggerConnect( lpCmdLine, 30 );
 
 	LauncherMain_t main = (LauncherMain_t)GetProcAddress( launcher, "LauncherMain" );
 	return main( hInstance, hPrevInstance, lpCmdLine, nCmdShow );
