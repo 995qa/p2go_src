@@ -57,7 +57,7 @@
 #include "GameUI/IGameUI.h"
 #include "sv_main.h"
 #if defined( BINK_VIDEO )
-#include "bink/bink.h"
+#include "bink.h"
 #endif
 #include "vgui/IVGui.h"
 #include "IHammer.h"
@@ -66,6 +66,7 @@
 #include "materialsystem/imaterial.h"
 #include "characterset.h"
 #include "server.h"
+#include "client.h"
 
 #if defined( INCLUDE_SCALEFORM )
 #include "scaleformui/scaleformui.h"
