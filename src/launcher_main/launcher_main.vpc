@@ -126,7 +126,6 @@ $Configuration
 									"if exist $(TargetDir)$(TargetName).map copy $(TargetDir)$(TargetName).map $OUTBINDIR\$OUTBINNAME.map" "\n" \
 									"if exist $(TargetDir)$(TargetName).pdb copy $(TargetDir)$(TargetName).pdb $OUTBINDIR\$OUTBINNAME.pdb" "\n" \
 									"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$OUTBINNAME.dat $SRCDIR" "\n"								\
-									"$OUTBINDIR\bin\newdat $OUTBINDIR\$OUTBINNAME.exe" "\n"					\
 									"goto BuildEventOK" "\n" \
 									":BuildEventFailed" "\n" \
 									"echo *** ERROR! PostBuildStep FAILED for $(ProjectName)! EXE or DLL is probably running. ***" "\n" \
