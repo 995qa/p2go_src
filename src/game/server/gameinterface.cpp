@@ -1269,7 +1269,7 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 	m_fAutoSaveDangerousMinHealthToCommit = 0.0f;
 
 	// ask for the latest game rules
-//	GameRules()->UpdateGameplayStatsFromSteam();
+	GameRules()->UpdateGameplayStatsFromSteam();
 
 	if ( gpGlobals->eLoadType == MapLoad_Transition )
 	{
@@ -1396,7 +1396,7 @@ void CServerGameDLL::GameFrame( bool simulating )
 	// are done before the engine has got the Steam API connected, so we have to wait until now to connect ourselves.
 	if ( Steam3Server().CheckInitialized() )
 	{
-//		GameRules()->UpdateGameplayStatsFromSteam();
+		GameRules()->UpdateGameplayStatsFromSteam();
 	}
 #endif
 
@@ -1579,13 +1579,13 @@ void CServerGameDLL::Think( bool finalTick )
 		m_fAutoSaveDangerousMinHealthToCommit = 0.0f;
 	}
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// TODO: would have liked this to be totally event driven... currently needs a tick.
-	/*
 	if ( engine->IsDedicatedServer() && steamgameserverapicontext->SteamHTTP() )
 	{
 		DedicatedServerWorkshop().Update();	
 	}
-	*/
+#endif
 }
 
 void CServerGameDLL::OnQueryCvarValueFinished( QueryCvarCookie_t iCookie, edict_t *pPlayerEntity, EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
@@ -2259,25 +2259,35 @@ void CServerGameDLL::LoadMessageOfTheDay()
 
 PublishedFileId_t CServerGameDLL::GetUGCMapFileID( const char* szMapPath )
 {
-//	return DedicatedServerWorkshop().GetUGCMapPublishedFileID( szMapPath );
-	return NULL;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	return DedicatedServerWorkshop().GetUGCMapPublishedFileID( szMapPath );
+#else
+	return 0;
+#endif
 }
 
 bool CServerGameDLL::GetNewestSubscribedFiles( void )
 {
-//	DedicatedServerWorkshop().GetNewestSubscribedFiles();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	DedicatedServerWorkshop().GetNewestSubscribedFiles();
+#endif
 	return true;
 }
 
 void CServerGameDLL::UpdateUGCMap( PublishedFileId_t id )
 {
-//	DedicatedServerWorkshop().CheckForNewVersion( id );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	DedicatedServerWorkshop().CheckForNewVersion( id );
+#endif
 }
 
 bool CServerGameDLL::HasPendingMapDownloads( void ) const
 {
-//	return DedicatedServerWorkshop().HasPendingMapDownloads();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	return DedicatedServerWorkshop().HasPendingMapDownloads();
+#else
 	return false;
+#endif
 }
 
 // Pure server validation failed for the given client, client supplied
@@ -3642,13 +3652,14 @@ void CServerGameClients::ClientEarPosition( edict_t *pEdict, Vector *pEarOrigin 
 
 bool CServerGameClients::ClientReplayEvent( edict_t *pEdict, const ClientReplayEventParams_t &params )
 {
-	CBasePlayer *pPlayer = ( CBasePlayer * )CBaseEntity::Instance( pEdict );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	CCSPlayer *pPlayer = ( CCSPlayer * )CBaseEntity::Instance( pEdict );
 	if ( pPlayer )
 	{
-//		return pPlayer->StartHltvReplayEvent( params );
-		return 0.0f; //fix not all control paths return a value, this should be removed or made useful
+		return pPlayer->StartHltvReplayEvent( params );
 	}
 	else
+#endif
 	{
 		return 0.0f;
 	}
@@ -3751,9 +3762,9 @@ int CServerGameClients::GetMaxHumanPlayers()
 {
 	if ( g_pGameRules )
 	{
-		//return g_pGameRules->GetMaxHumanPlayers();
+		return g_pGameRules->GetMaxHumanPlayers();
 	}
-	return 32;
+	return -1;
 }
 
 // The client has submitted a keyvalues command
