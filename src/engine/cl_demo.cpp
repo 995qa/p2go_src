@@ -116,7 +116,7 @@ static ConVar demo_highlight_skipthreshold( "demo_highlight_skipthreshold", "10"
 float scr_demo_override_fov = 0.0f;
 
 // Defined in engine
-static ConVar cl_interpolate( "cl_interpolate", "1", FCVAR_RELEASE, "Enables or disables interpolation on listen servers or during demo playback" );
+static ConVar cl_interpolate( "cl_interpolate", "1", FCVAR_USERINFO | FCVAR_HIDDEN, "Enables or disables interpolation on listen servers or during demo playback" );
 
 void SetPlaybackParametersLockFirstPersonAccountID( uint32 nAccountID );
 void CL_ScanDemoDone( const char *pszMode );

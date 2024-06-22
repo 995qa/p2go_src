@@ -209,7 +209,7 @@ ConVar	cl_resend	( "cl_resend", "2", FCVAR_RELEASE, "Delay in seconds before the
 ConVar	cl_resend_timeout	( "cl_resend_timeout", "60", FCVAR_RELEASE, "Total time allowed for the client to resend the 'connect' attempt", true, CL_MIN_RESEND_TIME, true, 1000 * CL_MAX_RESEND_TIME );
 ConVar	cl_name		( "name","unnamed", FCVAR_ARCHIVE | FCVAR_USERINFO | FCVAR_SS | FCVAR_PRINTABLEONLY | FCVAR_SERVER_CAN_EXECUTE, "Current user name", CL_NameCvarChanged );
 ConVar	password	( "password", "", FCVAR_ARCHIVE | FCVAR_SERVER_CANNOT_QUERY | FCVAR_DONTRECORD, "Current server access password" );
-static ConVar cl_interpolate( "cl_interpolate", "1", FCVAR_RELEASE, "Enables or disables interpolation on listen servers or during demo playback" );
+static ConVar cl_interpolate( "cl_interpolate", "1", FCVAR_USERINFO | FCVAR_HIDDEN, "Enables or disables interpolation on listen servers or during demo playback" );
 ConVar  cl_clanid( "cl_clanid", "0", FCVAR_ARCHIVE | FCVAR_USERINFO | FCVAR_HIDDEN, "Current clan ID for name decoration", CL_ClanIdChanged );
 ConVar  cl_color( "cl_color", "0", FCVAR_ARCHIVE | FCVAR_USERINFO, "Preferred teammate color", true, 0, true, 4 );
 ConVar  cl_decryptdata_key( "cl_decryptdata_key", "", FCVAR_RELEASE, "Key to decrypt encrypted GOTV messages" );
