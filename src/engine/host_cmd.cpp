@@ -1662,12 +1662,6 @@ void Host_Disconnect( bool bShowMainMenu )
 	}
 #endif
 
-
-	IGameEvent *disconnectEvent = g_GameEventManager.CreateEvent( "cs_game_disconnected" );
-
-	if ( disconnectEvent )
-		g_GameEventManager.FireEventClientSide( disconnectEvent );
-
 	CDisconnectReentrancyCounter autoReentrancyCounter;
 	
 #if !defined( DEDICATED )

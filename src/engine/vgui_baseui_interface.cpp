@@ -1034,7 +1034,7 @@ void CEngineVGui::Init()
 		staticGameConsole->Initialize();
 #if defined( TOOLFRAMEWORK_VGUI_REFACTOR )
 		staticGameConsole->SetParent(staticEngineToolsPanel->GetVPanel());
-#elif !defined (CSTRIKE15_REAL)
+#else
 		staticGameConsole->SetParent(staticGameUIPanel->GetVPanel());
 #endif
 	}
@@ -1389,10 +1389,10 @@ bool CEngineVGui::HideGameUI()
 		staticGameUIFuncs->OnGameUIHidden();
 	}
 
-#if defined (CSTRIKE15_REAL)
+#if !defined( PORTAL2 )
 	// Decouple the pause menu and console window: ensure we hide the console when the game UI is hidden (eg. when we hit ESC key)
 	HideConsole();
-#endif // CSTRIKE15_REAL
+#endif // !PORTAL2
 
 	// Tracker 18820:  Pulling up options/console was perma-pausing the background levels, now we
 	//  unpause them when you hit the Esc key even though the UI remains...
