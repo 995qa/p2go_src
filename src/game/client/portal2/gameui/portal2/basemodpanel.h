@@ -7,6 +7,8 @@
 #ifndef _BASEMODFACTORYBASEPANEL_H__
 #define _BASEMODFACTORYBASEPANEL_H__
 
+//#define NO_UGC
+
 #define GAMEUI_BASEMODPANEL_VGUI
 #define GAMEUI_BASEMODPANEL_SCHEME "basemodui_scheme"
 
@@ -20,6 +22,8 @@
 #include "ixboxsystem.h"
 #include "matchmaking/imatchframework.h"
 #include "utlmap.h"
+#include "steam/steamclientpublic.h"
+#include "steam/isteamremotestorage.h"
 #include "ugc_workshop_manager.h"
 
 #if defined( PORTAL2_PUZZLEMAKER )
@@ -30,7 +34,7 @@ extern ConVar cm_current_community_map;
 
 #if !defined( NO_STEAM )
 extern CWorkshopManager &WorkshopManager( void );
-#endif // 
+#endif // NO_STEAM
 
 // must supply some non-trivial time to let the movie startup smoothly
 #define TRANSITION_FROM_OVERLAY_DELAY_TIME	0.5f	// how long to wait before starting the fade
@@ -63,7 +67,7 @@ enum ECommunityMapQueueMode {
 	QUEUEMODE_COOP_QUICK_PLAY,	// User is quick playing coop maps
 };
 
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && !defined(NO_UGC)
 
 // Handle file requests for community maps (downloads thumbnail / content)
 class CBaseCommunityRequest : public CBasePublishedFileRequest
@@ -120,12 +124,12 @@ public:
 
 	typedef CBaseCommunityRequest BaseClass;
 
-	CCommunityMapSPQuickplayRequest( PublishedFileId_t nFileID ) :
+	CCommunityMapSPQuickplayRequest(PublishedFileId_t nFileID) :
 	BaseClass( nFileID )
 	{}
 
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
+	virtual void OnLoaded(PublishedFileInfo_t& info);
+	virtual void OnError(EResult nErrorCode);
 };
 
 // Handle file requests for community coop quickplay
@@ -135,12 +139,12 @@ public:
 
 	typedef CBaseCommunityRequest BaseClass;
 
-	CCommunityMapCoopQuickplayRequest( PublishedFileId_t nFileID ) :
+	CCommunityMapCoopQuickplayRequest(PublishedFileId_t nFileID) :
 	BaseClass( nFileID )
 	{}
 
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
+	virtual void OnLoaded(PublishedFileInfo_t& info);
+	virtual void OnError(EResult nErrorCode);
 };
 
 // Handle file requests for community map queue history (downloads thumbnail)
@@ -150,20 +154,20 @@ public:
 
 	typedef CBaseCommunityRequest BaseClass;
 
-	CQueueHistoryEntryRequest( PublishedFileId_t nFileID ) : 
+	CQueueHistoryEntryRequest(PublishedFileId_t nFileID) :
 		BaseClass( nFileID ),
-		m_unLastPlayedTime( 0 ),
-		m_unCompletionTime( 0 ) 
+		m_unLastPlayedTime(0),
+		m_unCompletionTime(0)
 	{}
 
-	CQueueHistoryEntryRequest( PublishedFileId_t nFileID, uint32 nLastPlayedTime, uint32 nCompletionTime ) : 
+	CQueueHistoryEntryRequest(PublishedFileId_t nFileID, uint32 nLastPlayedTime, uint32 nCompletionTime) :
 		BaseClass( nFileID ),
-		m_unLastPlayedTime( nLastPlayedTime ),
-		m_unCompletionTime( nCompletionTime ) 
+		m_unLastPlayedTime(nLastPlayedTime),
+		m_unCompletionTime(nCompletionTime)
 	{}
 
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
+	virtual void OnLoaded(PublishedFileInfo_t& info);
+	virtual void OnError(EResult nErrorCode);
 
 	uint32 m_unLastPlayedTime;
 	uint32 m_unCompletionTime;
@@ -176,13 +180,13 @@ public:
 
 	typedef CBaseCommunityRequest BaseClass;
 
-	CUserPublishedFileRequest( PublishedFileId_t nFileID ) : 
+	CUserPublishedFileRequest(PublishedFileId_t nFileID) : 
 		BaseClass( nFileID )
 	{}
 
 
-	virtual void OnLoaded( PublishedFileInfo_t &info );
-	virtual void OnError( EResult nErrorCode );
+	virtual void OnLoaded(PublishedFileInfo_t& info);
+	virtual void OnError(EResult nErrorCode);
 };
 
 #endif // !NO_STEAM

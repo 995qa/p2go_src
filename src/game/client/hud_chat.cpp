@@ -11,6 +11,8 @@
 #include "vguicenterprint.h"
 #include "hud_basechat.h"
 #include <vgui/ILocalize.h>
+#include "c_playerresource.h"
+#include "voice_status.h"
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
@@ -41,57 +43,87 @@ void CHudChat::Init( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Reads in a player's Chat text from the server
-//-----------------------------------------------------------------------------
-void CHudChat::MsgFunc_SayText2( bf_read &msg )
-{
-	int client = msg.ReadByte();
-	bool bWantsToChat = msg.ReadByte() ? true : false;
-
-	wchar_t szBuf[6][256];
-	char untranslated_msg_text[256];
-	wchar_t *msg_text = ReadLocalizedString( msg, szBuf[0], sizeof( szBuf[0] ), false, untranslated_msg_text, sizeof( untranslated_msg_text ) );
-
-	// keep reading strings and using C format strings for subsituting the strings into the localised text string
-	ReadChatTextString ( msg, szBuf[1], sizeof( szBuf[1] ) );		// player name
-	ReadChatTextString ( msg, szBuf[2], sizeof( szBuf[2] ) );		// chat text
-	ReadLocalizedString( msg, szBuf[3], sizeof( szBuf[3] ), true );
-	ReadLocalizedString( msg, szBuf[4], sizeof( szBuf[4] ), true );
-
-	g_pVGuiLocalize->ConstructString( szBuf[5], sizeof( szBuf[5] ), msg_text, 4, szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
-
-	char ansiString[512];
-	g_pVGuiLocalize->ConvertUnicodeToANSI( ConvertCRtoNL( szBuf[5] ), ansiString, sizeof( ansiString ) );
-
-	if ( bWantsToChat )
-	{
-		// print raw chat text
-		ChatPrintf( client, CHAT_FILTER_NONE, "%s", ansiString );
-
-		Msg( "%s\n", RemoveColorMarkup(ansiString) );
-	}
-	else
-	{
-		// print raw chat text
-		ChatPrintf( client, CHAT_FILTER_NONE, "%s", ansiString );
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: 
-// Input  : *pszName - 
-//			iSize - 
-//			*pbuf - 
 //-----------------------------------------------------------------------------
-void CHudChat::MsgFunc_SayText( bf_read &msg )
+bool CHudChat::MsgFunc_SayText( const CUsrMsg_SayText &msg )
 {
 	char szString[256];
 
-	msg.ReadByte(); // client ID
-	msg.ReadString( szString, sizeof(szString) );
+	//msg.ReadByte(); // client ID // SanyaSho: Used only in ASW
+	Q_strncpy( szString, msg.text().c_str(), sizeof( szString ) );
 	Printf( CHAT_FILTER_NONE, "%s", szString );
+
+	return true;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Reads in a player's Chat text from the server
+//-----------------------------------------------------------------------------
+bool CHudChat::MsgFunc_SayText2( const CUsrMsg_SayText2 &msg )
+{
+	if (CDemoPlaybackParameters_t const *pParameters = engine->GetDemoPlaybackParameters())
+	{
+		if (pParameters->m_bAnonymousPlayerIdentity)
+			return true; // cannot print potentially personal details
+	}
+
+	int client = msg.ent_idx();
+	bool bWantsToChat = msg.chat() != 0;
+
+	wchar_t szBuf[6][256];
+	char untranslated_msg_text[256];
+	wchar_t *msg_text = ReadLocalizedString(msg.msg_name().c_str(), szBuf[0], sizeof(szBuf[0]), false, untranslated_msg_text, sizeof(untranslated_msg_text));
+
+	// keep reading strings and using C format strings for subsituting the strings into the localised text string
+	ReadChatTextString(msg.params(0).c_str(), szBuf[1], sizeof(szBuf[1]));		// player name
+	ReadChatTextString(msg.params(1).c_str(), szBuf[2], sizeof(szBuf[2]), true);	// location
+	ReadLocalizedString(msg.params(2).c_str(), szBuf[3], sizeof(szBuf[3]), true);	// radio text
+	ReadLocalizedString(msg.params(3).c_str(), szBuf[4], sizeof(szBuf[4]), true);	// unused :(
+
+	if (V_strcmp(msg.params(3).c_str(), "auto") != 0 && (GetClientVoiceMgr()->IsPlayerBlocked(client) || GetClientVoiceMgr()->ShouldHideCommunicationFromPlayer(client)))
+		bWantsToChat = false;
+
+	g_pVGuiLocalize->ConstructString(szBuf[5], sizeof(szBuf[5]), msg_text, 4, szBuf[1], szBuf[2], szBuf[3], szBuf[4]);
+
+	char ansiString[512];
+	g_pVGuiLocalize->ConvertUnicodeToANSI(ConvertCRtoNL(szBuf[5]), ansiString, sizeof(ansiString));
+
+	if (bWantsToChat)
+	{
+		int iFilter = CHAT_FILTER_NONE;
+		bool playChatSound = true;
+
+		if (client > 0 && g_PR && (g_PR->GetTeam(client) != g_PR->GetTeam(GetLocalPlayerIndex())))
+		{
+			iFilter = CHAT_FILTER_PUBLICCHAT;
+			if (!(iFilter & GetFilterFlags()))
+			{
+				playChatSound = false;
+			}
+		}
+
+		// print raw chat text
+		ChatPrintf(client, iFilter, "%s", ansiString);
+
+		Msg("%s\n", RemoveColorMarkup(ansiString));
+
+		if (playChatSound)
+		{
+			CLocalPlayerFilter filter;
+			C_BaseEntity::EmitSound(filter, -1, "HudChat.Message"); //SOUND_FROM_LOCAL_PLAYER is defined in iEngineAudio.h afaik and its just pointed to -1 so thats what ill make it here
+		}
+	}
+	else
+	{
+		if (!GetClientVoiceMgr()->IsPlayerBlocked(client) && !GetClientVoiceMgr()->ShouldHideCommunicationFromPlayer(client))
+		{
+			// print raw chat text
+			ChatPrintf(client, GetFilterForString(untranslated_msg_text), "%s", ansiString);
+		}
+	}
+
+	return true;
+}
 
 // Message handler for text messages
 // displays a string, looking them up from the titles.txt file, which can be localised
@@ -105,37 +137,37 @@ void CHudChat::MsgFunc_SayText( bf_read &msg )
 //   string: message parameter 4
 // any string that starts with the character '#' is a message name, and is used to look up the real message in titles.txt
 // the next (optional) one to four strings are parameters for that string (which can also be message names if they begin with '#')
-void CHudChat::MsgFunc_TextMsg( bf_read &msg )
+bool CHudChat::MsgFunc_TextMsg( const CUsrMsg_TextMsg &msg )
 {
 	char szString[2048];
-	int msg_dest = msg.ReadByte();
+	int msg_dest = msg.msg_dst();
 	static char szBuf[6][256];
 
-	msg.ReadString( szString, sizeof(szString) );
+	Q_strncpy( szString, msg.params( 0 ).c_str(), sizeof( szString ) );
 	char *msg_text = hudtextmessage->LookupString( szString, &msg_dest );
 	Q_strncpy( szBuf[0], msg_text, sizeof( szBuf[0] ) );
 	msg_text = szBuf[0];
 
 	// keep reading strings and using C format strings for subsituting the strings into the localised text string
-	msg.ReadString( szString, sizeof(szString) );
+	Q_strncpy( szString, msg.params( 1 ).c_str(), sizeof( szString ) );
 	char *sstr1 = hudtextmessage->LookupString( szString );
 	Q_strncpy( szBuf[1], sstr1, sizeof( szBuf[1] ) );
 	sstr1 = szBuf[1];
 
 	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	msg.ReadString( szString, sizeof(szString) );
+	Q_strncpy( szString, msg.params( 2 ).c_str(), sizeof( szString ) );
 	char *sstr2 = hudtextmessage->LookupString( szString );
 	Q_strncpy( szBuf[2], sstr2, sizeof( szBuf[2] ) );
 	sstr2 = szBuf[2];
 	
 	StripEndNewlineFromString( sstr2 );
-	msg.ReadString( szString, sizeof(szString) );
+	Q_strncpy( szString, msg.params( 3 ).c_str(), sizeof( szString ) );
 	char *sstr3 = hudtextmessage->LookupString( szString );
 	Q_strncpy( szBuf[3], sstr3, sizeof( szBuf[3] ) );
 	sstr3 = szBuf[3];
 
 	StripEndNewlineFromString( sstr3 );
-	msg.ReadString( szString, sizeof(szString) );
+	Q_strncpy( szString, msg.params( 4 ).c_str(), sizeof( szString ) );
 	char *sstr4 = hudtextmessage->LookupString( szString );
 	Q_strncpy( szBuf[4], sstr4, sizeof( szBuf[4] ) );
 	sstr4 = szBuf[4];
@@ -144,7 +176,7 @@ void CHudChat::MsgFunc_TextMsg( bf_read &msg )
 	char *psz = szBuf[5];
 
 	if ( !cl_showtextmsg.GetInt() )
-		return;
+		return false;
 
 	switch ( msg_dest )
 	{
@@ -169,5 +201,7 @@ void CHudChat::MsgFunc_TextMsg( bf_read &msg )
 		Msg( "%s", ConvertCRtoNL( psz ) );
 		break;
 	}
+
+	return true;
 }
 

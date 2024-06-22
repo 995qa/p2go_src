@@ -12,7 +12,7 @@
 #ifdef CLIENT_DLL
 
 #include "c_portal_player.h"
-#include "c_paintblob.h"
+#include "paint/c_paintblob.h"
 #include "portal_mp_gamerules.h"
 
 #else
@@ -20,7 +20,7 @@
 #include "portal_player.h"
 #include "npc_portal_turret_floor.h"
 #include "prop_weightedcube.h"
-#include "cpaintblob.h"
+#include "paint/cpaintblob.h"
 
 #endif
 

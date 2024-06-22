@@ -52,7 +52,7 @@ private:
 	CPanelAnimationVar( bool, m_bHideCrosshair, "never_draw", "false" );
 };
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 // Enable/disable crosshair rendering.
 extern ConVar crosshair;
 #endif

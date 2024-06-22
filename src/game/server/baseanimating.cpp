@@ -1503,6 +1503,7 @@ int CBaseAnimating::LookupBone( const char *szName )
 
 	int ret = Studio_BoneIndexByName( GetModelPtr(), szName );
 
+#if !defined( PORTAL2 )
 	if ( ret == -1 )
 	{
 		// Try to fix up some common old bone names to new bone names, until I can go through the code and fix all cases or write a data-driven solution.
@@ -1524,8 +1525,8 @@ int CBaseAnimating::LookupBone( const char *szName )
 		}
 
 		//AssertMsg( ret > 0, "Failed to find an alternate bone name!" );
-
 	}
+#endif
 
 	return ret;
 }
@@ -3033,7 +3034,11 @@ bool CBaseAnimating::TestHitboxes( const Ray_t &ray, unsigned int fContentsMask,
 	matrix3x4_t *hitboxbones[MAXSTUDIOBONES];
 	pcache->ReadCachedBonePointers( hitboxbones, pStudioHdr->numbones() );
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( TraceToStudioCsgoHitgroupsPriority( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetAbsOrigin(), GetModelHierarchyScale(), tr ) )
+#else
+	if ( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetAbsOrigin(), GetModelHierarchyScale(), tr ) )
+#endif
 	{
 		mstudiobbox_t *pbox = set->pHitbox( tr.hitbox );
 		const mstudiobone_t *pBone = pStudioHdr->pBone(pbox->bone);

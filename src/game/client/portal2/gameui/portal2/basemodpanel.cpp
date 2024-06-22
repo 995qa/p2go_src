@@ -6,7 +6,7 @@
 
 #include "cbase.h"
 
-#include "basemodpanel.h"
+#include "portal2/gameui/portal2/basemodpanel.h"
 
 #include "./GameUI/IGameUI.h"
 #include "ienginevgui.h"
@@ -21,6 +21,7 @@
 #include "inputsystem/iinputsystem.h"
 #include "FileSystem.h"
 #include "filesystem/IXboxInstaller.h"
+#include "../gcsdk/steamextra/rtime.h"
 
 #ifdef _X360
 	#include "xbox/xbox_launch.h"
@@ -75,8 +76,8 @@
 #include "vcustomcampaigns.h"
 #include "vdownloadcampaign.h"
 #include "vleaderboard.h"
-#include "vportalleaderboard.h"
-#include "vportalleaderboardhud.h"
+//#include "vportalleaderboard.h"
+//#include "vportalleaderboardhud.h"
 #include "vcoopexitchoice.h"
 #include "gameconsole.h"
 #include "vgui/ISystem.h"
@@ -107,6 +108,7 @@
 #include "vfadeouttoeconui.h"
 #include "materialsystem/materialsystem_config.h"
 #include "utlmap.h"
+#include "CegClientWrapper.h"
 
 #if defined( PORTAL2_PUZZLEMAKER )
 #include "gc_clientsystem.h"
@@ -115,7 +117,6 @@
 #include "vratemapdialog.h"
 #include "vplaytestdemosdialog.h"
 #include "vplaytestuploadwait.h"
-#include "../gcsdk/steamextra/rtime.h"
 #include "vpuzzlemakermenu.h"
 #include "vpuzzlemakermychambers.h"
 #include "vpuzzlemakerexitconfirmation.h"
@@ -127,6 +128,16 @@
 #include "c_community_coop.h"
 #endif // PORTAL2_PUZZLEMAKER
 
+//-----------------------------------------------------------------------------
+// Purpose: Helper function for Steam's remote storage interface
+//-----------------------------------------------------------------------------
+#ifndef CSTRIKE15 // CSGO branch has this defined elsewhere
+ISteamRemoteStorage *GetISteamRemoteStorage()
+{
+	return (steamapicontext != NULL) ? steamapicontext->SteamRemoteStorage() : NULL;
+}
+#endif // CSTRIKE15
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -135,11 +146,24 @@ static LoggingFileHandle_t s_WorkshopLogHandle;
 using namespace BaseModUI;
 using namespace vgui;
 
+#include "iconsole.h"
+
+#ifndef CSTRIKE15 // CSGO branch has this defined elsewhere
+Color g_WorkshopLogColor(0, 255, 255, 255);
+BEGIN_DEFINE_LOGGING_CHANNEL(LOG_WORKSHOP, "Workshop", LCF_CONSOLE_ONLY, LS_WARNING, g_WorkshopLogColor);
+ADD_LOGGING_CHANNEL_TAG("UGCOperation");
+ADD_LOGGING_CHANNEL_TAG("WorkshopOperation");
+END_DEFINE_LOGGING_CHANNEL();
+#endif // CSTRIKE15
+
 //setup in GameUI_Interface.cpp
 extern class IMatchSystem *matchsystem;
-extern IGameConsole *IGameConsole();
+#ifdef SWARM_DLL
+//extern IGameConsole *IGameConsole();
+#endif
 
 extern CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent );
+//CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent ) {}
 
 #define MAX_QUICK_PLAY_ENTRIES	50	// We want at least this many in the queue to consider ourselves "full"
 
@@ -721,7 +745,11 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 			break;
 
 		case WT_XBOXLIVE:
+#if defined( _X360 )
 			m_Frames[wt] = new XboxLiveOptions( this, "XboxLIVE" );
+#else
+			Assert( 0 );
+#endif
 			break;
 
 		case WT_OPTIONSCLOUD:
@@ -874,15 +902,15 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 			break;
 
 		case WT_PORTALLEADERBOARD:
-			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
+		//	m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", true );
 			break;
 
 		case WT_PORTALCOOPLEADERBOARD:
-			m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
+		//	m_Frames[wt] = new CPortalLeaderboardPanel( this, "PortalLeaderboard", false );
 			break;
 
 		case  WT_PORTALLEADERBOARDHUD:
-			m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
+		//	m_Frames[wt] = new CPortalHUDLeaderboard( this, "PortalHUDLeaderboard" );
 			break;
 
 		case WT_COOPEXITCHOICE:
@@ -2537,7 +2565,7 @@ void CBaseModPanel::OnEvent( KeyValues *pEvent )
 			}
 		}
 	}
-#if !defined( NO_STEAM )
+#if !defined( NO_STEAM ) && defined( PORTAL2_PUZZLEMAKER )
 	else if ( !V_stricmp( "CommunityMap_Added", szEvent ) )
 	{
 #if !defined( _PS3 )		
@@ -5244,7 +5272,8 @@ bool CBaseModPanel::CreateThumbnailFileRequest( const PublishedFileInfo_t &info 
 {
 	// Grab the thumbnail file
 	return WorkshopManager().CreateFileDownloadRequest(	info.m_hPreviewFile,
-														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_hFile ),
+														info.m_nPublishedFileId,
+														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_nPublishedFileId ),
 														CFmtStr( "%s%llu.jpg", COMMUNITY_MAP_THUMBNAIL_PREFIX, info.m_nPublishedFileId ),
 														UGC_PRIORITY_THUMBNAIL,
 														info.m_rtimeUpdated );
@@ -5260,10 +5289,11 @@ bool CBaseModPanel::CreateMapFileRequest( const PublishedFileInfo_t &info, bool 
 
 	// Grab the map file
 	return WorkshopManager().CreateFileDownloadRequest(	info.m_hFile,
-														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_hFile ),
-														szFixedFilename,
+														info.m_nPublishedFileId,
+														CFmtStr( "%s/%llu", COMMUNITY_MAP_PATH, info.m_nPublishedFileId ),
+														V_GetFileName( info.m_pchFileName ),
 														( bUserMadeMap ) ? UGC_PRIORITY_USER_MAP : UGC_PRIORITY_BSP,
-														info.m_rtimeUpdated );	
+														info.m_rtimeUpdated );
 }
 
 //-----------------------------------------------------------------------------
@@ -5443,7 +5473,9 @@ void CBaseModPanel::Steam_OnEnumerateWorkshopFiles( RemoteStorageEnumerateWorksh
 		}
 		ConColorMsg( rgbaCommunityDebug, "-------END MY HISTORY\n" );
 
+#ifdef PORTAL2_PUZZLEMAKER
 		g_CommunityCoopManager.Dev_SpewParterHistory();
+#endif // PORTAL2_PUZZLEMAKER
 	}
 		
 	// Work through all the returned entries we received
@@ -5462,11 +5494,13 @@ void CBaseModPanel::Steam_OnEnumerateWorkshopFiles( RemoteStorageEnumerateWorksh
 			}
 
 			// Filter out maps that the partner has already visited
+#ifdef PORTAL2_PUZZLEMAKER
 			if ( g_CommunityCoopManager.IsInPartnerHistoryQueue( fileID ) )
 			{
 				if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "DISCARDED - Already in THEIR history\n");
 				continue;
 			}
+#endif // PORTAL2_PUZZLEMAKDER
 		}
 
 		if( cm_community_debug_spew.GetBool() ) ConColorMsg( rgbaCommunityDebug, "ACCEPTED\n");

@@ -10,7 +10,7 @@
 #include "shaderapi/ishaderapi.h"
 #include "materialsystem/imaterialvar.h"
 #include "view_shared.h"
-#include "c_cs_player.h"
+//#include "c_cs_player.h"
 #include "tier2/renderutils.h"
 
 #define FULL_FRAME_TEXTURE "_rt_FullFrameFB"
@@ -222,7 +222,7 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 		vecGlowObjects[i].DrawModel();
 
 		// align and render the glow-only muzzle flash model for glowing weapon fire
-		if ( vecGlowObjects[i].m_flGlowPulseOverdrive >= 0.25f )
+/*		if (vecGlowObjects[i].m_flGlowPulseOverdrive >= 0.25f)
 		{
 			C_CSPlayer* localPlayer = GetLocalOrInEyeCSPlayer();
 			C_CSPlayer* tempPlayer = ToCSPlayer( vecGlowObjects[i].m_pEntity );
@@ -250,7 +250,7 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 					}					
 				}
 			}
-		}
+		}*/
 
 		// dampen overdrive here. Do this at the end, otherwise our framerate may be low enough that we don't see the effect for even one frame
 		if ( vecGlowObjects[i].m_flGlowPulseOverdrive > 0 )
@@ -634,12 +634,12 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 			stencilState.m_bEnable = true;
 			stencilState.m_nReferenceValue = 2;
 
-			C_CSPlayer* pPlayer = ToCSPlayer( m_GlowObjectDefinitions[i].m_pEntity );
+			C_BasePlayer* pPlayer = ToBasePlayer( m_GlowObjectDefinitions[i].m_pEntity );
 			if ( pPlayer )
 			{
-				pPlayer->m_iHealthBarRenderMaskIndex = iTempHealthBarRenderMaskIndex;
-				stencilState.m_nReferenceValue = iTempHealthBarRenderMaskIndex;
-				iTempHealthBarRenderMaskIndex ++;
+				//pPlayer->m_iHealthBarRenderMaskIndex = iTempHealthBarRenderMaskIndex;
+				//stencilState.m_nReferenceValue = iTempHealthBarRenderMaskIndex;
+				//iTempHealthBarRenderMaskIndex ++;
 			}
 
 			stencilState.m_CompareFunc = SHADER_STENCILFUNC_ALWAYS;
@@ -669,7 +669,7 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 		if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) || m_GlowObjectDefinitions[i].m_nRenderStyle != GLOWRENDERSTYLE_DEFAULT )
 			continue;
 
-		C_CSPlayer* pPlayer = ToCSPlayer( m_GlowObjectDefinitions[i].m_pEntity );
+/*		C_CSPlayer* pPlayer = ToCSPlayer(m_GlowObjectDefinitions[i].m_pEntity);
 		if ( pPlayer && pPlayer != GetLocalOrInEyeCSPlayer() && pPlayer->IsAlive() )
 		{
 			
@@ -751,7 +751,7 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 
 			}
 
-		}
+		}*/
 
 	}
 

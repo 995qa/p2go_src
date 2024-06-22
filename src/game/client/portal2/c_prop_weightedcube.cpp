@@ -62,7 +62,6 @@ const Vector& C_PropWeightedCube::GetRenderOrigin( void )
 			return pPlayer->GetGrabController().GetHeldObjectRenderOrigin();
 		}
 	}
-
 	return BaseClass::GetRenderOrigin();
 }
 

@@ -14,6 +14,7 @@
 #include "collisionutils.h"
 #include "prop_portal_shared.h"
 #include "debugoverlay_shared.h"
+#include "particle_parse.h"
 
 #if defined( GAME_DLL )
 #	include "info_placement_helper.h"
@@ -23,9 +24,9 @@
 #	include "BasePropDoor.h"
 #	include "portal_gamestats.h"
 #	include "triggers.h"
-#	include "tier0/stackstats.h"
+//#	include "tier0/stackstats.h"
 #	include "trigger_portal_cleanser.h"
-#	include "portal_mp_stats.h"
+//#	include "portal_mp_stats.h"
 #else
 #	include "c_info_placement_helper.h"
 #	include "c_te_effect_dispatch.h"
@@ -791,12 +792,15 @@ void CWeaponPortalgun::FirePortal1( void )
 
 			gameeventmanager->FireEvent( event );
 		}
-		
+
+		//FIXME:
+#if 0
 		// Track multiplayer stats
 		if( GetPortalMPStats() && pPlayer )
 		{
 			GetPortalMPStats()->IncrementPlayerPortals( pPlayer );
 		}
+#endif
 #endif
 	}
 
@@ -809,7 +813,7 @@ void CWeaponPortalgun::FirePortal1( void )
 		WeaponSound( SINGLE_NPC );
 	}
 
-#if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+#if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM ) && 0
 	if ( pPlayer )
 	{
 		Vector vPortalPos(0,0,0);
@@ -881,12 +885,14 @@ void CWeaponPortalgun::FirePortal2( void )
 
 			gameeventmanager->FireEvent( event );
 		}
-
+	//FIXME:
+#if 0
 		// Track multiplayer stats
 		if( GetPortalMPStats() && pPlayer )
 		{
 			GetPortalMPStats()->IncrementPlayerPortals( pPlayer );
 		}
+#endif
 #endif
 	}
 
@@ -899,7 +905,7 @@ void CWeaponPortalgun::FirePortal2( void )
 		WeaponSound( DOUBLE_NPC );
 	}
 
-#if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM )
+#if defined( GAME_DLL ) && !defined( _GAMECONSOLE ) && !defined( NO_STEAM ) && 0
 	if ( pPlayer )
 	{
 		Vector vPortalPos(0,0,0);

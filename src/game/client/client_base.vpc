@@ -6,7 +6,6 @@
 
 $Macro OUTBINNAME	"client"
 $Macro OUTBINDIR	"$SRCDIR\..\game\$GAMENAME\bin"
-$Macro OUTCEGDIR	"$SRCDIR\..\game\$GAMENAME\bin\ceg"				[$WINDOWS && $CEG]
 $Macro DEVKITBINDIR	"$GAMENAME\bin"							[$X360]
 $Macro GENERATED_PROTO_DIR	"$SRCDIR\game\client\generated_proto"
 
@@ -504,6 +503,7 @@ $Project
 				"$SRCDIR\public\interpolatortypes.cpp"				\
 				"$SRCDIR\public\networkvar.cpp"						\
 				"$SRCDIR\common\randoverride.cpp"					\
+				"$SRCDIR\common\steamid.cpp"						\
 				"$SRCDIR\public\rope_physics.cpp"					\
 				"$SRCDIR\public\scratchpad3d.cpp"					\
 				"$SRCDIR\public\ScratchPadUtils.cpp"				\
@@ -531,17 +531,6 @@ $Project
 						}
 					}
 				}
-
-		$File	"$SRCDIR\common\CegClientWrapper.cpp"
-		{
-			$Configuration
-			{
-				$Compiler [$WINDOWS]
-				{
-					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
-				}
-			}
-		}
 
 		$Folder	"Precompiled Header"
 		{
@@ -743,7 +732,7 @@ $Project
 		$File	"functionproxy.h"
 		$File	"fx.h"
 		$File	"fx_blood.h"
-		$File	"cstrike15\fx_cs_blood.h"
+		$File	"cstrike15\fx_cs_blood.h" [$CSGO]
 		$File	"fx_discreetline.h"
 		$File	"fx_envelope.h"
 		$File	"fx_explosion.h"
@@ -871,8 +860,6 @@ $Project
 		$File	"vgui_hudvideo.h"
 		$File	"vgui_video.h"
 		$File	"subtitlepanel.h"
-		$File	"$SRCDIR\common\CegClientWrapper.h"
-		$File	"$SRCDIR\common\cegclient.h"			[$WINDOWS && $CEG]
 		$File	"render_to_rt_helper.h"
 	}
 
@@ -1111,7 +1098,7 @@ $Project
 		$File	"$SRCDIR\game\shared\animation.h"
 		$File	"$SRCDIR\game\shared\apparent_velocity_helper.h"
 		$File	"$SRCDIR\game\shared\base_playeranimstate.h"
-		$File	"$SRCDIR\game\shared\cstrike15\basecsgrenade_projectile.h"
+		$File	"$SRCDIR\game\shared\cstrike15\basecsgrenade_projectile.h" [$CSGO]
 		$File	"$SRCDIR\game\shared\baseentity_shared.h"
 		$File	"$SRCDIR\game\shared\basegrenade_shared.h"
 		$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.h"
@@ -1138,7 +1125,7 @@ $Project
 		$File	"$SRCDIR\game\shared\eventlist.h"
 		$File	"$SRCDIR\game\shared\func_dust_shared.h"
 		$File	"$SRCDIR\game\shared\func_ladder.h"
-		$File	"$SRCDIR\game\shared\cstrike15\fx_cs_shared.h"
+		$File	"$SRCDIR\game\shared\cstrike15\fx_cs_shared.h" [$CSGO]
 		$File	"$SRCDIR\game\shared\gameeventdefs.h"
 		$File	"$SRCDIR\game\shared\gamemovement.h"
 		$File	"$SRCDIR\game\shared\gamerules.h"
@@ -1215,8 +1202,8 @@ $Project
 		$File	"$SRCDIR\game\shared\voice_gamemgr.h"
 		$File	"$SRCDIR\game\shared\voice_status.h"
 		$File	"$SRCDIR\game\shared\vphysics_sound.h"
-		$File	"$SRCDIR\game\shared\cstrike15\weapon_flashbang.h"
-		$File	"$SRCDIR\game\shared\cstrike15\weapon_hegrenade.h"
+		$File	"$SRCDIR\game\shared\cstrike15\weapon_flashbang.h" [$CSGO]
+		$File	"$SRCDIR\game\shared\cstrike15\weapon_hegrenade.h" [$CSGO]
 		$File	"$SRCDIR\game\shared\weapon_parse.h"
 		$File	"$SRCDIR\game\shared\weapon_proficiency.h"
 		$File	"$SRCDIR\game\shared\weapon_ifmsteadycam.h"

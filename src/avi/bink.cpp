@@ -14,7 +14,11 @@
 #elif defined( _PS3 )
 #	include "bink_ps3/bink.h"
 #else
+#if defined( PORTAL2 )
+#	include "bink.h"
+#else
 #	include "bink/bink.h"
+#endif
 #endif
 #include "filesystem.h"
 #include "tier1/strtools.h"

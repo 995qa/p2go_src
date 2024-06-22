@@ -920,6 +920,8 @@ private:
 
 EXTERN_RECV_TABLE(DT_BasePlayer);
 
+C_BasePlayer* GetHudPlayer( void );	// get the player we should show the HUD for (local or observed)
+
 //-----------------------------------------------------------------------------
 // Inline methods
 //-----------------------------------------------------------------------------

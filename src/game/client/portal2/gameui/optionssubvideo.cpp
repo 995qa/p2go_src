@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=======================================================================================//
-
+#include <cbase.h>
 #include "OptionsSubVideo.h"
 #include "CvarSlider.h"
 #include "EngineInterface.h"

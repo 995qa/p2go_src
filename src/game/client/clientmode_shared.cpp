@@ -27,10 +27,12 @@
 #include "hltvcamera.h"
 #include "hud.h"
 #include "hud_element_helper.h"
+#if defined( INCLUDE_SCALEFORM )
 #include "Scaleform/HUD/sfhud_chat.h"
 #include "Scaleform/HUD/sfhudfreezepanel.h"
 #include "Scaleform/HUD/sfhud_teamcounter.h"
 #include "Scaleform/mapoverview.h"
+#endif
 #include "hltvreplaysystem.h"
 #include "netmessages.h"
 #if defined( REPLAY_ENABLED )
@@ -43,20 +45,21 @@
 #include "fmtstr.h"
 #include "c_playerresource.h"
 #include <localize/ilocalize.h>
-#include "gameui_interface.h"
+#include "gameui/gameui_interface.h"
+#include "vgui/ILocalize.h"
 #include "menu.h" // CHudMenu
 #if defined( _X360 )
 #include "xbox/xbox_console.h"
 #endif
 #include "matchmaking/imatchframework.h"
-#include "clientmode_csnormal.h"
+//#include "clientmode_csnormal.h"
 
 
 #ifdef PORTAL2
 #include "c_basehlplayer.h"
 #endif // PORTAL2
 
-#ifdef CSTRIKE15
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "c_cs_playerresource.h"
 #endif
 
@@ -135,7 +138,7 @@ CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 
 }
 #endif // _DEBUG
 
-static bool __MsgFunc_Rumble( const CCSUsrMsg_Rumble &msg )
+static bool __MsgFunc_Rumble( const CUsrMsg_Rumble &msg )
 {
 	unsigned char waveformIndex;
 	unsigned char rumbleData;
@@ -152,8 +155,9 @@ static bool __MsgFunc_Rumble( const CCSUsrMsg_Rumble &msg )
 	return true;
 }
 
-static bool __MsgFunc_VGUIMenu( const CCSUsrMsg_VGUIMenu &msg )
+static bool __MsgFunc_VGUIMenu( const CUsrMsg_VGUIMenu &msg )
 {
+	const char* pszPanelName = msg.name().c_str();
 	bool bShow = msg.show();
 
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
@@ -166,9 +170,22 @@ static bool __MsgFunc_VGUIMenu( const CCSUsrMsg_VGUIMenu &msg )
 
 		for (int i = 0; i < msg.subkeys_size(); i ++ )
 		{
-			const CCSUsrMsg_VGUIMenu::Subkey& subkey = msg.subkeys( i );
+			const CUsrMsg_VGUIMenu::Subkey& subkey = msg.subkeys( i );
 						
 			keys->SetString( subkey.name().c_str(), subkey.str().c_str() );
+		}
+
+		// !KLUDGE! Whitelist of URL protocols formats for MOTD
+		if ( !V_stricmp( pszPanelName, PANEL_INFO ) // MOTD
+			&& keys->GetInt( "type", 0 ) == 2 // URL message type
+		) {
+			const char *pszURL = keys->GetString( "msg", "" );
+			if ( Q_strncmp( pszURL, "http://", 7 ) != 0 && Q_strncmp( pszURL, "https://", 8 ) != 0 && Q_stricmp( pszURL, "about:blank" ) != 0 )
+			{
+				Warning( "Blocking MOTD URL '%s'; must begin with 'http://' or 'https://' or be about:blank\n", pszURL );
+				keys->deleteThis();
+				return true;
+			}
 		}
 	}
 
@@ -178,7 +195,7 @@ static bool __MsgFunc_VGUIMenu( const CCSUsrMsg_VGUIMenu &msg )
 	// keys->deleteThis();
 
 	// is the server telling us to show the scoreboard (at the end of a map)?
-	if ( Q_stricmp( msg.name().c_str(), "scores" ) == 0 )
+	if ( Q_stricmp( pszPanelName, "scores" ) == 0 )
 	{
 		if ( hud_takesshots.GetBool() == true )
 		{
@@ -649,12 +666,47 @@ void ClientModeShared::GraphPageChanged()
 	/* Removed for partner depot */
 }
 
+void ClientModeShared::OnColorCorrectionWeightsReset()
+{
+	// SanyaSho: STUB
+}
+
+void ClientModeShared::DoPostScreenSpaceEffects( const CViewSetup *pSetup )
+{
+	// SanyaSho: STUB
+}
+
+void ClientModeShared::UpdatePostProcessingEffects()
+{
+	// SanyaSho: STUB
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: See if spectator input occurred. Return 0 if the key is swallowed.
 //-----------------------------------------------------------------------------
 int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
 {
-	/* Removed for partner depot */
+	if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+attack" ) == 0 )
+	{
+		engine->ClientCmd( "spec_next" );
+		return 0; // we handled it, don't handle twice or send to server
+	}
+	else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+attack2" ) == 0 )
+	{
+		engine->ClientCmd( "spec_prev" );
+		return 0;
+	}
+	else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+jump" ) == 0 )
+	{
+		engine->ClientCmd( "spec_mode" );
+		return 0;
+	}
+	else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+strafe" ) == 0 )
+	{
+		HLTVCamera()->SetAutoDirector( C_HLTVCamera::AUTODIRECTOR_ON );
+		return 0;
+	}
+	
 	return 1;
 }
 
@@ -663,75 +715,17 @@ int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, co
 //-----------------------------------------------------------------------------
 int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
 {
-	if ( GetFullscreenClientMode() && GetFullscreenClientMode() != this &&
-		!GetFullscreenClientMode()->HudElementKeyInput( down, keynum, pszCurrentBinding ) )
-		return 0;
-
-	if ( CSGameRules() && CSGameRules()->IsEndMatchVotingForNextMap() )
+	if (m_pWeaponSelection)
 	{
-		// this looks messy, but essentially, if the convar is set to true, use the bindings, if not use the raw keys
-		if ( down && (( spec_usenumberkeys_nobinds.GetBool() == false && pszCurrentBinding &&
-			( ContainsBinding( pszCurrentBinding, "slot1" ) ||
-			ContainsBinding( pszCurrentBinding, "slot2" ) ||
-			ContainsBinding( pszCurrentBinding, "slot3" ) ||
-			ContainsBinding( pszCurrentBinding, "slot4" ) ||
-			ContainsBinding( pszCurrentBinding, "slot5" ) ||
-			ContainsBinding( pszCurrentBinding, "slot6" ) ||
-			ContainsBinding( pszCurrentBinding, "slot7" ) ||
-			ContainsBinding( pszCurrentBinding, "slot8" ) ||
-			ContainsBinding( pszCurrentBinding, "slot9" ) ||
-			ContainsBinding( pszCurrentBinding, "slot10" ) ) )
-			||
-			( spec_usenumberkeys_nobinds.GetBool() == true &&
-			( keynum == KEY_1 ||
-			keynum == KEY_2 ||
-			keynum == KEY_3 ||
-			keynum == KEY_4 ||
-			keynum == KEY_5 ||
-			keynum == KEY_6 ||
-			keynum == KEY_7 ||
-			keynum == KEY_8 ||
-			keynum == KEY_9 ||
-			keynum == KEY_0 ) ) ) )
-		{
-			int slotnum = 0;
-			if ( spec_usenumberkeys_nobinds.GetBool() )
-			{
-				slotnum = ( keynum - KEY_0 ) - 1;
-			}
-			else
-			{
-				char* slotnumberchar = ( char * )pszCurrentBinding + strlen( pszCurrentBinding ) - 1;
-				slotnum = atoi( slotnumberchar ) - 1;
-			}
-
-			if ( slotnum < 0 )
-				slotnum = 10 + slotnum;
-
-			char commandBuffer[32];
-			V_snprintf( commandBuffer, sizeof( commandBuffer ), "endmatch_votenextmap %d", slotnum );
-			engine->ClientCmd( commandBuffer );
-
-			return 0;
-		}
-	}
-
-	if ( down && pszCurrentBinding && ContainsBinding( pszCurrentBinding, "radio1" ) )
-	{
-		/* Removed for partner depot */
-		return 0;
-	}
-
-	if ( m_pWeaponSelection )
-	{
-		if ( !m_pWeaponSelection->KeyInput( down, keynum, pszCurrentBinding ) )
+		if (!m_pWeaponSelection->KeyInput(down, keynum, pszCurrentBinding))
 		{
 			return 0;
 		}
-	}		
+	}
 
 	return 1;
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -756,11 +750,18 @@ void ClientModeShared::StartMessageMode( int iMessageModeType )
 		return;
 	}
 
+#if defined( INCLUDE_SCALEFORM )
 	SFHudChat* pChat = GET_HUDELEMENT( SFHudChat );
 	if ( pChat )
 	{
 		pChat->StartMessageMode( iMessageModeType );
 	}
+#else
+	if( m_pChatElement )
+	{
+		m_pChatElement->StartMessageMode( iMessageModeType );
+	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1042,6 +1043,7 @@ bool PlayerNameNotSetYet( const char *pszName )
 	return false;
 }
 
+// SanyaSho: i can't find something special in this events from 2013 src
 void ClientModeShared::FireGameEvent( IGameEvent *event )
 {
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD( GetSplitScreenPlayerSlot() );
@@ -1082,7 +1084,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 	{
 		CLocalPlayerFilter filter;
 		C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "Music.StopMenuMusic" );
-		GameUI().SetBackgroundMusicDesired( false );
+		//GameUI().SetBackgroundMusicDesired( false ); // SanyaSho: no music
 	}
 	else if ( Q_strcmp( "player_disconnect", eventname ) == 0 )
 	{
@@ -1097,9 +1099,11 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		int userID = event->GetInt("userid");
 		C_BasePlayer *pPlayer = USERID2PLAYER( userID );
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		// don't show disconnects for bots in coop
 		if ( CSGameRules() && CSGameRules()->IsPlayingCooperativeGametype() && (pPlayer && pPlayer->IsBot()) )
 			return;
+#endif
 
 		if ( !hudChat || !pPlayer )
 			return;
@@ -1109,7 +1113,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		if ( !IsInCommentaryMode() )
 		{
 
-#ifdef CSTRIKE15
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 			wchar_t wszPlayerName[MAX_DECORATED_PLAYER_NAME_LENGTH];
 			C_CS_PlayerResource *pCSPR = ( C_CS_PlayerResource* )GameResources();
 			pCSPR->GetDecoratedPlayerName( pPlayer->entindex(), wszPlayerName, sizeof( wszPlayerName ), ( EDecoratedPlayerNameFlag_t) ( k_EDecoratedPlayerNameFlag_DontUseNameOfControllingPlayer | k_EDecoratedPlayerNameFlag_DontUseAssassinationTargetName ) );

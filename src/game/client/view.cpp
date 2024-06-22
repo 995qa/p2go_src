@@ -41,7 +41,7 @@
 #include "ScreenSpaceEffects.h"
 #include "vgui_int.h"
 #include "engine/SndInfo.h"
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "c_cs_player.h"
 #endif
 #ifdef GAMEUI_UISYSTEM2_ENABLED
@@ -49,10 +49,10 @@
 #endif
 #ifdef GAMEUI_EMBEDDED
 #if defined( PORTAL2 )
-#include "gameui/basemodpanel.h"
+#include "gameui/portal2/basemodpanel.h"
 #elif defined( SWARM_DLL )
 #include "swarm/gameui/swarm/basemodpanel.h"
-#elif defined( CSTRIKE15 )
+#elif defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "gameui/basemodpanel.h"
 #else
 #error "GAMEUI_EMBEDDED"
@@ -498,7 +498,7 @@ void CViewRender::OnRenderStart()
 		SetUpView();
 
 		// Adjust mouse sensitivity based upon the current FOV
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		C_CSPlayer *player = C_CSPlayer::GetLocalCSPlayer();
 #else
 		C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
@@ -511,7 +511,11 @@ void CViewRender::OnRenderStart()
 			int iDefaultFOV = default_fov.GetInt();
 			int	localFOV	= player->GetFOV();
 			int min_fov		= player->GetMinFOV();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 			bool bZoomed = (  player->GetFOV() != player->GetDefaultFOV() );
+#else
+			bool bZoomed = false;
+#endif
 
 			// 'scoped' mode is handled by the ironsight system
 /*
@@ -746,7 +750,7 @@ void CViewRender::SetUpView()
 		GetClientMode()->OverrideView( &GetView() );
 	}
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CBasePlayer *pCameraMan = NULL;
 	if ( g_bEngineIsHLTV )
 		pCameraMan = HLTVCamera()->GetCameraMan();

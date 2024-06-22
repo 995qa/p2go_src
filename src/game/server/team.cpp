@@ -10,7 +10,7 @@
 #include "team_spawnpoint.h"
 #include "usermessages.h"
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_bot.h"
 #endif
 
@@ -157,6 +157,7 @@ void CTeam::Think( void )
 
 void CTeam::DetermineGGLeaderAndSort( void )
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CUtlVector< CCSPlayer* >	playerList_CT;
 	CUtlVector< CCSPlayer* >	playerList_T;
 
@@ -220,18 +221,22 @@ void CTeam::DetermineGGLeaderAndSort( void )
 	}
 	m_nLastGGLeader_CT = m_nGGLeaderEntIndex_CT;
 	m_nLastGGLeader_T = m_nGGLeaderEntIndex_T;
+#endif
 }
 
 int CTeam::GetGGLeader( int nTeam )
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( nTeam == TEAM_CT )
 		return m_nGGLeaderEntIndex_CT;
 	else if ( nTeam == TEAM_TERRORIST )
 		return m_nGGLeaderEntIndex_T;
+#endif
 
 	return -1;
 }
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 //-----------------------------------------------------------------------------
 // Purpose: Used for sorting players in valve containers
 //-----------------------------------------------------------------------------
@@ -270,6 +275,7 @@ int CTeam::TeamGGSortFunction( CCSPlayer* const *entry1, CCSPlayer* const *entry
 
 	return 0;
 }
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Teams are always transmitted to clients
@@ -577,9 +583,9 @@ void CTeam::AwardAchievement( int iAchievement )
 		}
 	}
 
-	CCSUsrMsg_AchievementEvent msg;
+	CUsrMsg_AchievementEvent msg;
 	msg.set_achievement( iAchievement );
-	SendUserMessage( filter, CS_UM_AchievementEvent, msg );
+	SendUserMessage( filter, UM_AchievementEvent, msg );
 }
 
 int CTeam::GetAliveMembers( void )
@@ -599,7 +605,7 @@ int CTeam::GetAliveMembers( void )
 	return iAlive;
 }
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 int CTeam::GetBotMembers( CUtlVector< CCSBot* > *pOutVecBots /*= NULL*/ )
 {
 	int iBots = 0;

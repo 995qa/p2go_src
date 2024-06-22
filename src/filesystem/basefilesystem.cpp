@@ -2845,7 +2845,11 @@ void CBaseFileSystem::AddSearchPath( const char *pPath, const char *pathID, Sear
 	// The PC has no concept of update/dlc discovery, it explicitly adds them now
 	// This layout matches the Xbox's search path layout, when the Xbox does late bind the DLC
 	// any platform, game, or mod search paths get subverted in order to prepend the DLC path
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 	const char *pGameName = "csgo";
+#elif defined( PORTAL2 )
+	const char *pGameName = "portal2";
+#endif
 
 	// CSGO compatibility VPKs
 	if ( const char *pActualPathID = pathID ? StringAfterPrefix( pathID, "COMPAT:" ) : NULL )
@@ -2865,7 +2869,11 @@ void CBaseFileSystem::AddSearchPath( const char *pPath, const char *pathID, Sear
 
 		// Build compatibility syntax path and proceed with adding
 		pathID = pActualPathID;
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 		V_sprintf_safe( tempSymlinkBuffer, "csgo/compatibility/%s/", pPath );
+#elif defined( PORTAL2 )
+		V_sprintf_safe( tempSymlinkBuffer, "portal2/compatibility/%s/", pPath );
+#endif
 		pPath = tempSymlinkBuffer;
 	}
 
@@ -3312,7 +3320,11 @@ bool CBaseFileSystem::RemoveSearchPath( const char *pPath, const char *pathID )
 		for ( int i = c - 1; i >= 0; i-- )
 		{
 			char newCompatPath[ MAX_PATH ] = {};
-			sprintf( newCompatPath, "/csgo/compatibility/%s/", pPath );
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
+			V_sprintf_safe( newCompatPath, "csgo/compatibility/%s/", pPath );
+#elif defined( PORTAL2 )
+			V_sprintf_safe( newCompatPath, "portal2/compatibility/%s/", pPath );
+#endif
 			Q_FixSlashes( newCompatPath );
 			if ( V_strstr( m_SearchPaths[ i ].GetPathString(), newCompatPath ) )
 			{
@@ -8254,7 +8266,11 @@ bool CBaseFileSystem::AddDLCSearchPaths()
 		unsigned int nDLCType = DLC_LICENSE_ID( m_DLCContents[iDLC].m_LicenseMask );
 
 		char szDLCPath[MAX_PATH];
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 		V_snprintf( szDLCPath, sizeof( szDLCPath ), "%s:\\csgo_dlc%d", m_DLCContents[iDLC].m_szVolume, nDLCType );
+#elif defined( PORTAL2 )
+		V_snprintf( szDLCPath, sizeof( szDLCPath ), "%s:\\portal2_dlc%d", m_DLCContents[iDLC].m_szVolume, nDLCType );
+#endif
 
 		char szDLCLanguagePath[MAX_PATH];
 		const char *pLanguageString = NULL;

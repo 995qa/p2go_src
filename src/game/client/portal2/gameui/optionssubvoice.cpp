@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //==========================================================================//
-
+#include <cbase.h>
 #include "OptionsSubVoice.h"
 #include "CvarSlider.h"
 #include <vgui/IVGui.h>

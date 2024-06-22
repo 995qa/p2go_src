@@ -58,7 +58,8 @@ AudioVideo::~AudioVideo()
 	CGameUIConVarRef force_audio_english( "force_audio_english" );
 	if ( m_bOldForceEnglishAudio != force_audio_english.GetBool() )
 	{
-		engine->AudioLanguageChanged();
+		//engine->AudioLanguageChanged();
+		PostMessage(&(CBaseModPanel::GetSingleton()), new KeyValues("command", "command", "QuitRestartNoConfirm"), 0.0f);
 	}
 }
 

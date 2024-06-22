@@ -562,7 +562,8 @@ public:
 
 	virtual void			NotifyShouldTransmit( ShouldTransmitState_t state );
 
-
+	// SanyaSho: get rid of this ASAP
+	virtual int				GetWorldModelIndex(void);
 
 	virtual void			GetToolRecordingState( KeyValues *msg );
 	bool					IsFirstPersonSpectated( void ); //true if the weapon is held by someone we're spectating in first person

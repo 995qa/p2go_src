@@ -353,7 +353,11 @@ static void PerformNewCustomEffects( const Vector &vecOrigin, trace_t &tr, const
 #endif
 
 	CSmartPtr<CNewParticleEffect> pEffect = CNewParticleEffect::CreateOrAggregatePrecached( NULL, nEffectIndex, vecImpactPoint );
+	if (pEffect == NULL)
+		return;
 	if ( !pEffect->IsValid() )
+		return;
+	if (pEffect->IsValid())
 		return;
 
 	SetImpactControlPoint( pEffect.GetObject(), 0, vecImpactPoint, tr.plane.normal, tr.m_pEnt ); 
@@ -386,6 +390,9 @@ void PerformCustomEffects( const Vector &vecOrigin, trace_t &tr, const Vector &s
 //-----------------------------------------------------------------------------
 void PlayImpactSound( CBaseEntity *pEntity, trace_t &tr, Vector &vecServerOrigin, int nServerSurfaceProp )
 {
+	if (!pEntity)
+		return;
+
 	VPROF( "PlayImpactSound" );
 	surfacedata_t *pdata;
 	Vector vecOrigin;
@@ -425,7 +432,7 @@ void PlayImpactSound( CBaseEntity *pEntity, trace_t &tr, Vector &vecServerOrigin
 			C_BaseEntity::EmitSound( filter, NULL, pbulletImpactSoundName, pdata->soundhandles.bulletImpact, &vecOrigin );
 		}
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		// play a ricochet based on the material
 		float flRicoChance = 0.0f;
 		switch( pdata->game.material )

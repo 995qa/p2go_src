@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <cbase.h>
 #include "LoadingDialog.h"
 #include "EngineInterface.h"
 #include "igameuifuncs.h"

@@ -12,7 +12,7 @@
 #include "KeyValues.h"
 #include "vgenericconfirmation.h"
 #include "filesystem.h"
-#include "vportalleaderboard.h"
+//#include "vportalleaderboard.h"
 
 #ifdef _PS3
 #include "sysutil/sysutil_savedata.h"
@@ -106,13 +106,13 @@ CEG_NOINLINE void CSinglePlayer::OnCommand( char const *pCommand )
 		CBaseModPanel::GetSingleton().OpenWindow( WT_LOADGAME, this, true );
 		return;
 	}
-	else if ( !V_stricmp( pCommand, "OpenChallengeMode" ) )
-	{
-		KeyValues *pSettings = new KeyValues( "Setting" );
-		pSettings->SetInt( "state", STATE_MAIN_MENU );
-		CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
-		return;
-	}
+	//else if ( !V_stricmp( pCommand, "OpenChallengeMode" ) )
+	//{
+	//	KeyValues *pSettings = new KeyValues( "Setting" );
+	//	pSettings->SetInt( "state", STATE_MAIN_MENU );
+	//	CBaseModPanel::GetSingleton().OpenWindow( WT_PORTALLEADERBOARD, this, true, KeyValues::AutoDeleteInline( pSettings ) );
+	//	return;
+	//}
 	else if ( !V_stricmp( pCommand, "OpenCommentaryDialog" ) )
 	{
 		GenericConfirmation	*pConfirmation = static_cast< GenericConfirmation* >( CBaseModPanel::GetSingleton().OpenWindow( WT_GENERICCONFIRMATION, this, true ) );

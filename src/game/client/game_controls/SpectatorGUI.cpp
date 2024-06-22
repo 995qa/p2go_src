@@ -9,7 +9,7 @@
 #include <cdll_client_int.h>
 #include <globalvars_base.h>
 #include <cdll_util.h>
-#include <KeyValues.h>
+#include <keyvalues.h>
 
 #include "spectatorgui.h"
 
@@ -64,12 +64,6 @@ static char *s_SpectatorModes[] =
 };
 
 using namespace vgui;
-
-ConVar cl_spec_mode(
-	"cl_spec_mode",
-	"1",
-	FCVAR_ARCHIVE | FCVAR_USERINFO | FCVAR_SERVER_CAN_EXECUTE,
-	"spectator mode" );
 
 
 
@@ -472,11 +466,16 @@ void CSpectatorGUI::PerformLayout()
 	int w,h,x,y;
 	GetHudSize(w, h);
 
+#if defined( CSTRIKE_DLL )
 	//offset for title safe viewing zone
 	int safeX = 0;
 	int safeY = (int)floorf( ScreenHeight() * 0.075f );
 
 	SetBounds( safeX, safeY, w, h - ( safeY * 2 ) );
+#else
+	// fill the screen
+	SetBounds( 0, 0, w, h );
+#endif
 
 	m_pBottomBarBlank->GetPos( x, y );
 	m_pBottomBarBlank->SetSize( w, h - y );
@@ -824,7 +823,7 @@ CON_COMMAND_F( spec_mode, "Set spectator mode", FCVAR_CLIENTCMD_CAN_EXECUTE )
 		}
 
 			// turn off auto director once user tried to change view settings
-		HLTVCamera()->SetAutoDirector( false );
+		HLTVCamera()->SetAutoDirector( C_HLTVCamera::AUTODIRECTOR_OFF );
 	}
 #if defined( REPLAY_ENABLED )
 	else if ( engine->IsReplay() )

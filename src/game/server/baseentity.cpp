@@ -74,6 +74,7 @@
 
 #if defined ( PORTAL2 )
 #include "PortalSimulation.h"
+#include "portal2_usermessages.pb.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -819,6 +820,11 @@ CBaseEntity::~CBaseEntity( )
 		// Remove this entity from the ent list (NOTE:  This Makes EHANDLES go NULL)
 		gEntList.RemoveEntity( GetRefEHandle() );
 	}
+}
+
+void CBaseEntity::IncrementInterpolationFrame()
+{
+	m_ubInterpolationFrame = (m_ubInterpolationFrame + 1) % NOINTERP_PARITY_MAX;
 }
 
 void CBaseEntity::PostConstructor( const char *szClassname )
@@ -7405,9 +7411,13 @@ void CBaseEntity::InputRemovePaint( inputdata_t &inputdata )
 
 		CBroadcastRecipientFilter filter;
 		filter.MakeReliable();
-		UserMessageBegin( filter, "RemovePaint" );
-		WRITE_EHANDLE( this );
-		MessageEnd();
+//		UserMessageBegin( filter, "RemovePaint" );
+//		WRITE_EHANDLE( this );
+//		MessageEnd();
+
+		CUsrMsg_RemovePaint msg;
+		msg.set_entity(this->entindex());
+		SendUserMessage(filter, UM_RemovePaint, msg);
 	}
 }
 

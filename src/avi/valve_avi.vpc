@@ -22,6 +22,7 @@ $Configuration
 		$AdditionalIncludeDirectories	"$BASE,..\common\quicktime_win32\"		[$QUICKTIME_WINDOWS]
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\dx9sdk\include"			[$WINDOWS]
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty\sdl\include;$SRCDIR\thirdparty\sdl_mixer"	[$LINUXALL]
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty\BinkSDK" // P2 BINK
 	}
 	$Linker
 	{
@@ -49,7 +50,7 @@ $Project "valve_avi"
 	{
 		$File	"avi.h"
 		$file   "quicktime.h"
-//		$File	"$SRCDIR\BinkSDK\bink.h"
+		$File	"$SRCDIR\thirdparty\BinkSDK\bink.h" // P2 BINK
 		$File	"$SRCDIR\public\pixelwriter.h"
 	}
 
@@ -68,6 +69,7 @@ $Project "valve_avi"
 		$File	"$SRCDIR\DX9SDK\lib\dsound.lib"						[$QUICKTIME_WINDOWS]
 		$File	"$SRCDIR\DX9SDK\lib\dxguid.lib"						[$QUICKTIME_WINDOWS]
 		$File	"$SRCDIR\lib\common\libSDL2_mixer.a"				[$LINUXALL]
+		$File	"$SRCDIR\lib\common\binkw32.lib" // P2 BINK
 	}
 
 }

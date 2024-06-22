@@ -18,7 +18,7 @@
 #ifdef CLIENT_DLL
 #include "achievement_notification_panel.h"
 #include "c_playerresource.h"
-#include "c_cs_player.h"
+//#include "c_cs_player.h"
 #ifdef TF_CLIENT_DLL
 #include "item_inventory.h"
 #endif //TF_CLIENT_DLL
@@ -31,7 +31,7 @@
 #include "steam/isteamfriends.h"
 #include "steam/isteamutils.h"
 #endif
-#include "cs_gamerules.h"
+//#include "cs_gamerules.h"
 #include "tier3/tier3.h"
 #include "vgui/ILocalize.h"
 
@@ -52,10 +52,10 @@
 #include "ienginevgui.h"
 #endif  // _GAMECONSOLE
 
-#include "matchmaking/imatchframework.h"
+//#include "matchmaking/imatchframework.h"
 #include "tier0/vprof.h"
-#include "cs_weapon_parse.h"
-#include "achievements_cs.h"
+//#include "cs_weapon_parse.h"
+//#include "achievements_cs.h"
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
@@ -156,6 +156,25 @@ CAchievementMgr::CAchievementMgr() : CAutoGameSystemPerFrame( "CAchievementMgr" 
 #endif // _X360
 }
 
+#if defined( GAME_DLL ) && !defined( CSTRIKE_DLL )
+CAchievementMgr *CAchievementMgr::GetInstance()
+{
+	IAchievementMgr *pMgr = engine->GetAchievementMgr();
+	class CAchievementMgrDelegateIAchievementMgr_friend : public CAchievementMgrDelegateIAchievementMgr
+	{
+	public: CAchievementMgr *GetDelegate() const {
+		return m_pDelegate;
+	}
+	private: CAchievementMgrDelegateIAchievementMgr_friend() : CAchievementMgrDelegateIAchievementMgr( NULL ) {}
+	};
+	return reinterpret_cast<CAchievementMgrDelegateIAchievementMgr_friend *>( pMgr )->GetDelegate();
+}
+IAchievementMgr *CAchievementMgr::GetInstanceInterface()
+{
+	return engine->GetAchievementMgr();
+}
+#endif // GAME_DLL
+
 //#if defined (_X360)
 void CAchievementMgr::ResetProfileInfo()
 {
@@ -201,7 +220,7 @@ bool CAchievementMgr::Init()
 	for ( int hh = 0; hh < MAX_SPLITSCREEN_PLAYERS; ++hh )
 	{
 		ACTIVE_SPLITSCREEN_PLAYER_GUARD( hh );
-		m_UMCMsgAchievementEvent.Bind< CS_UM_AchievementEvent, CCSUsrMsg_AchievementEvent >( UtlMakeDelegate( MsgFunc_AchievementEvent ) );
+		m_UMCMsgAchievementEvent.Bind< UM_AchievementEvent, CUsrMsg_AchievementEvent >( UtlMakeDelegate( MsgFunc_AchievementEvent ) );
 	}
 	ListenForGameEvent( "read_game_titledata" );
 	ListenForGameEvent( "write_game_titledata" );
@@ -820,74 +839,7 @@ void CAchievementMgr::SaveGlobalStateIfDirty( )
 
 bool CAchievementMgr::IsAchievementAllowedInGame( int iAchievementID )
 {
-	// Offline modes with trivial bots disable ALL achievements
-	if ( CSGameRules() && !CSGameRules()->IsAwardsProgressAllowedForBotDifficulty() )
-		return false;
-
-	bool isGunGameAchievement = false;
-
-	switch( iAchievementID )
-	{
-		// a list of gun game achievements
-		//case CSFastRoundWin:
-		case CSGunGameKillKnifer:
-		case CSWinEveryGGMap:
-		case CSGunGameProgressiveRampage:
-		case CSGunGameFirstKill:
-		case CSFirstBulletKills:
-		case CSGunGameConservationist:
-		case CSWinMatchAR_SHOOTS:
-		case CSWinMatchAR_BAGGAGE:
-		case CSPlantBombsTRLow:
-		case CSDefuseBombsTRLow:
-		case CSKillEnemyTerrTeamBeforeBombPlant:
-		case CSKillEnemyCTTeamBeforeBombPlant:
-		case CSWinMatchDE_LAKE:
-		case CSWinMatchDE_SAFEHOUSE:   
-		case CSWinMatchDE_SUGARCANE:
-		case CSWinMatchDE_STMARC:
-		case CSWinMatchDE_BANK:
-		case CSWinMatchDE_EMBASSY:
-		case CSWinMatchDE_DEPOT:
-		case CSWinMatchDE_SHORTTRAIN:
-		//case CSHipShot:
-		case CSBornReady:
-		case CSSpawnCamper:
-		case CSGunGameKnifeKillKnifer:
-		case CSGunGameSMGKillKnifer:
-		case CSStillAlive:
-		case CSGGWinRoundsLow:
-		case CSGGWinRoundsMed:
-		case CSGGWinRoundsHigh:
-		case CSGGWinRoundsExtreme:
-		case CSGGWinRoundsUltimate:
-		case CSGGRoundsLow:
-		case CSGGRoundsMed:
-		case CSGGRoundsHigh:
-		case CSPlayEveryGGMap:
-		case CSDominationsLow:
-		case CSDominationsHigh:
-		case CSRevengesLow:
-		case CSRevengesHigh:
-		case CSDominationOverkillsLow:
-		case CSDominationOverkillsHigh:
-		case CSDominationOverkillsMatch:
-		case CSExtendedDomination:
-		case CSConcurrentDominations:
-		//case CSAvengeFriend:
-			isGunGameAchievement = true;
-	};
-
-	// Only unlock gungame achievements in gun game modes
-	if( isGunGameAchievement ) 
-	{
-		return CSGameRules()->IsPlayingGunGame();
-	}
-	else
-	{
-		// Other achievements are valid for all game types.
 		return true;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -900,11 +852,12 @@ void CAchievementMgr::AwardAchievement( int iAchievementID, int nUserSlot )
 
 #ifdef CLIENT_DLL
 	C_BasePlayer *pPlayerLocal = C_BasePlayer::GetLocalPlayer();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	C_CSPlayer* pPlayer = ToCSPlayer(pPlayerLocal);
 
 	if( ( pPlayer && pPlayer->IsControllingBot() ) ) // if we're controlling a bot, no achievements for us!
 		return;
-
+#endif
 	CBaseAchievement *pAchievement = GetAchievementByID( iAchievementID, nUserSlot );
 	Assert( pAchievement );
 	if ( !pAchievement )
@@ -946,10 +899,6 @@ void CAchievementMgr::AwardAchievement( int iAchievementID, int nUserSlot )
 		event->SetInt( "splitscreenplayer", nUserSlot );
 		gameeventmanager->FireEventClientSide( event );
 	}
-
-#if defined ( CLIENT_DLL )
-	STEAMWORKS_TESTSECRET();
-#endif
 #endif
 
 	if ( cc_achievement_debug.GetInt() > 0 )
@@ -1515,7 +1464,7 @@ void CAchievementMgr::ResetAchievement( int iAchievementID )
 //-----------------------------------------------------------------------------
 void CAchievementMgr::PrintAchievementStatus()
 {
-#if defined( CLIENT_DLL )
+#if defined( CLIENT_DLL ) && 0 // SanyaSho: FIXME
 	if ( IsPC() && !LoggedIntoSteam() )
 	{
 		Msg( "Steam not running, achievements disabled. Cannot view or unlock achievements.\n" );
@@ -1533,7 +1482,7 @@ void CAchievementMgr::PrintAchievementStatus()
 		CFailableAchievement *pFailableAchievement = dynamic_cast<CFailableAchievement *>( pAchievement );
 		if ( pAchievement->IsAchieved() )
 		{
-			CCSBaseAchievement* pCSAchievement = dynamic_cast<CCSBaseAchievement*>(pAchievement);
+			CHL2BaseAchievement* pHL2Achievement = dynamic_cast<CHL2BaseAchievement*>(pAchievement);
 
 			// Assign the award date text
 			char dateBuffer[32] = "";
@@ -2156,7 +2105,7 @@ void CAchievementMgr::ResetAchievement_Internal( CBaseAchievement *pAchievement 
 
 #ifdef CLIENT_DLL
 
-bool MsgFunc_AchievementEvent( const CCSUsrMsg_AchievementEvent &msg )
+bool MsgFunc_AchievementEvent( const CUsrMsg_AchievementEvent &msg )
 {
 	int iAchievementID = (int) msg.achievement();
 	CAchievementMgr *pAchievementMgr = CAchievementMgr::GetInstance();

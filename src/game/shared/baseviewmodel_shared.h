@@ -17,10 +17,6 @@
 #include "shared_classnames.h"
 #include "ihasowner.h"
 
-#ifdef CSTRIKE15
-#include "cs_shareddefs.h"
-#endif
-
 class CBaseCombatWeapon;
 class CBaseCombatCharacter;
 class CVGuiScreen;
@@ -123,11 +119,11 @@ public:
 
 #if defined ( CLIENT_DLL )
 	C_ViewmodelAttachmentModel *AddViewmodelArmModel( const char *pszModel, int nSkintoneIndex = -1 );
-	C_ViewmodelAttachmentModel* FindArmModelForLoadoutPosition( loadout_positions_t nPosition ) const;
+	C_ViewmodelAttachmentModel* FindArmModelForLoadoutPosition( int nPosition ) const;
 #endif
-	void					AddViewmodelLabel( CEconItemView *pItem );
-	void					AddViewmodelStatTrak( CEconItemView *pItem, int nStatTrakType, int nWeaponID, AccountID_t holderAcctId );
-	void					AddViewmodelStickers( CEconItemView *pItem, int nWeaponID );
+	void					AddViewmodelLabel( void *pItem );
+	void					AddViewmodelStatTrak( void *pItem, int nStatTrakType, int nWeaponID, AccountID_t holderAcctId );
+	void					AddViewmodelStickers( void *pItem, int nWeaponID );
 	bool					ViewmodelStickersAreValid( int nWeaponID );
 
 	void					RemoveViewmodelArmModels( void );

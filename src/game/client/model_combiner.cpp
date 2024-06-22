@@ -6,6 +6,7 @@
 //=============================================================================//
 #include "cbase.h"
 #include "model_combiner.h"
+#include "gamestringpool.h"
 
 struct model_combine_t;
 enum combine_result_t

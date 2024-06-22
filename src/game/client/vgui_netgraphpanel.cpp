@@ -28,7 +28,7 @@
 #include "materialsystem/imaterial.h"
 #include "matchmaking/imatchframework.h"
 
-#include "cs_gamerules.h"
+//#include "cs_gamerules.h"
 
 #ifdef _PS3
 #include "ps3/ps3_core.h"
@@ -338,20 +338,22 @@ CNetGraphPanel::~CNetGraphPanel( void )
 	g_pNetGraphPanel = NULL;
 }
 
-extern ConVar sv_max_allowed_net_graph;
+
+//extern ConVar sv_max_allowed_net_graph;
 void NetgraphChangeCallback( IConVar *var, const char *pOldValue, float flOldValue )
-{
+{/*
 	if ( net_graph.GetInt() > sv_max_allowed_net_graph.GetInt() )
 	{
 		net_graph.SetValue( sv_max_allowed_net_graph.GetInt() );
 		Msg( "Server does not allow net_graph values above %d\n", sv_max_allowed_net_graph.GetInt() );
-	}
+	}*/
 	
 	if ( g_pNetGraphPanel )
 	{
 		g_pNetGraphPanel->OnFontChanged();
 	}
 }
+
 
 void CNetGraphPanel::OnFontChanged()
 {
@@ -1058,7 +1060,7 @@ int CNetGraphPanel::GraphValue( void )
 	// With +graph key, use max area
 	if ( !graphtype )
 	{
-		graphtype = Min( sv_max_allowed_net_graph.GetInt(), 3 );
+		graphtype = Min( 10, 3 ); //TODO we might need to alter this eventually idk
 	}
 
 	return graphtype;
@@ -1196,18 +1198,14 @@ void CNetGraphPanel::DrawServerType( int xright, int y )
 		bool bP2P = ( netadr_t( pInfo ? pInfo->GetAddress() : "127.0.0.1" ).GetPort() == 1 );
 		if ( engine->IsHLTV() )
 		{
-			if ( CSGameRules() && CSGameRules()->IsValveDS() )
-				psz = bLiveBroadcast ? "Official GOTV+" : "Official GOTV";
-			else if ( bP2P )
-				psz = bLiveBroadcast ? "P2P GOTV+" : "P2P GOTV";
+			if ( bP2P )
+				psz = bLiveBroadcast ? "P2P SourceTV+" : "P2P SourceTV";
 			else
-				psz = bLiveBroadcast ? "GOTV+" : "GOTV";
+				psz = bLiveBroadcast ? "SourceTV+" : "SourceTV";
 		}
 		else
 		{
-			if ( CSGameRules() && CSGameRules()->IsValveDS() )
-				psz = "Official DS";
-			else if ( bP2P )
+			if ( bP2P )
 				psz = "P2P";
 			else
 				psz = "online";

@@ -1558,6 +1558,9 @@ float CInput::HandleMotionControllerInputSmoothing( float flDeadZonePct, float v
 //-----------------------------------------------------------------------------
 void CInput::MotionControllerMove( float frametime, CUserCmd *cmd )
 {
+	// conn - this probably aint worth it
+	// SanyaSho: don't modify input interface to remove this thing
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	int nSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
 
 	C_CSPlayer* pPlayer = C_CSPlayer::GetLocalCSPlayer();
@@ -1822,6 +1825,7 @@ void CInput::MotionControllerMove( float frametime, CUserCmd *cmd )
 	cmd->aimdirection = pPlayer->GetAimDirection();
 	cmd->mousedx = deltaYaw;
 	cmd->mousedy = deltaPitch;
+#endif
 }
 
 //-----------------------------------------------------------------------------

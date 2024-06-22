@@ -20,7 +20,7 @@
 #define HISTORY_DRAW_TIME	"5"
 
 ConVar hud_drawhistory_time( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
-ConVar hud_fastswitch( "hud_fastswitch", "1", FCVAR_SS ); // [hpe:jason] Enabling weapon fastswitch by default
+ConVar hud_fastswitch( "hud_fastswitch", "0", FCVAR_SS | FCVAR_ARCHIVE );
 
 //-----------------------------------------------------------------------------
 // Purpose: Weapon Selection commands
@@ -44,12 +44,14 @@ DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, LastWeapon, "CHudWeaponSelecti
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, NextGrenadeWeapon, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, NextItemWeapon, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, NextNonGrenadeWeapon, "CHudWeaponSelection");
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot1, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot2, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot3, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot4, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot5, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, GamePadSlot6, "CHudWeaponSelection");
+#endif
 
 HOOK_COMMAND( slot1, Slot1 );
 HOOK_COMMAND( slot2, Slot2 );
@@ -70,12 +72,14 @@ HOOK_COMMAND( lastinv, LastWeapon );
 HOOK_COMMAND( invnextgrenade, NextGrenadeWeapon);
 HOOK_COMMAND( invnextitem, NextItemWeapon);
 HOOK_COMMAND( invnextnongrenade, NextNonGrenadeWeapon);
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 HOOK_COMMAND( gamepadslot1, GamePadSlot1 );
 HOOK_COMMAND( gamepadslot2, GamePadSlot2 );
 HOOK_COMMAND( gamepadslot3, GamePadSlot3 );
 HOOK_COMMAND( gamepadslot4, GamePadSlot4 );
 HOOK_COMMAND( gamepadslot5, GamePadSlot5 );
 HOOK_COMMAND( gamepadslot6, GamePadSlot6 );
+#endif
 
 // instance info
 CBaseHudWeaponSelection *CBaseHudWeaponSelection::s_pInstance[MAX_SPLITSCREEN_PLAYERS];
@@ -143,7 +147,7 @@ void CBaseHudWeaponSelection::VidInit(void)
 	// If we've already loaded weapons, let's get new sprites
 	gWR.LoadAllWeaponSprites();
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	// set spacing of pickup history
 	CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
 	if( pHudHR )
@@ -292,12 +296,10 @@ int	CBaseHudWeaponSelection::KeyInput( int down, ButtonCode_t keynum, const char
 //-----------------------------------------------------------------------------
 void CBaseHudWeaponSelection::OnWeaponPickup( C_BaseCombatWeapon *pWeapon )
 {
-	RANDOM_CEG_TEST_SECRET_PERIOD( 2, 3 )
-
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	// add to pickup history
 	CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
-	
+
 	if ( pHudHR )
 	{
 		pHudHR->AddToHistory( pWeapon );
@@ -502,7 +504,7 @@ void CBaseHudWeaponSelection::UserCmd_NextWeapon(void)
 		return;
 
 	CycleToNextWeapon();
-#if !defined ( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	if( hud_fastswitch.GetInt() > 0 )
 #endif
 	{
@@ -520,8 +522,10 @@ void CBaseHudWeaponSelection::UserCmd_NextGrenadeWeapon(void)
 	if ( !BaseClass::ShouldDraw() )
 		return;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CycleToNextGrenadeOrBomb();
-#if !defined ( CSTRIKE15 )
+#endif
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	if( hud_fastswitch.GetInt() > 0 )
 #endif
 	{
@@ -539,8 +543,10 @@ void CBaseHudWeaponSelection::UserCmd_NextItemWeapon(void)
 	if ( !BaseClass::ShouldDraw() )
 		return;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CycleToNextGrenadeBombOrMelee();
-#if !defined ( CSTRIKE15 )
+#endif
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	if( hud_fastswitch.GetInt() > 0 )
 #endif
 	{
@@ -558,8 +564,10 @@ void CBaseHudWeaponSelection::UserCmd_NextNonGrenadeWeapon(void)
 	if ( !BaseClass::ShouldDraw() )
 		return;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CycleToNextNonGrenadeOrBomb();
-#if !defined ( CSTRIKE15 )
+#endif
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	if( hud_fastswitch.GetInt() > 0 )
 #endif
 	{
@@ -579,7 +587,7 @@ void CBaseHudWeaponSelection::UserCmd_PrevWeapon(void)
 
 	CycleToPrevWeapon();
 
-#if !defined ( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	if( hud_fastswitch.GetInt() > 0 )
 #endif
 	{
@@ -660,18 +668,8 @@ void CBaseHudWeaponSelection::SelectWeapon( void )
 	
 		engine->ClientCmd( "cancelselect\n" );
 
-		if (player->GetTeamNumber() == TEAM_CT)
-		{
-			// Play the "weapon selected" sound
-			player->EmitSound("Player.WeaponSelected_CT");
-
-		}
-		else
-		{
-			// Play the "weapon selected" sound
-			player->EmitSound("Player.WeaponSelected_T");
-		}
-		
+		// Play the "weapon selected" sound
+		player->EmitSound("Player.WeaponSelected");
 	}
 }
 
@@ -693,21 +691,8 @@ void CBaseHudWeaponSelection::CancelWeaponSelection( void )
 
 		m_hSelectedWeapon = NULL;
 
-		// Play the "close weapon selection" sound based on faction
-		//player->EmitSound( "Player.WeaponSelectionClose" );
-
-		if (player->GetTeamNumber() == TEAM_CT)
-		{
-			// Play the CT Suit sound
-			player->EmitSound("Player.WeaponSelectionClose_CT");
-
-		}
-		else
-		{
-			// Play the T Suit sound
-			player->EmitSound("Player.WeaponSelectionClose_T");
-		}
-
+		// Play the "close weapon selection" sound
+		player->EmitSound( "Player.WeaponSelectionClose" );
 	}
 	else
 	{

@@ -16,7 +16,7 @@ struct CPortalCornerFitData;
 
 #if defined( CLIENT_DLL )
 class C_Prop_Portal;
-typedef C_Prop_Portal CProp_Portal;
+#define CProp_Portal C_Prop_Portal
 #else
 class CProp_Portal;
 #endif
@@ -34,7 +34,5 @@ bool PortalPlacementSucceeded( PortalPlacementResult_t eResult );
 bool IsNoPortalMaterial( const trace_t &tr );
 PortalSurfaceType_t PortalSurfaceType( const trace_t& tr );
 bool IsOnPortalPaint( const trace_t &tr );
-void InitSurfNoPortalFlag();
-void InitPortalPaintPowerValue();
 
 #endif // PORTAL_PLACEMENT_H

@@ -1128,7 +1128,7 @@ void GameSettings::OnCommand(const char *command)
 		Q_snprintf( chBuffer, sizeof( chBuffer ), "%s", szServerTypeValue );
 		for ( char *pszUpper = chBuffer; *pszUpper; ++ pszUpper )
 		{
-			if ( isupper( *pszUpper ) )
+			if ( V_isupper( *pszUpper ) )
 				*pszUpper = tolower( *pszUpper );
 		}
 

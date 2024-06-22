@@ -54,6 +54,9 @@ public:
 	// Return false if players aren't allowed to cap points at this time (i.e. in WaitingForPlayers)
 	virtual bool PointsMayBeCaptured( void ) { return true; }
 	virtual void SetLastCapPointChanged( int iIndex ) { return; }
+#ifndef CLIENT_DLL
+	virtual const char* GetTeamID(CBaseEntity* pEntity);
+#endif
 
 #ifdef CLIENT_DLL
 

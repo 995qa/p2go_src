@@ -36,6 +36,7 @@ public:
 
 	virtual void	Init();
 	virtual void	InitViewport();
+	virtual void	InitViewport( bool bOnlyBaseClass );
 	virtual void	LevelInit( const char *newmap );
 	virtual void	LevelShutdown( void );
 	virtual void	SetBlurFade( float scale );
@@ -43,6 +44,7 @@ public:
 	virtual void	OnColorCorrectionWeightsReset( void );
 	virtual float	GetColorCorrectionScale( void ) const { return 1.0f; }
 	virtual void	InitWeaponSelectionHudElement( void ) { return; } // don't init this hud
+	virtual void	Update();
 	virtual bool	ShouldDrawCrosshair( void );
 	virtual void	DoPostScreenSpaceEffects( const CViewSetup *pSetup );
 
@@ -54,15 +56,17 @@ public:
 	void StartTransitionFade( float flFadeTime );
 private:
 	
-	//	void	UpdateSpectatorMode( void );
-	// ClientCCHandle_t	m_CCDeathHandle;	// handle to death cc effect
-	// float				m_flDeathCCWeight;	// for fading in cc effect
+	void	UpdateSpectatorMode( void );
+	ClientCCHandle_t	m_CCDeathHandle;	// handle to death cc effect
+	float				m_flDeathCCWeight;	// for fading in cc effect
 
 	CHandle<C_ColorCorrection>	m_hCurrentColorCorrection;
 
 	float m_BlurFadeScale;
 
 	CRadialMenu	*m_pRadialMenu;
+
+	CUserMessageBinder m_UMCMsgTransitionFade;
 };
 
 

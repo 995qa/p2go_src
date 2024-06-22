@@ -9,7 +9,7 @@
 
 #include "basemodui.h"
 #include "VGenericPanelList.h"
-#include "portal2_leaderboard_manager.h"
+//#include "portal2_leaderboard_manager.h"
 
 using namespace vgui;
 using namespace BaseModUI;
@@ -123,9 +123,9 @@ class CAvatarPanelItem : public CLeaderboardMapItem
 public:
 	CAvatarPanelItem( vgui::Panel *pParent, const char *pPanelName );
 	~CAvatarPanelItem();
-	void SetPlayerData( const PortalLeaderboardItem_t *pData, LeaderboardType type );
+	//void SetPlayerData( const PortalLeaderboardItem_t *pData, LeaderboardType type );
 #if !defined( NO_STEAM )
-	void SetPlayerData( CSteamID playerID, int nScore, LeaderboardType type );
+	//void SetPlayerData( CSteamID playerID, int nScore, LeaderboardType type );
 #elif defined( _X360 )
 	void SetPlayerData( XUID playerID, int nScore, LeaderboardType type, int nController );
 #endif
@@ -150,9 +150,9 @@ protected:
 private:
 	bool IsMouseOnGamerPicture( void );
 
-	CPortalHUDLeaderboard *m_pHUDLeaderboard;
-	LeaderboardType m_leaderboardType;
-	StatType_t m_statType;
+	//CPortalHUDLeaderboard *m_pHUDLeaderboard;
+	//LeaderboardType m_leaderboardType;
+	//StatType_t m_statType;
 	int	m_nAvatarIndex;
 
 	uint64 m_nSteamID;
@@ -174,7 +174,7 @@ public:
 	~CPortalLeaderboardPanel();
 	int GetCurrentChapterNumber() { return m_nCurrentChapterNumber; }
 	int GetCurrentMapIndex() { return m_nMapIndex; }
-	void UpdateLeaderboards() { m_pLeaderboard = 0; m_bNeedsUpdate = true; }
+	void UpdateLeaderboards() { /*m_pLeaderboard = 0;*/ m_bNeedsUpdate = true; }
 	void SetMapIndex( int nMapIndex ) { m_nMapIndex = nMapIndex; }
 	virtual void	OnKeyCodePressed( vgui::KeyCode code );
 	void SelectPanel( PanelSelection_t selectedPanel, bool bForceItemSelect = false );
@@ -207,7 +207,7 @@ protected:
    void	SetNextMap();
 	void SetMapList();
 	void SetPanelStats();
-	void SetGraphData( CPortalLeaderboardGraphPanel *pGraphPanel, LeaderboardType graphType );
+	//void SetGraphData( CPortalLeaderboardGraphPanel *pGraphPanel, LeaderboardType graphType );
 	void UpdateStatPanel();
 	const char* GetCurrentMapName();
 	int GetIndexOfMap( int nMapNumber );
@@ -262,8 +262,8 @@ private:
 	PanelSelection_t m_currentSelection;
 
 	// the current leaderboard data
-	CPortalLeaderboard* m_pLeaderboard;
-	LeaderboardType m_CurrentLeaderboardType;
+	//CPortalLeaderboard* m_pLeaderboard;
+	//LeaderboardType m_CurrentLeaderboardType;
 
 	bool m_bCheated;
 	bool m_bOnline;
@@ -271,7 +271,7 @@ private:
 };
 
 
-void AddAvatarPanelItem( CPortalLeaderboard *pLeaderboard, BaseModUI::GenericPanelList *pStatLists, const PortalLeaderboardItem_t *pData, int nScore, LeaderboardType nType, int nPlayerType, int nAvatarIndex, int nHeight, int nSlot, bool bHUDElement = false );
+//void AddAvatarPanelItem( CPortalLeaderboard *pLeaderboard, BaseModUI::GenericPanelList *pStatLists, const PortalLeaderboardItem_t *pData, int nScore, LeaderboardType nType, int nPlayerType, int nAvatarIndex, int nHeight, int nSlot, bool bHUDElement = false );
 
 };
 

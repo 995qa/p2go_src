@@ -455,8 +455,8 @@ bool CBaseCombatCharacter::FVisibleThroughPortal( const CPortal_Base2D *pPortal,
 {
 	VPROF( "CBaseCombatCharacter::FVisible" );
 
-	if ( pPortal && IsPlayerNearTargetPortal( pPortal->m_hLinkedPortal.Get() ) == false )
-		return false;
+//	if ( pPortal && IsPlayerNearTargetPortal( pPortal->m_hLinkedPortal.Get() ) == false )
+//		return false;
 
 	if ( pEntity->GetFlags() & FL_NOTARGET )
 		return false;
@@ -2094,11 +2094,11 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 	}
 	// If default ammo given is greater than clip
 	// size, fill clips and give extra ammo
-// 	else if (pWeapon->GetDefaultClip1() >  pWeapon->GetMaxClip1() )
-// 	{
-// 		pWeapon->m_iClip1 = pWeapon->GetMaxClip1();
-// 		pWeapon->SetReserveAmmoCount( AMMO_POSITION_PRIMARY, (pWeapon->GetDefaultClip1() - pWeapon->GetMaxClip1())); 
-// 	}
+ 	else if (pWeapon->GetDefaultClip1() >  pWeapon->GetMaxClip1() )
+ 	{
+ 		pWeapon->m_iClip1 = pWeapon->GetMaxClip1();
+ 		pWeapon->SetReserveAmmoCount( AMMO_POSITION_PRIMARY, (pWeapon->GetDefaultClip1() - pWeapon->GetMaxClip1())); 
+ 	}
 
 	// ----------------------
 	//  Give Secondary Ammo
@@ -2117,11 +2117,11 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 	}
 	// If default ammo given is greater than clip
 	// size, fill clips and give extra ammo
-// 	else if ( pWeapon->GetDefaultClip2() > pWeapon->GetMaxClip2() )
-// 	{
-// 		pWeapon->m_iClip2 = pWeapon->GetMaxClip2();
-// 		pWeapon->SetReserveAmmoCount( AMMO_POSITION_SECONDARY, ( pWeapon->GetDefaultClip2() - pWeapon->GetMaxClip2() ) );
-// 	}
+ 	else if ( pWeapon->GetDefaultClip2() > pWeapon->GetMaxClip2() )
+ 	{
+ 		pWeapon->m_iClip2 = pWeapon->GetMaxClip2();
+ 		pWeapon->SetReserveAmmoCount( AMMO_POSITION_SECONDARY, ( pWeapon->GetDefaultClip2() - pWeapon->GetMaxClip2() ) );
+ 	}
 
 	pWeapon->Equip( this );
 
@@ -2180,7 +2180,7 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 			int secondaryGiven	= (pWeapon->UsesClipsForAmmo2()) ? pWeapon->m_iClip2 : pWeapon->GetSecondaryAmmoCount();
 
 			bool bSuppressSound = false;
-#if defined (CSTRIKE15)
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 			bSuppressSound = ShouldPickupItemSilently( this );
 #endif
 			CBaseCombatCharacter * pOwner = NULL;
@@ -2212,7 +2212,7 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 			//Only succeed if we've taken ammo from the weapon
 			if ( takenPrimary > 0 || takenSecondary > 0 )
 			{
-#if defined (CSTRIKE15)
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 				IGameEvent * event = gameeventmanager->CreateEvent( "ammo_pickup" );
 				if( event )
 				{
@@ -3239,7 +3239,7 @@ int CBaseCombatCharacter::GiveAmmo( int iCount, int iAmmoIndex, bool bSuppressSo
 	if ( iAmmoIndex < 0 || iAmmoIndex >= MAX_AMMO_SLOTS )
 		return 0;
 
-	int iMax = GetAmmoDef()->MaxCarry(iAmmoIndex, this);
+	int iMax = GetAmmoDef()->MaxCarry(iAmmoIndex);
 	int iAdd = MIN( iCount, iMax - m_iAmmo[iAmmoIndex] );
 	if ( iAdd < 1 )
 		return 0;

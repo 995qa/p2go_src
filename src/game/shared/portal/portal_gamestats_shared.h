@@ -254,7 +254,7 @@ struct BaseStatData
 {
 	BaseStatData()
 	{
-		TimeSubmitted = GetSteamWorksSGameStatsUploader().GetTimeSinceEpoch();
+		TimeSubmitted = 0; //GetSteamWorksSGameStatsUploader().GetTimeSinceEpoch();
 		m_bUseGlobalData = true;
 	}
 	

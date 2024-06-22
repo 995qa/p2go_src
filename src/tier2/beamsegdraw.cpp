@@ -77,6 +77,7 @@ inline void CBeamSegDraw::SpecifySeg( const Vector &vecCameraPos, const Vector &
 		// Specify the points.
 		m_pMeshBuilder->Position3fv( vPoint1.Base() );
 		m_pMeshBuilder->Color4ubv( (const unsigned char *) &m_Seg.m_color );
+		m_pMeshBuilder->Color4f(VectorExpand(m_Seg.m_vColor), m_Seg.m_flAlpha);
 		m_pMeshBuilder->TexCoord2f( 0, 0, m_Seg.m_flTexCoord );
 		m_pMeshBuilder->TexCoord2f( 1, 0, m_Seg.m_flTexCoord );
 		m_pMeshBuilder->TangentS3fv( vNormal.Base() );
@@ -85,6 +86,7 @@ inline void CBeamSegDraw::SpecifySeg( const Vector &vecCameraPos, const Vector &
 		
 		m_pMeshBuilder->Position3fv( vPoint2.Base() );
 		m_pMeshBuilder->Color4ubv( (const unsigned char *) &m_Seg.m_color );
+		m_pMeshBuilder->Color4f(VectorExpand(m_Seg.m_vColor), m_Seg.m_flAlpha);
 		m_pMeshBuilder->TexCoord2f( 0, 1, m_Seg.m_flTexCoord );
 		m_pMeshBuilder->TexCoord2f( 1, 1, m_Seg.m_flTexCoord );
 		m_pMeshBuilder->TangentS3fv( vNormal.Base() );
@@ -108,6 +110,7 @@ inline void CBeamSegDraw::SpecifySeg( const Vector &vecCameraPos, const Vector &
 		// Specify the points.
 		m_Mesh.Position3fv( vPoint1.Base() );
 		m_Mesh.Color4ubv( (const unsigned char *)  &m_Seg.m_color );
+		m_Mesh.Color4f(VectorExpand(m_Seg.m_vColor), m_Seg.m_flAlpha);
 		m_Mesh.TexCoord2f( 0, 0, m_Seg.m_flTexCoord );
 		m_Mesh.TexCoord2f( 1, 0, m_Seg.m_flTexCoord );
 		m_Mesh.TangentS3fv( vNormal.Base() );
@@ -116,6 +119,7 @@ inline void CBeamSegDraw::SpecifySeg( const Vector &vecCameraPos, const Vector &
 		
 		m_Mesh.Position3fv( vPoint2.Base() );
 		m_Mesh.Color4ubv( (const unsigned char *)  &m_Seg.m_color );
+		m_Mesh.Color4f(VectorExpand(m_Seg.m_vColor), m_Seg.m_flAlpha);
 		m_Mesh.TexCoord2f( 0, 1, m_Seg.m_flTexCoord );
 		m_Mesh.TexCoord2f( 1, 1, m_Seg.m_flTexCoord );
 		m_Mesh.TangentS3fv( vNormal.Base() );
@@ -327,14 +331,24 @@ void CBeamSegDrawArbitrary::SpecifySeg( const Vector &vNormal )
 	VectorAdd( m_Seg.m_vPos, vDelta, vPoint1 );
 	VectorSubtract( m_Seg.m_vPos, vDelta, vPoint2 );
 
+	Assert(IsFinite(m_Seg.m_vColor.x) && IsFinite(m_Seg.m_vColor.y) && IsFinite(m_Seg.m_vColor.z) && IsFinite(m_Seg.m_flAlpha));
+	Assert((m_Seg.m_vColor.x >= 0.0) && (m_Seg.m_vColor.y >= 0.0) && (m_Seg.m_vColor.z >= 0.0) && (m_Seg.m_flAlpha >= 0.0));
+	Assert((m_Seg.m_vColor.x <= 1.0) && (m_Seg.m_vColor.y <= 1.0) && (m_Seg.m_vColor.z <= 1.0) && (m_Seg.m_flAlpha <= 1.0));
+
+	unsigned char r = FastFToC(m_Seg.m_vColor.x);
+	unsigned char g = FastFToC(m_Seg.m_vColor.y);
+	unsigned char b = FastFToC(m_Seg.m_vColor.z);
+	unsigned char a = FastFToC(m_Seg.m_flAlpha);
 	m_Mesh.Position3fv( vPoint1.Base() );
 	m_Mesh.Color4ub( m_Seg.m_color.r, m_Seg.m_color.g, m_Seg.m_color.b, m_Seg.m_color.a );
+	m_Mesh.Color4ub(r, g, b, a);
 	m_Mesh.TexCoord2f( 0, 0, m_Seg.m_flTexCoord );
 	m_Mesh.TexCoord2f( 1, 0, m_Seg.m_flTexCoord );
 	m_Mesh.AdvanceVertex();
 	
 	m_Mesh.Position3fv( vPoint2.Base() );
 	m_Mesh.Color4ub( m_Seg.m_color.r, m_Seg.m_color.g, m_Seg.m_color.b, m_Seg.m_color.a );
+	m_Mesh.Color4ub(r, g, b, a);
 	m_Mesh.TexCoord2f( 0, 1, m_Seg.m_flTexCoord );
 	m_Mesh.TexCoord2f( 1, 1, m_Seg.m_flTexCoord );
 	m_Mesh.AdvanceVertex();

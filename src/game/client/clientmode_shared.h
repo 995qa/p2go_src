@@ -117,6 +117,12 @@ public:
 	virtual void	ScoreboardOff( void );
 	virtual void	GraphPageChanged( void );
 
+	// CSGO
+	virtual void	OnColorCorrectionWeightsReset( void );
+	virtual float	GetColorCorrectionScale( void ) const { return 1.0f; }
+	virtual void	DoPostScreenSpaceEffects( const CViewSetup *pSetup );
+	void			UpdatePostProcessingEffects();
+
 	CUserMessageBinder m_UMCMsgVGUIMenu;
 	CUserMessageBinder m_UMCMsgRumble;
 

@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //===========================================================================//
 
-
+#include <cbase.h>
 #include "IRunGameEngine.h"
 #include "EngineInterface.h"
 #include "tier1/strtools.h"

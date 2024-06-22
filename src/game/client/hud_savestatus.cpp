@@ -11,7 +11,7 @@
 #include "view.h"
 #include "vgui_controls/Controls.h"
 #include "vgui_controls/EditablePanel.h"
-#include "engineinterface.h"
+//#include "engineinterface.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -80,9 +80,18 @@ void CHudSaveStatus::ApplySchemeSettings( IScheme *pScheme )
 
 void CHudSaveStatus::SetSavingLabels( bool bIsGameSave )
 {
+#if defined( INCLUDE_SCALEFORM )
 	const char *pSavingLabel = bIsGameSave ? "#SFUI_Hud_SavingGame" : "#SFUI_Hud_SavingProfile";
 	const char *pSavedLabel =  bIsGameSave ? "#SFUI_Hud_GameSaved" : "#SFUI_Hud_ProfileSaved";
-	
+#elif defined( PORTAL2 )
+	const char *pSavingLabel = bIsGameSave ? "#PORTAL2_Hud_SavingGame" : "#PORTAL2_Hud_SavingProfile";
+	const char *pSavedLabel = bIsGameSave ? "#PORTAL2_Hud_GameSaved" : "#PORTAL2_Hud_ProfileSaved";
+#else
+	NOTE_UNUSED( bIsGameSave );
+	const char *pSavingLabel = "Saving...";
+	const char *pSavedLabel = "Saved.";
+#endif
+
 	if ( m_pSavingLabel )
 	{
 		m_pSavingLabel->SetText( pSavingLabel );

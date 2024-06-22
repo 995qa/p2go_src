@@ -35,7 +35,7 @@
 #include "c_portal_gamestats.h"
 #endif
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "c_cs_player.h"
 #include "matchmaking/imatchtitle.h"
 #include "matchmaking/iplayer.h"
@@ -63,7 +63,7 @@ ConVar voice_local_icon( "voice_local_icon", "0", FCVAR_NONE, "Draw local player
 ConVar voice_all_icons( "voice_all_icons", "0", FCVAR_NONE, "Draw all players' voice icons" );
 ConVar voice_icons_method( "voice_icons_method", "2", FCVAR_NONE, "0 = classic style, 1 = particles, 2 = integrated into target ID" );
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 ConVar cl_mute_enemy_team( "cl_mute_enemy_team", "0", FCVAR_ARCHIVE, "Block all communication from players on the enemy team." );
 ConVar cl_mute_all_but_friends_and_party( "cl_mute_all_but_friends_and_party", "0", FCVAR_ARCHIVE, "Only allow communication from friends and matchmaking party members. Doesn't apply to competitive matchmaking games." );
 #endif
@@ -119,7 +119,7 @@ void ClientVoiceMgr_LevelShutdown()
 
 static CVoiceStatus *g_pInternalVoiceStatus = NULL;
 
-bool __MsgFunc_VoiceMask(const CCSUsrMsg_VoiceMask &msg)
+bool __MsgFunc_VoiceMask(const CUsrMsg_VoiceMask &msg)
 {
 	if(g_pInternalVoiceStatus)
 		return g_pInternalVoiceStatus->HandleVoiceMaskMsg(msg);
@@ -127,7 +127,7 @@ bool __MsgFunc_VoiceMask(const CCSUsrMsg_VoiceMask &msg)
 	return true;
 }
 
-bool __MsgFunc_RequestState(const CCSUsrMsg_RequestState &msg)
+bool __MsgFunc_RequestState(const CUsrMsg_RequestState &msg)
 {
 	if(g_pInternalVoiceStatus)
 		return g_pInternalVoiceStatus->HandleReqStateMsg(msg);
@@ -475,7 +475,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, int iSsSlot, bool bTalking)
 	if( entindex == -1 && iSsSlot >= 0 )
 	{
 		m_bTalking[ iSsSlot ] = !!bTalking;
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		if( bTalking )
 		{
 			// Enable voice for them automatically if they try to talk.
@@ -525,7 +525,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, int iSsSlot, bool bTalking)
 		}
 		else 
 		{
-#if defined( PORTAL2 ) && !defined( _GAMECONSOLE )
+#if defined( PORTAL2_REAL ) && !defined( _GAMECONSOLE )
 			if ( m_flTalkTime[ iClient ] > 0.0f )
 			{
 				g_PortalGameStats.Event_MicUsage( entindex, m_flTalkTime[ iClient ], gpGlobals->curtime - m_flTalkTime[ iClient ] );
@@ -631,7 +631,7 @@ void CVoiceStatus::UpdateServerState(bool bForce)
 	m_LastUpdateServerState = gpGlobals->curtime;
 }
 
-bool CVoiceStatus::HandleVoiceMaskMsg(const CCSUsrMsg_VoiceMask &msg)
+bool CVoiceStatus::HandleVoiceMaskMsg(const CUsrMsg_VoiceMask &msg)
 {
 	unsigned long dw;
 	for(dw=0; dw < VOICE_MAX_PLAYERS_DW; dw++)
@@ -652,7 +652,7 @@ bool CVoiceStatus::HandleVoiceMaskMsg(const CCSUsrMsg_VoiceMask &msg)
 	return true;
 }
 
-bool CVoiceStatus::HandleReqStateMsg(const CCSUsrMsg_RequestState &msg)
+bool CVoiceStatus::HandleReqStateMsg(const CUsrMsg_RequestState &msg)
 {
 	if( voice_clientdebug.GetInt() == 1 )
 	{
@@ -718,20 +718,9 @@ bool CVoiceStatus::IsPlayerBlocked(int iPlayer)
 	return m_BanMgr.GetPlayerBan( pi.guid );
 }
 
-
-bool IsPartyMember( XUID xuidPlayer )
-{
-	if ( IMatchSession *pMatchSession = g_pMatchFramework->GetMatchSession() )
-	{
-		return SessionMembersFindPlayer( pMatchSession->GetSessionSettings(), xuidPlayer ) != NULL;
-	}
-	return false;
-}
-
-
 bool CVoiceStatus::ShouldHideCommunicationFromPlayer( int iPlayerIndex )
 {
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	C_CSPlayer* pLocalPlayer = C_CSPlayer::GetLocalCSPlayer();
 	if ( pLocalPlayer && pLocalPlayer->entindex() == iPlayerIndex )
 		return false;

@@ -7,7 +7,7 @@
 #define PORTAL_GAMEMOVEMENT_H
 
 #include "cbase.h"
-#include "hl_gamemovement.h"
+#include "gamemovement.h"
 
 #if defined( CLIENT_DLL )
 	#include "c_portal_player.h"

@@ -13,7 +13,7 @@
 #include "gameui_util.h"
 #include "vgui/ISurface.h"
 #include "VGenericConfirmation.h"
-#include "vportalleaderboard.h"
+//#include "vportalleaderboard.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -22,7 +22,7 @@ using namespace vgui;
 using namespace BaseModUI;
 
 extern int g_nPortalScoreTempUpdate;
-extern int g_nTimeScoreTempUpdate;
+/*extern */int g_nTimeScoreTempUpdate = 0;
 
 //=============================================================================
 static void LeaveGameOkCallback()
@@ -31,13 +31,13 @@ static void LeaveGameOkCallback()
 
 	CUIGameData::Get()->GameStats_ReportAction( "challenge_quit", engine->GetLevelNameShort(), g_nTimeScoreTempUpdate );
 
-	CPortalLeaderboardPanel* self = 
-		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_PORTALLEADERBOARDHUD ) );
+	//CPortalLeaderboardPanel* self = 
+	//	static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_PORTALLEADERBOARDHUD ) );
 
-	if ( self )
-	{
-		self->Close();
-	}
+	//if ( self )
+	//{
+	//	self->Close();
+	//}
 
 	GameUI().HideGameUI();
 
@@ -69,14 +69,14 @@ static void LeaveGameOkCallback()
 static void GoToHubOkCallback()
 {
 	GameUI().AllowEngineHideGameUI();
-	CPortalLeaderboardPanel* pSelf = 
-		static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
+	//CPortalLeaderboardPanel* pSelf = 
+	//	static_cast< CPortalLeaderboardPanel* >( CBaseModPanel::GetSingleton().GetWindow( WT_COOPEXITCHOICE ) );
 
-	if ( pSelf )
-	{
-		bool bWaitScreen =  CUIGameData::Get()->OpenWaitScreen( "#PORTAL2_WaitScreen_GoingToHub", 0.0f, NULL );
-		pSelf->PostMessage( pSelf, new KeyValues( "MsgPreGoToHub" ), bWaitScreen ? 2.0f : 0.0f );
-	}
+	//if ( pSelf )
+	//{
+	//	bool bWaitScreen =  CUIGameData::Get()->OpenWaitScreen( "#PORTAL2_WaitScreen_GoingToHub", 0.0f, NULL );
+	//	pSelf->PostMessage( pSelf, new KeyValues( "MsgPreGoToHub" ), bWaitScreen ? 2.0f : 0.0f );
+	//}
 }
 
 

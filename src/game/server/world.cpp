@@ -39,7 +39,7 @@
 #include "music.h"
 #endif
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "gametypes.h"
 #endif
 
@@ -731,7 +731,7 @@ void CWorld::Spawn( void )
 	SetModelName( AllocPooledString( modelinfo->GetModelName( GetModel() ) ) );
 	AddFlag( FL_WORLDBRUSH );
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// reinitialize all of the game type kv file data because we may have new things availible to us in the filesystem mounted from the bsp that we didn't have when the gamemodes.txt was first parsed
 	g_pGameTypes->Initialize( true );
 #endif

@@ -16,6 +16,17 @@
 
 #define STORAGE_COUNT_FOR_BITS( aStorageType, numBits ) ( ( (numBits) + 8*sizeof( aStorageType ) - 1 ) / ( 8* sizeof( aStorageType ) ) )
 
+#define MATCHMAKINGDATA_FIELD(name) short name [MMDATA_TYPE_COUNT][MMDATA_SCOPE_COUNT];
+
+// MatchmakingData
+// This is the data structure used for matchmaking.  Any fields addsed to this structure
+// need to be added to all of the appropriate areas where we calculate averages and 
+// serialize this data.
+struct MatchmakingData
+{
+};
+
+#undef MATCHMAKINGDATA_FIELD
 
 //
 //
@@ -114,11 +125,12 @@ struct TitleData2
 	// Achievement component bits
 	enum AchievementBits_t
 	{
-		kAchievementComponentTotalCount = 0
-#define CFG( name, compcount, ... ) \
-		+ STORAGE_COUNT_FOR_BITS( uint32, compcount )
-#include "xlast_portal2/inc_achievements.inc"
-#undef CFG
+		//kAchievementComponentTotalCount = 0
+//#define CFG( name, compcount, ... ) \
+//		+ STORAGE_COUNT_FOR_BITS( uint32, compcount )
+//#include "xlast_portal2/inc_achievements.inc"
+//#undef CFG
+		kAchievementComponentTotalCount = 5
 	};
 	uint32 bitsAchievementsComponents[ kAchievementComponentTotalCount ];
 

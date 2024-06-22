@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================//
-
+#include <cbase.h>
 #include "OptionsSubAudio.h"
 
 #include "CvarSlider.h"

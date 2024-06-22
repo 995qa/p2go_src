@@ -13,8 +13,11 @@
 #include "datacache/imdlcache.h"
 #include "tier0/vprof.h"
 #include "collisionutils.h"
-#include "econ_entity.h"
-#include "econ_item_view.h"
+#ifdef CLIENT_DLL
+#include "prediction.h"
+#endif
+//#include "econ_entity.h"
+//#include "econ_item_view.h"
 
 #if !defined( CLIENT_DLL )
 
@@ -893,9 +896,11 @@ const char *CBaseCombatWeapon::GetAnimPrefix( void ) const
 //-----------------------------------------------------------------------------
 const char *CBaseCombatWeapon::GetPrintName( void ) const
 {
+	/*
 	if ( GetEconItemView( ) )
 		return GetEconItemView( )->GetItemDefinition()->GetItemBaseName();
 	else
+	*/
 		return GetWpnData().szPrintName;
 }
 
@@ -3454,7 +3459,7 @@ int CBaseCombatWeapon::SetReserveAmmoCount( AmmoPosition_t nAmmoPosition, int nC
 			// use player ammo if a player entity was passed in or if there already is ammo in this position
 			if ( pPlayer->GetAmmoCount( nAmmoType ) || bForceSetAmmoOnPlayer )
 			{
-				int iMax = GetAmmoDef()->MaxCarry( nAmmoType, pPlayer );
+				int iMax = GetAmmoDef()->MaxCarry( nAmmoType );
 				iAdd = MIN( nCount, iMax - pPlayer->GetAmmoCount( nAmmoType ) );
 				int iTotal = MIN( nCount, iMax );
 
@@ -3518,15 +3523,15 @@ int CBaseCombatWeapon::GetReserveAmmoMax( AmmoPosition_t nAmmoPosition ) const
 			// use player ammo if there already is ammo in this position
 			if ( pPlayer->GetAmmoCount( nAmmoType ) )
 			{
-				return GetAmmoDef()->MaxCarry( nAmmoType, pPlayer );
+				return GetAmmoDef()->MaxCarry( nAmmoType );
 			}
 		}
 	}
 
 	switch( nAmmoPosition )
 	{
-	case AMMO_POSITION_PRIMARY: return GetWpnData().GetPrimaryReserveAmmoMax( GetEconItemView() );
-	case AMMO_POSITION_SECONDARY: return GetWpnData().GetSecondaryReserveAmmoMax( GetEconItemView() );
+	case AMMO_POSITION_PRIMARY: return GetWpnData().GetPrimaryReserveAmmoMax();
+	case AMMO_POSITION_SECONDARY: return GetWpnData().GetSecondaryReserveAmmoMax();
 	default: Assert(0); return 0;
 	}
 }

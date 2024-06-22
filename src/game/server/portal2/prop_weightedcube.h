@@ -14,7 +14,7 @@
 #include "datacache/imdlcache.h"
 #include "func_portal_detector.h"
 
-#include "player_pickup_paint_power_user.h"
+#include "paint/player_pickup_paint_power_user.h"
 
 DECLARE_AUTO_LIST( IPropWeightedCubeAutoList );
 

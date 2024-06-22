@@ -10,7 +10,9 @@
 #include "eiface.h"
 #include "team.h"
 #include "gameinterface.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_gamerules.h"
+#endif
 #include "usermessages.h"
 
 #ifdef TF_DLL
@@ -260,7 +262,7 @@ bool CVoteController::SetupVote( int iEntIndex )
 		CSingleUserRecipientFilter filter( pVoteCaller );
 		filter.MakeReliable();
 		
-		CCSUsrMsg_VoteSetup msg;
+		CUsrMsg_VoteSetup msg;
 		
 		for( int iIndex = 0; iIndex < m_potentialIssues.Count(); ++iIndex )
 		{
@@ -283,7 +285,7 @@ bool CVoteController::SetupVote( int iEntIndex )
 			}
 		}
 
-		SendUserMessage( filter, CS_UM_VoteSetup, msg );
+		SendUserMessage( filter, UM_VoteSetup, msg );
 	}
 
 	return true;
@@ -344,8 +346,23 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 				}
 #endif
 
-				// if this is not an instant voting issue ( i.e. tournament pause match )
+#if 0
+				// Does the GC need to approve now? If so, this function will send the message.
+				if ( pCurrentIssue->NeedsPermissionFromGC() )
+				{
+					m_pendingVoteParams.m_iIssueIndex = issueIndex;
+					m_pendingVoteParams.m_iEntIndex = iEntIndex;
+					V_strcpy_safe( m_pendingVoteParams.m_szTypeString, pszTypeString );
+					V_strcpy_safe( m_pendingVoteParams.m_szDetailString, pszDetailString );
 
+					// Put the vote in limbo and wait for a time-out, or answer.
+					m_waitingForGCResponseTimer.Start( 3.f );
+					return false;
+				}
+#endif
+
+				// if this is not an instant voting issue ( i.e. tournament pause match )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 				if (pCurrentIssue->GetVotesRequiredToPass() > 1 )
 				{
 					// can't call it if there's a global vote in progress.
@@ -385,6 +402,7 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 						return false;
 					}
 				}
+#endif
 
 				// Establish a bunch of data on this particular issue
 				m_iEntityHoldingVote = iEntIndex;
@@ -434,7 +452,7 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 						CSingleUserRecipientFilter filter( pPlayer );					
 						filter.MakeReliable();
 						
-						CCSUsrMsg_VoteStart msg;
+						CUsrMsg_VoteStart msg;
 						msg.set_team( m_iOnlyTeamToVote );			// move into the filter
 						msg.set_ent_idx( m_iEntityHoldingVote );
 						msg.set_vote_type( pCurrentIssue->GetVoteIssue() );
@@ -442,7 +460,7 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 						msg.set_details_str( pCurrentIssue->GetDetailsString() );
 						msg.set_other_team_str( pCurrentIssue->GetOtherTeamDisplayString() );
 						msg.set_is_yes_no_vote( m_bIsYesNoVote );
-						SendUserMessage( filter, CS_UM_VoteStart, msg );
+						SendUserMessage( filter, UM_VoteStart, msg );
 					}
 				}
 
@@ -454,7 +472,12 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 
 				m_nPotentialVotes = pCurrentIssue->CountPotentialVoters();
 				// FIX TO MAKE REMATCH ONLY
-				float flVoteDuration = CSGameRules()->IsQueuedMatchmaking() ? 45.0f : sv_vote_timer_duration.GetFloat();
+				float flVoteDuration;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+				flVoteDuration = CSGameRules()->IsQueuedMatchmaking() ? 45.0f : sv_vote_timer_duration.GetFloat();
+#else
+				flVoteDuration = sv_vote_timer_duration.GetFloat();
+#endif
 				m_acceptingVotesTimer.Start( flVoteDuration );
 				pCurrentIssue->OnVoteStarted();
 
@@ -495,10 +518,10 @@ void CVoteController::SendVoteFailedMessage( vote_create_failed_t nReason, CBase
 		CSingleUserRecipientFilter user( pVoteCaller );
 		user.MakeReliable();
 
-		CCSUsrMsg_CallVoteFailed msg;
+		CUsrMsg_CallVoteFailed msg;
 		msg.set_reason( nReason );
 		msg.set_time( nTime );
-		SendUserMessage( user, CS_UM_CallVoteFailed, msg );
+		SendUserMessage( user, UM_CallVoteFailed, msg );
 	}
 	else
 	{
@@ -509,10 +532,10 @@ void CVoteController::SendVoteFailedMessage( vote_create_failed_t nReason, CBase
 		CBroadcastRecipientFilter filter;
 		filter.MakeReliable();
 
-		CCSUsrMsg_VoteFailed msg;
+		CUsrMsg_VoteFailed msg;
 		msg.set_team( m_iOnlyTeamToVote );
 		msg.set_reason( nReason );
-		SendUserMessage( filter, CS_UM_VoteFailed, msg );
+		SendUserMessage( filter, UM_VoteFailed, msg );
 	}
 }
 
@@ -747,12 +770,12 @@ void CVoteController::VoteControllerThink( void )
 				CBroadcastRecipientFilter filter;
 				filter.MakeReliable();
 
-				CCSUsrMsg_VotePass msg;
+				CUsrMsg_VotePass msg;
 				msg.set_team( m_iOnlyTeamToVote );
 				msg.set_vote_type( pActiveIssue->GetVoteIssue() );
 				msg.set_disp_str( pActiveIssue->GetVotePassedString() );
 				msg.set_details_str( pActiveIssue->GetDetailsString() );
-				SendUserMessage( filter, CS_UM_VotePass, msg );
+				SendUserMessage( filter, UM_VotePass, msg );
 			}
 			else
 			{
@@ -816,8 +839,12 @@ bool CVoteController::IsValidVoter( CBasePlayer *pWhom )
 
 	if ( !sv_vote_allow_spectators.GetBool() || !sv_vote_count_spectator_votes.GetBool() )
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		if ( pWhom->GetTeamNumber() != TEAM_TERRORIST && pWhom->GetTeamNumber() != TEAM_CT )
-			return false;
+#else
+		if ( pWhom->GetTeamNumber() == TEAM_SPECTATOR )
+#endif
+		return false;
 	}
 
 	if ( SV_VOTE_IGNORE_BOTS )  // Don't want to do this check for debug builds (so we can test with bots)
@@ -1017,11 +1044,13 @@ int CBaseIssue::GetVotesRequiredToPass( void )
 
 	int nVotesToSucceed = 0;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( CSGameRules() && CSGameRules()->IsQueuedMatchmaking() 
 		 && CSGameRules()->IsPlayingAnyCompetitiveStrictRuleset() && !IsAllyRestrictedVote() )
 	{	// in queued matchmaking must have 100% voting to succeed (unless kick vote)
 		nVotesToSucceed = CSGameRules()->m_numQueuedMatchmakingAccounts;
 	}
+
 	// Unanimous votes require all attending humans (which might be less than 10 players)
 	else if ( IsUnanimousVoteToPass() )
 	{
@@ -1032,6 +1061,18 @@ int CBaseIssue::GetVotesRequiredToPass( void )
 		float flnVotesToSucceed = ( CSGameRules() && CSGameRules()->IsPlayingAnyCompetitiveStrictRuleset() ) ? MAX( 1, nPotentialVoters - 1 ) : ( ( float )nPotentialVoters * sv_vote_quorum_ratio.GetFloat() );
 		nVotesToSucceed = ceil( flnVotesToSucceed );
 	}
+#else
+	// Unanimous votes require all attending humans (which might be less than 10 players)
+	if ( IsUnanimousVoteToPass() )
+	{
+		nVotesToSucceed = MAX( 1, nPotentialVoters );
+	}
+	else
+	{
+		float flnVotesToSucceed = ( float )nPotentialVoters * sv_vote_quorum_ratio.GetFloat();
+		nVotesToSucceed = ceil( flnVotesToSucceed );
+	}
+#endif
 
 	return nVotesToSucceed;
 }
@@ -1103,11 +1144,14 @@ bool CBaseIssue::CanCallVote( int iEntIndex, const char *pszCommand, const char 
 	}
 #endif // TF_DLL
 
+#ifdef CSTRIKE_DLL
+
 	if ( !sv_vote_allow_in_warmup.GetBool() && CSGameRules() && CSGameRules()->IsWarmupPeriod() && !IsEnabledDuringWarmup() )
 	{
 		nFailCode = VOTE_FAILED_WAITINGFORPLAYERS;
 		return false;
 	}
+#endif
 
 	CBaseEntity *pVoteCaller = UTIL_EntityByIndex( iEntIndex );
 	if( pVoteCaller && !CanTeamCallVote( GetVoterTeam( pVoteCaller ) ) )
@@ -1127,6 +1171,7 @@ bool CBaseIssue::CanCallVote( int iEntIndex, const char *pszCommand, const char 
 		}
 	}
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// Only few votes are actually allowed in queue matchmaking mode
 	if ( CSGameRules() && CSGameRules()->IsQueuedMatchmaking() && !IsEnabledInQueuedMatchmaking() )
 	{
@@ -1148,6 +1193,7 @@ bool CBaseIssue::CanCallVote( int iEntIndex, const char *pszCommand, const char 
 		nFailCode = VOTE_FAILED_ISSUE_DISABLED;
 		return false;
 	}
+#endif
 
 	// Did this fail recently?
 	for( int iIndex = 0; iIndex < m_FailedVotes.Count(); iIndex++ )

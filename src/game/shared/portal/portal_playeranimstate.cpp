@@ -369,13 +369,10 @@ bool CPortalPlayerAnimState::HandleMoving( Activity &idealActivity )
 	}
 	else
 	{
-		CEG_GCV_PRE();
-		static const int CEG_SPEED_POWER = CEG_GET_CONSTANT_VALUE( PaintSpeedPower );
-		CEG_GCV_POST();
-		bool bHasSpeedPower = pPortalPlayer->GetPaintPower( CEG_SPEED_POWER ).m_State == ACTIVE_PAINT_POWER;
+		bool bHasSpeedPower = pPortalPlayer->GetPaintPower( SPEED_POWER ).m_State == ACTIVE_PAINT_POWER;
 
 #ifdef CLIENT_DLL
-		if ( engine->HasPaintmap() && !bHasSpeedPower && !pPortalPlayer->IsLocalPlayer() )
+		if ( engine->HasPaintmap() && !bHasSpeedPower && !pPortalPlayer->IsLocalPlayer())
 		{
 			// FIXME: Is this doing extra work in splitscreen?
 			// Non-local players don't update paint powers on the client because this has to happen in gamemovement!
@@ -387,7 +384,7 @@ bool CPortalPlayerAnimState::HandleMoving( Activity &idealActivity )
 			for( PaintPowerConstIter i = activeRange.first; i != activeRange.second; ++i )
 			{
 				const PaintPowerInfo_t &newPower = *i;
-				if ( newPower.m_PaintPowerType == CEG_SPEED_POWER )
+				if ( newPower.m_PaintPowerType == SPEED_POWER )
 				{
 					bHasSpeedPower = true;
 				}

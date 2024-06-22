@@ -8,7 +8,9 @@
 #include "props.h"
 #include "triggers.h"
 #include "prop_weightedcube.h"
+
 #include "portal_mp_gamerules.h"
+
 #include "prop_monster_box.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -298,7 +300,7 @@ const char *CPropFloorButton::GetButtonModelName()
 //-----------------------------------------------------------------------------
 // Purpose: Press the button
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void CPropFloorButton::Press( CBaseEntity *pActivator )
+void CPropFloorButton::Press( CBaseEntity *pActivator )
 {
 	// play the down sequence
 	ResetSequence( m_DownSequence );
@@ -308,7 +310,6 @@ CEG_NOINLINE void CPropFloorButton::Press( CBaseEntity *pActivator )
 
 	// Change the skin
 	SetSkin( button_on_skin );
-	CEG_PROTECT_MEMBER_FUNCTION( CPropFloorButton_Press );
 
 	// call the function that fires the OnPressed output
 	OnPressed( pActivator );
@@ -392,12 +393,13 @@ void CPropFloorButton::OnPressed( CBaseEntity* pActivator )
 //-----------------------------------------------------------------------------
 void CPropFloorButton::OnUnPressed( CBaseEntity* pActivator )
 {
+#if 1
 	if( pActivator && FClassnameIs( pActivator, "prop_monster_box" ) )
 	{
 		CPropMonsterBox* pMonsterBox = static_cast<CPropMonsterBox*>( pActivator );
 		pMonsterBox->BecomeMonster( false );
 	}
-
+#endif
 
 	SetContextThink( NULL, gpGlobals->curtime, s_pszPressingBoxHasSetteledThinkContext );
 

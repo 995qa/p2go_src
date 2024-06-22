@@ -37,7 +37,7 @@
 #if defined ( PORTAL2 )
 #include "portal_player.h"
 #endif
-#include "weapon_c4.h"
+//#include "weapon_c4.h"
 
 #ifdef HL2_DLL
 #include "hl2_player.h"
@@ -2669,6 +2669,7 @@ void CTriggerPush::DrawDebugGeometryOverlays()
 	}	
 }
 
+#if defined( CSTRIKE_DLL )
 //-----------------------------------------------------------------------------
 // Bomb reset trigger - places dropped bomb at the last valid player-held location
 //-----------------------------------------------------------------------------
@@ -2705,6 +2706,7 @@ void CTriggerBombReset::Touch(CBaseEntity *pOther)
 		pC4->ResetToLastValidPlayerHeldPosition();
 	}
 }
+#endif
 
 //-----------------------------------------------------------------------------
 // Teleport trigger

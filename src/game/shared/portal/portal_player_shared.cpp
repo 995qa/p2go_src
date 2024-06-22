@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -10,15 +10,29 @@
 #include "portal_player_shared.h"
 //#include "portal_playeranimstate.h"
 #include "debugoverlay_shared.h"
-#include "mesh.h"
+#include "meshutils/mesh.h"
 #include "in_buttons.h"
-#include "portal_base2d_shared.h"
+#include "prop_portal_shared.h"
 #include "movevars_shared.h"
 #include "util_shared.h"
 #include "portal_util_shared.h"
 #include "collisionutils.h"
 #include "portal_mp_gamerules.h"
 
+#ifndef NO_TRACTOR_BEAM
+#include "trigger_tractorbeam_shared.h"
+#endif
+
+#ifdef GAME_DLL
+BEGIN_SIMPLE_DATADESC( PortalPlayerStatistics_t )
+
+DEFINE_FIELD( iNumPortalsPlaced, FIELD_INTEGER ),
+DEFINE_FIELD( iNumStepsTaken, FIELD_INTEGER ),
+DEFINE_FIELD( fNumSecondsTaken, FIELD_FLOAT ),
+DEFINE_FIELD( fDistanceTaken, FIELD_FLOAT ),
+
+END_DATADESC()
+#endif
 #ifdef CLIENT_DLL
 
 #include "c_portal_player.h"
@@ -38,10 +52,11 @@ extern IViewRender *view;
 extern IViewEffects *GetViewEffects();
 
 #include "cdll_util.h"
-#include "c_portal_base2d.h"
-#include "c_weapon_paintgun.h"
-#include "c_trigger_catapult.h"
-#include "c_trigger_tractorbeam.h"
+#include "c_prop_portal.h"
+#include "paint/c_weapon_paintgun.h"
+// TODO:
+//#include "c_trigger_catapult.h"
+//#include "c_trigger_tractorbeam.h"
 #include "c_basetempentity.h"
 #include "igameevents.h"
 #include "cam_thirdperson.h"
@@ -67,15 +82,17 @@ extern IViewEffects *GetViewEffects();
 
 extern int TrainSpeed(int iSpeed, int iMax);
 
-#include "portal_base2d.h"
-#include "paint_database.h"
+#include "prop_portal.h"
+#include "paint/paint_database.h"
 
 #include "basetempentity.h"
-#include "paint_swap_guns.h"
-#include "weapon_paintgun.h"
+#include "paint/paint_swap_guns.h"
+#include "paint/weapon_paintgun.h"
 #include "weapon_portalgun.h"
 #include "trigger_catapult.h"
+#ifndef NO_TRACTOR_BEAM
 #include "trigger_tractorbeam.h"
+#endif
 #include "physicsshadowclone.h"
 
 #include "explode.h"
@@ -90,7 +107,7 @@ extern int TrainSpeed(int iSpeed, int iMax);
 #include "collisionutils.h"
 #include "portal2/portal_grabcontroller_shared.h"
 #include "portal2/player_pickup.h"
-#include "weapon_paintgun_shared.h"
+#include "paint/weapon_paintgun_shared.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -129,7 +146,7 @@ const float PORTAL_PLANE_IGNORE_EPSILON = 17.0f;
 extern ConVar sv_speed_normal;
 extern ConVar sv_speed_paint_max;
 extern ConVar portal_tauntcam_dist;
-ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED );
+ConVar portal_deathcam_dist( "portal_deathcam_dist", "128", FCVAR_CHEAT | FCVAR_REPLICATED );
 
 ConVar sv_portal_coop_ping_hud_indicitator_duration( "sv_portal_coop_ping_hud_indicitator_duration", "5", FCVAR_REPLICATED );
 
@@ -226,11 +243,11 @@ ConVar sv_wall_jump_help_amount("sv_wall_jump_help_amount", "5.0f", FCVAR_REPLIC
 ConVar sv_wall_jump_help_debug("sv_wall_jump_help_debug", "0", FCVAR_REPLICATED);
 
 //Debug convars
-ConVar show_player_paint_power_debug( "show_player_paint_power_debug", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar show_player_paint_power_debug( "show_player_paint_power_debug", "0", FCVAR_REPLICATED );
 ConVar mp_should_gib_bots("mp_should_gib_bots", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
-ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
+ConVar sv_debug_bounce_reflection("sv_debug_bounce_reflection", "0", FCVAR_REPLICATED );
+ConVar sv_debug_bounce_reflection_time("sv_debug_bounce_reflection_time", "15.f", FCVAR_REPLICATED );
+ConVar paint_compute_contacts_simd("paint_compute_contacts_simd", "0", FCVAR_REPLICATED, "Compute the contacts with paint in fast SIMD (1) or with slower FPU (0)." );
 
 ConVar prevent_crouch_jump("prevent_crouch_jump", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Enable/Disable crouch jump prevention.");
 
@@ -452,7 +469,7 @@ bool CPortal_Player::TestHitboxes( const Ray_t &ray, unsigned int fContentsMask,
 			return false;
 
 		mstudiobbox_t *pbox = set->pHitbox( tr.hitbox );
-		mstudiobone_t *pBone = pStudioHdr->pBone(pbox->bone);
+		const mstudiobone_t* pBone = pStudioHdr->pBone(pbox->bone);
 		tr.surface.name = "**studio**";
 		tr.surface.flags = SURF_HITBOX;
 		tr.surface.surfaceProps = pBone->GetSurfaceProp();
@@ -479,7 +496,7 @@ void CPortal_Player::ForceDuckThisFrame( void )
 {
 	if( (GetFlags() & FL_DUCKING) == 0 )
 	{
-		EASY_DIFFPRINT( this, "CPortal_Player::ForceDuckThisFrame()" );
+		//EASY_DIFFPRINT( this, "CPortal_Player::ForceDuckThisFrame()" );
 		SetGroundEntity( NULL );
 		SetGroundChangeTime( gpGlobals->curtime + 0.5f );
 		m_Local.m_bDucked = true;
@@ -1542,11 +1559,12 @@ float CPortal_Player::PredictedBounce( void )
 	fSeconds -= tr.fraction * fStep;
 
 	bool bTouched = false;
+	// TODO:
+#if 0
 	float fLeastFraction = tr.fraction;
 
 	Ray_t ray;
 	ray.Init( tr.startpos, vPos, GetHullMins(), GetHullMaxs() );
-
 	for ( int i = 0; i < ITriggerCatapultAutoList::AutoList().Count(); ++i )
 	{
 		CTriggerCatapult *pCatapult = static_cast< CTriggerCatapult* >( ITriggerCatapultAutoList::AutoList()[ i ] );
@@ -1571,7 +1589,7 @@ float CPortal_Player::PredictedBounce( void )
 			}
 		}
 	}
-
+#endif
 	fSeconds += tr.fraction * fStep;
 
 	if ( bTouched )
@@ -1616,7 +1634,7 @@ const char *CPortal_Player::GetPlayerModelName( void )
 #endif // PORTAL2_PUZZLEMAKER
 	if ( GameRules()->IsMultiplayer() )
 	{
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 		int iBot = ( GetTeamNumber() == TEAM_BLUE ) ? P2BOT_ATLAS : P2BOT_PBODY;
 		m_bIsBendy = false;
 
@@ -2766,15 +2784,12 @@ bool CPortal_Player::IsHoldingJumpKey() const
 }
 
 
-CEG_NOINLINE bool CPortal_Player::IsTryingToSuperJump( const PaintPowerInfo_t* pInfo ) const
+bool CPortal_Player::IsTryingToSuperJump( const PaintPowerInfo_t* pInfo ) const
 {
 	if( !pInfo )
 		return false;
 
 	const int superJumpMode = sv_press_jump_to_bounce.GetInt();
-	CEG_GCV_PRE();
-	static const int CEG_SPEED_POWER = CEG_GET_CONSTANT_VALUE( PaintSpeedPower );
-	CEG_GCV_POST();
 
 	// For the trampoline bounce mode, the player can bounce if the velocity is significantly toward the surface.
 	// Note that this condition requires the player be in the air. That is because we must always detect this case
@@ -2791,7 +2806,7 @@ CEG_NOINLINE bool CPortal_Player::IsTryingToSuperJump( const PaintPowerInfo_t* p
 	const bool canTrampolineBounceOffWall = trampoline_bounce_off_walls_while_on_ground.GetBool() || isInAir;
 	const bool spaceBarActivatedTrampolineJump = IsPressingJumpKey() && jump_button_can_activate_trampoline_bounce.GetBool();
 	const bool canAutoLongJump = MaxSpeed() > bounce_auto_trigger_min_speed.GetFloat() &&
-								 !IsActivatingPower( GetPaintPower( CEG_SPEED_POWER ) ) &&
+								 !IsActivatingPower( GetPaintPower( SPEED_POWER ) ) &&
 								 !isInAir &&
 								 ( !look_dependent_auto_long_jump_enabled.GetBool() || DotProduct( Forward(), velocity.Normalized() ) >= look_dependent_auto_long_jump_min_cos_angle.GetFloat() );
 	const bool canTrampolineBounce = ( superJumpMode == TRAMPOLINE_BOUNCE ) &&
@@ -2818,7 +2833,7 @@ void CPortal_Player::SetJumpedThisFrame( bool jumped )
 {
 	if( jumped != m_PortalLocal.m_bJumpedThisFrame )
 	{
-		EASY_DIFFPRINT( this, "CPortal_Player::SetJumpedThisFrame() %s", jumped ? "true" : "false" );
+		//EASY_DIFFPRINT( this, "CPortal_Player::SetJumpedThisFrame() %s", jumped ? "true" : "false" );
 	}
 	m_PortalLocal.m_bJumpedThisFrame = jumped;
 }
@@ -2848,7 +2863,7 @@ InAirState CPortal_Player::GetInAirState() const
 }
 
 // Extracted and noinlined to give us a standalone callsite to protect
-CEG_NOINLINE void UpdatePaintZ( Vector &velocity, float inGravity )
+void UpdatePaintZ( Vector &velocity, float inGravity )
 {
 	// Find the height the player will go at the current velocity
 	// 0 = v0 + g * t
@@ -2870,13 +2885,8 @@ CEG_NOINLINE void UpdatePaintZ( Vector &velocity, float inGravity )
 	velocity.z = sqrt( 2 * -gravity * targetHeight ); // Negate gravity so the value is valid
 }
 
-#ifdef CLIENT_DLL
-CEG_PROTECT_FUNCTION( UpdatePaintZ );
-#endif
-
 bool CPortal_Player::CheckToUseBouncePower( PaintPowerInfo_t& info )
 {	
-
 	// Crouching opts out of using bounce powers
 	const bool bIsCrouching = m_Local.m_bDucking || GetFlags() & FL_DUCKING || m_PortalLocal.m_bPreventedCrouchJumpThisFrame;
 	const bool bShouldJump = IsTryingToSuperJump( &info );
@@ -4459,7 +4469,7 @@ void ComputeAABBContactsWithBrushEntity( ContactVector& contacts, const cplane_t
 	if ( paint_compute_contacts_simd.GetBool() )
 	{
 		ComputeAABBContactsWithBrushEntity_SIMD( contacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
-#if _DEBUG
+#if _DEBUG && 1
 		ContactVector fpuContacts;
 		ComputeAABBContactsWithBrushEntity_Old( fpuContacts, pClipPlanes, iClipPlaneCount, boxOrigin, boxMin, boxMax, pBrushEntity, contentsMask );
 
@@ -4602,15 +4612,15 @@ Vector CPortal_Player::EyePosition()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-// FIXME: Bring this back for DLC2
-#define paintgun_ammo_type 0 //extern ConVar paintgun_ammo_type;
+
+extern ConVar paintgun_ammo_type;
 void CPortal_Player::ItemPostFrame()
 {
 	BaseClass::ItemPostFrame();
 
 	CBaseCombatWeapon* pActiveWeapon = GetActiveWeapon();
 	if( m_hUseEntity != NULL &&
-		paintgun_ammo_type != PAINT_AMMO_NONE &&
+		paintgun_ammo_type.GetInt() != PAINT_AMMO_NONE &&
 		pActiveWeapon != NULL &&
 		FClassnameIs( pActiveWeapon, "weapon_paintgun" ) )
 	{
@@ -5107,9 +5117,10 @@ void CPortalPlayerShared::ConditionGameRulesThink( void )
 #endif
 }
 
-
+#ifndef NO_TRACTOR_BEAM
 void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 {
+	// TODO:
 	if ( !pTractorBeam )
 		return;
 
@@ -5145,7 +5156,8 @@ void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 	m_Local.m_fTBeamEndTime = 0.0f;
 	SetGravity( FLT_MIN );
 
-#ifdef GAME_DLL
+	// TODO:
+#if defined ( GAME_DLL ) && 1
 	triggerevent_t event;
 	if ( PhysGetTriggerEvent( &event, pTractorBeam ) && event.pObject )
 	{
@@ -5210,6 +5222,7 @@ void CPortal_Player::SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bo
 		}
 	}
 }
+#endif // #if 0
 
 
 void CPortal_Player::SetHullHeight( float flHeight )

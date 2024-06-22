@@ -13,7 +13,9 @@
 
 #include "shareddefs.h"
 #include "utlvector.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_player.h"
+#endif
 
 class CBasePlayer;
 class CTeamSpawnPoint;
@@ -71,7 +73,9 @@ public:
 	virtual void RemovePlayer( CBasePlayer *pPlayer );
 	virtual int  GetNumPlayers( void );
 	virtual CBasePlayer *GetPlayer( int iIndex );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	static int TeamGGSortFunction( CCSPlayer* const *entry1, CCSPlayer* const *entry2 );
+#endif
 	virtual void DetermineGGLeaderAndSort( void );
 	virtual int GetGGLeader( int nTeam );
 
@@ -102,7 +106,7 @@ public:
 
 	virtual int GetAliveMembers( void );
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	virtual int GetBotMembers( CUtlVector< class CCSBot* > *pOutVecBots = NULL );
 	virtual int GetHumanMembers( CUtlVector< class CCSPlayer* > *pOutVecPlayers = NULL );
 #endif

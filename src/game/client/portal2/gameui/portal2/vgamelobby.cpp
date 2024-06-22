@@ -1108,7 +1108,7 @@ void GameLobby::MsgNoValidMissionChapter( KeyValues *pSettings )
 {
 	LeaveLobbyImpl();	// Lobby is no valid at this point
 
-	if ( IsX360() )
+	/*if ( IsX360() )
 	{
 		// The required DLC is missing on the client, fire a notification that would
 		// allow us to download the DLC from the marketplace
@@ -1128,7 +1128,7 @@ void GameLobby::MsgNoValidMissionChapter( KeyValues *pSettings )
 
 		CUIGameData::Get()->OnEvent( kvDlcNotify );
 		return;
-	}
+	}*/
 
 	const char *szCampaignWebsite = pSettings->GetString( "game/missioninfo/website", NULL );
 

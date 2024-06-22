@@ -16,20 +16,25 @@ class CPortal_Player;
 #include "portal_playerlocaldata.h"
 #include "simtimer.h"
 #include "soundenvelope.h"
-#include "npc_security_camera.h"
 #include "portal_player_shared.h"
 #include "weapon_portalbase.h"
 #include "in_buttons.h"
 #include "ai_speech.h"			// For expresser host
 #include "basemultiplayerplayer.h"
-#include "paint_power_user.h"
-#include "paintable_entity.h"
+#include "paint/paint_power_user.h"
+#include "paint/paintable_entity.h"
 #include "ai_basenpc.h"
 #include "npc_security_camera.h"
-#include "portal_base2d.h"
+#include "prop_portal.h"
+#include "portal_grabcontroller_shared.h"
+#include "player_pickup.h"
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	#include "portal2_item_inventory.h"
+#endif
+
+#ifndef NO_TRACTOR_BEAM 
+
 #endif
 
 extern bool UTIL_TimeScaleIsNonStandard( void );
@@ -69,12 +74,13 @@ public:
 };
 
 class CMoveData;
+class CTrigger_TractorBeam;
 
 //=============================================================================
 // >> Portal_Player
 //=============================================================================
 class CPortal_Player : public PaintPowerUser< CPaintableEntity< CBaseMultiplayerPlayer > >
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	, public IInventoryUpdateListener
 #endif
 {
@@ -352,10 +358,12 @@ public:
 	int FlashlightIsOn( void );
 	bool FlashlightTurnOn( bool playSound /*= false*/ );
 	void FlashlightTurnOff( bool playSound /*= false*/ );
-
+	
+#ifndef NO_TRACTOR_BEAM
 	void SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam );
 	void SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bool bKeepFloating );
 	CTrigger_TractorBeam* GetTractorBeam( void ) const { return m_PortalLocal.m_hTractorBeam.Get(); }
+#endif
 
 	friend class CPortalGameMovement;
 
@@ -565,6 +573,8 @@ private: // PAINT SPECIFIC
 
 	void GivePortalPlayerItems( void );
 
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &vMins, Vector vMaxs, int iTraceType );
+
 	// Find all the contacts
 	void DeterminePaintContacts();
 	void PredictPaintContacts( const Vector& contactBoxMin,
@@ -689,7 +699,7 @@ private: // PAINT SPECIFIC
 	friend class CPortalPlayerShared;
 	friend class CGrabController;
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 
 	//----------------------------
 	// ECONOMY INVENTORY MANAGEMENT

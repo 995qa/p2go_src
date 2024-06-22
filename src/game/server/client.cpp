@@ -30,7 +30,7 @@
 #include "fmtstr.h"
 #include "videocfg/videocfg.h"
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_gamerules.h"
 #include "cs_team.h"
 #endif
@@ -40,7 +40,9 @@
 #endif
 
 #ifdef HL2_DLL
+#ifdef PHYSCANNON
 #include "weapon_physcannon.h"
+#endif
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -330,8 +332,6 @@ void Host_Say( edict_t *pEdict, const CCommand &args, bool teamonly )
 PRECACHE_REGISTER_BEGIN( GLOBAL, ClientPrecache )
 #ifndef DOTA_DLL
 	// Precache cable textures.
-	PRECACHE( MODEL, "cable/phonecable.vmt" )
-	PRECACHE( MODEL, "cable/phonecable_red.vmt" )
 	PRECACHE( MODEL, "cable/cable.vmt" )
 	PRECACHE( MODEL, "cable/cable_lit.vmt" )
 	PRECACHE( MODEL, "cable/chain.vmt" )
@@ -354,8 +354,6 @@ PRECACHE_REGISTER_BEGIN( GLOBAL, ClientPrecache )
 	PRECACHE( GAMESOUND, "Player.PickupWeapon" )
 	PRECACHE( GAMESOUND, "Player.DenyWeaponSelection" )
 	PRECACHE( GAMESOUND, "Player.WeaponSelected" )
-	PRECACHE( GAMESOUND, "Player.WeaponSelected_CT")
-	PRECACHE( GAMESOUND, "Player.WeaponSelected_T")
 	PRECACHE( GAMESOUND, "Player.WeaponSelectionClose" )
 	PRECACHE( GAMESOUND, "Player.WeaponSelectionMoveSlot" )
 
@@ -668,7 +666,7 @@ void CPointServerCommand::InputCommand( inputdata_t& inputdata )
 	if ( !inputdata.value.String()[0] )
 		return;
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CBasePlayer *player = UTIL_GetListenServerHost();
 	// if we're on a dedicated server or a non-listen server, only accept whitelisted commands
 	if ( engine->IsDedicatedServer() || player == NULL )
@@ -828,7 +826,7 @@ void kill_helper( const CCommand &args, bool bVector, bool bExplode )
 		return;
 	}
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// If we're doing global assassination targets, we have a known assassinate quest and the player who is the target is on the correct team
 	// then don't let them suicide. 
 	if ( CSGameRules() && CSGameRules()->GetActiveAssassinationQuest() )

@@ -13,9 +13,8 @@
 #include "portal_base2d_shared.h"
 #include "rumble_shared.h"
 #include "portal_mp_gamerules.h"
-#include "tier0/stacktools.h"
 #include "portal_util_shared.h"
-#include "iclient.h"
+#include "trigger_tractorbeam_shared.h"
 
 #if defined( CLIENT_DLL )
 	#include "c_portal_player.h"
@@ -23,7 +22,8 @@
 	#include "prediction.h"
 	#include "c_weapon_portalgun.h"
 	#include "c_projectedwallentity.h"
-	#define CRecipientFilter C_RecipientFilter
+	#include "c_basetoggle.h"
+#define CRecipientFilter C_RecipientFilter
 #else
 	#include "portal_player.h"
 	#include "env_player_surface_trigger.h"
@@ -33,7 +33,7 @@
 	#include "SoundEmitterSystem/isoundemittersystembase.h"
 	#include "weapon_portalgun.h"
 	#include "projectedwallentity.h"
-	#include "paint_power_info.h"
+	#include "paint/paint_power_info.h"
 	#include "particle_parse.h"
 #endif
 
@@ -405,7 +405,7 @@ void CPortalGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMov
 		// Cropping movement speed scales mv->m_fForwardSpeed etc. globally
 		// Once we crop, we don't want to recursively crop again, so we set the crop
 		// flag globally here once per usercmd cycle.
-		m_bSpeedCropped = false;
+		m_iSpeedCropped = SPEED_CROPPED_RESET;
 
 		m_bInPortalEnv = (((CPortal_Player *)pPlayer)->m_hPortalEnvironment != NULL);
 
@@ -2201,12 +2201,12 @@ CBaseHandle CPortalGameMovement::TestPlayerPosition( const Vector& pos, int coll
 		CPortal_Player *pPortalPlayer = (CPortal_Player *)((CBaseEntity *)mv->m_nPlayerHandle.Get());
 		pPortalPlayer->SetStuckOnPortalCollisionObject();
 
-		return INVALID_EHANDLE_INDEX;
+		return INVALID_EHANDLE;
 	}
 #endif
 	else
 	{	
-		return INVALID_EHANDLE_INDEX;
+		return INVALID_EHANDLE;
 	}
 }
 
@@ -2992,13 +2992,13 @@ void CPortalGameMovement::CheckParameters()
 		mv->m_flUpMove      = 0;
 	}
 
-	DecayPunchAngle();
+	DecayViewPunchAngle();
 
 	// Take angles from command.
 	if ( !IsDead() )
 	{
 		v_angle = mv->m_vecAngles;
-		v_angle = v_angle + player->m_Local.m_vecPunchAngle;
+		v_angle = v_angle + player->m_Local.m_viewPunchAngle;
 
 		// Now adjust roll angle
 		if ( player->GetMoveType() != MOVETYPE_ISOMETRIC  &&
@@ -3436,7 +3436,6 @@ void CPortalGameMovement::Friction()
 
 		// Bleed off some speed, but if we have less than the bleed
 		//  threshold, bleed the threshold amount.
-
 		if ( IsCrossPlayPlatformAConsole( player->GetCrossPlayPlatform() ) )
 		{
 			if( player->m_Local.m_bDucked )
@@ -3719,6 +3718,7 @@ void CPortalGameMovement::WalkMove()
 	bool shouldShovePlayer = false;
 	float wishVelShoveDampenFactor = 0;
 	Vector shoveVector = vec3_origin;
+#ifndef NO_PROJECTED_WALL
 	CProjectedWallEntity *pProjectedWall = dynamic_cast< CProjectedWallEntity* >( pOldGround );
 	if ( pProjectedWall )
 	{
@@ -3730,7 +3730,7 @@ void CPortalGameMovement::WalkMove()
 			shouldShovePlayer = true;
 		}
 	}
-
+#endif
 	// Don't let players stand on top of each other
 	if( pOldGround && pOldGround->IsPlayer() )
 	{

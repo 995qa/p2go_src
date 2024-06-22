@@ -1148,22 +1148,22 @@ CEG_NOINLINE void MainMenu::ApplySchemeSettings( IScheme *pScheme )
 			bool bUsesCloud = false;
 
 #ifndef NO_STEAM
-			ISteamRemoteStorage *pRemoteStorage =
+//			ISteamRemoteStorage *pRemoteStorage =
 #ifdef _PS3
 				::SteamRemoteStorage();
 #else
-				SteamClient()?(ISteamRemoteStorage *)SteamClient()->GetISteamGenericInterface(
-				SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), STEAMREMOTESTORAGE_INTERFACE_VERSION ):NULL;
+//				SteamClient()?(ISteamRemoteStorage *)SteamClient()->GetISteamGenericInterface(
+//				SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), STEAMREMOTESTORAGE_INTERFACE_VERSION ):NULL;
 #endif
 
-			int32 availableBytes, totalBytes = 0;
-			if ( pRemoteStorage && pRemoteStorage->GetQuota( &totalBytes, &availableBytes ) )
-			{
-				if ( totalBytes > 0 )
-				{
-					bUsesCloud = true;
-				}
-			}
+//			int32 availableBytes, totalBytes = 0;
+//			if ( pRemoteStorage && pRemoteStorage->GetQuota( &totalBytes, &availableBytes ) )
+//			{
+//				if ( totalBytes > 0 )
+//				{
+//					bUsesCloud = true;
+//				}
+//			}
 #else
 			AssertMsg( false, "This branch run on a PC build without IS_WINDOWS_PC defined." );
 #endif

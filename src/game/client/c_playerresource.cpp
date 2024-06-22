@@ -9,7 +9,7 @@
 #include "c_team.h"
 #include "gamestringpool.h"
 #include "hltvreplaysystem.h"
-
+#include "fmtstr.h"
 #if !defined( _X360 )
 #include "xbox/xboxstubs.h"
 #endif
@@ -96,7 +96,9 @@ C_PlayerResource::C_PlayerResource()
 
 	g_PR = this;
 
+#if defined( INCLUDE_SCALEFORM )
 	g_pScaleformUI->AddDeviceDependentObject( this );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -104,6 +106,9 @@ C_PlayerResource::C_PlayerResource()
 //-----------------------------------------------------------------------------
 C_PlayerResource::~C_PlayerResource()
 {
+	g_PR = NULL;
+
+#if defined( INCLUDE_SCALEFORM )
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{
 		if ( m_Xuids[i] != INVALID_XUID )
@@ -112,9 +117,8 @@ C_PlayerResource::~C_PlayerResource()
 		}
 	}
 
-	g_PR = NULL;
-
 	g_pScaleformUI->RemoveDeviceDependentObject( this );
+#endif
 }
 
 void C_PlayerResource::OnDataChanged(DataUpdateType_t updateType)
@@ -156,6 +160,7 @@ void C_PlayerResource::UpdateXuids( void )
 
 		if ( newXuid != m_Xuids[i] )
 		{
+#if defined( INCLUDE_SCALEFORM )
 			bool bAddRefSuccess = false;
 
 			if ( m_Xuids[i] != INVALID_XUID )
@@ -169,13 +174,14 @@ void C_PlayerResource::UpdateXuids( void )
 			}
 
 			if ( bAddRefSuccess || ( newXuid == INVALID_XUID ) )
+#endif
 			{
 				m_Xuids[i] = newXuid;
 			}
 		}
 	}
 }
-
+/*
 void C_PlayerResource::UpdateAsLocalizedFakePlayerName( int slot, char const *pchPlayerName )
 {
 	static CUtlStringMap< CUtlString > s_mapLocalizedNames;
@@ -210,7 +216,7 @@ void C_PlayerResource::UpdateAsLocalizedFakePlayerName( int slot, char const *pc
 
 	m_szName[ slot ] = s_mapLocalizedNames[ symName ];
 }
-
+*/
 void C_PlayerResource::UpdatePlayerName( int slot )
 {
 	if ( slot < 1 || slot > MAX_PLAYERS )
@@ -224,12 +230,13 @@ void C_PlayerResource::UpdatePlayerName( int slot )
 		engine->GetPlayerInfo( slot, &sPlayerInfo ) )
 	{
 		pchPlayerName = sPlayerInfo.name;
-
+		/*
 		if ( sPlayerInfo.fakeplayer && *pchPlayerName )
 		{
 			UpdateAsLocalizedFakePlayerName( slot, pchPlayerName );
 			return;
 		}
+		*/
 	}
 
 	if ( !m_szName[slot] || Q_stricmp( m_szName[slot], pchPlayerName ) )
@@ -262,127 +269,6 @@ void C_PlayerResource::ClientThink()
 			V_strcpy_safe( s_chStaticArrayVarName, szDefaultText ); \
 	}
 
-
-class CStaticPlayerNamesSet
-{
-public:
-	CStaticPlayerNamesSet()
-	{
-		m_bInitialized = false;
-		Q_memset( m_szNames, 0, sizeof( m_szNames ) );
-	}
-
-	char const * GetName( int idx )
-	{
-		if ( ( idx < 0 ) || ( idx > MAX_PLAYERS ) )
-		{
-			STATIC_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( s_utf8LocalPlayer, "#SFUI_LocalPlayer", "Player" );
-			return s_utf8LocalPlayer;
-		}
-		else
-		{
-			if ( !m_bInitialized )
-				InitializeNames();
-
-			return m_szNames[idx];
-		}
-	}
-
-protected:
-	bool m_bInitialized;
-	char const * m_szNames[MAX_PLAYERS+1];
-
-public:
-	void InitializeNames()
-	{
-		CUtlVector< const char * > arrNamesOptions;
-#define RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( englishName ) { \
-	STATIC_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( s_utf8Name##englishName, "#CSGO_FakePlayer_" #englishName, #englishName ); \
-	arrNamesOptions.AddToTail( s_utf8Name##englishName ); }
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Albatross );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Alpha );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Anchor );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Banjo );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Bell );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Beta );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Blackbird );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Bulldog );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Canary );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Cat );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Calf );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Cyclone );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Daisy );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Dalmatian );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Dart );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Delta );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Diamond );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Donkey );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Duck );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Emu );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Eclipse );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Flamingo );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Flute );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Frog );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Goose );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Hatchet );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Heron );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Husky );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Hurricane );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Iceberg );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Iguana );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Kiwi );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Kite );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Lamb );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Lily );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Macaw );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Manatee );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Maple );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Mask );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Nautilus );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Ostrich );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Octopus );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Pelican );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Puffin );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Pyramid );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Rattle );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Robin );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Rose );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Salmon );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Seal );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Shark );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Sheep );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Snake );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Sonar );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Stump );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Sparrow );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Toaster );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Toucan );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Torus );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Violet );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Vortex );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Vulture );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Wagon );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Whale );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Woodpecker );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Zebra );
-		RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( Zigzag );
-#undef RANDOM_FAKE_PLAYER_NAME_UTF8_ARRAY_LOCALIZED
-		for ( int k = 0; k < MAX_PLAYERS + 1; ++ k )
-		{
-			if ( !arrNamesOptions.Count() )
-				Error( "Insufficient random names pool!\n" );
-			int iRandomChoice = RandomInt( 0, arrNamesOptions.Count() - 1 );
-			m_szNames[k] = arrNamesOptions.Element( iRandomChoice );
-			arrNamesOptions.Remove( iRandomChoice );
-		}
-		m_bInitialized = true;
-	}
-} g_staticPlayerNames;
-void EnsureStaticPlayerNamesReinitialized()
-{
-	g_staticPlayerNames.InitializeNames();
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -406,25 +292,6 @@ const char *C_PlayerResource::GetPlayerName( int iIndex )
 		// If you get a full "reset" uncompressed update from server, then you can have NULLNAME show up in the scoreboard
 		UpdatePlayerName( iIndex );
 	}
-
-	if ( CDemoPlaybackParameters_t const *pParameters = engine->GetDemoPlaybackParameters() )
-	{
-		if ( pParameters->m_bAnonymousPlayerIdentity )
-		{
-			player_info_t sPlayerInfo;
-			if ( pParameters->m_uiLockFirstPersonAccountID && engine->GetPlayerInfo( iIndex, &sPlayerInfo ) &&
-				( CSteamID( sPlayerInfo.xuid ).GetAccountID() == pParameters->m_uiLockFirstPersonAccountID ) )
-			{
-				STATIC_PLAYER_NAME_UTF8_ARRAY_LOCALIZED( s_utf8TheSuspect, "#CSGO_Overwatch_TheSuspect", "The Suspect" );
-				return s_utf8TheSuspect;
-			}
-			else
-			{
-				return g_staticPlayerNames.GetName( iIndex );
-			}
-		}
-	}
-
 	// This gets updated in ClientThink, so it could be up to 1 second out of date, oh well.
 	return m_szName[iIndex];
 }
@@ -687,6 +554,7 @@ void C_PlayerResource::FillXuidText( int iIndex, char *buf, int bufSize )
 	}
 }
 
+#if defined( INCLUDE_SCALEFORM )
 void C_PlayerResource::DeviceLost( void )
 {
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
@@ -703,3 +571,4 @@ void C_PlayerResource::DeviceReset( void *pDevice, void *pPresentParameters, voi
 {
 	UpdateXuids();
 }
+#endif

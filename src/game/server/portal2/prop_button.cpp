@@ -5,7 +5,10 @@
 //===========================================================================//
 
 #include "cbase.h"
+
+#ifdef PORTAL_MP
 #include "portal_mp_gamerules.h"
+#endif
 
 #include "cvisibilitymonitor.h"
 
@@ -182,7 +185,7 @@ void CPropButton::Spawn( void )
 
 	//Buttons are unpaintable
 	AddFlag( FL_UNPAINTABLE );
-	
+
 	LookUpAnimationSequences();
 
 	m_flGoalTime = 0;
@@ -360,9 +363,12 @@ void CPropButton::OnPressed( void )
 	// fire the OnPressed output
 	if ( m_hActivator.Get() != NULL )
 	{
+		/*
 		CBaseEntity *pOther = dynamic_cast<CBaseEntity*>(m_hActivator.Get());
+
 		if ( GameRules() && GameRules()->IsMultiplayer() && pOther && pOther->IsPlayer() )
 		{
+
 			if ( pOther->GetTeamNumber() == TEAM_RED )
 			{
 				m_OnPressedOrange.FireOutput( pOther, this );
@@ -372,6 +378,7 @@ void CPropButton::OnPressed( void )
 				m_OnPressedBlue.FireOutput( pOther, this );
 			}
 		}
+		*/
 
 		m_OnPressed.FireOutput( m_hActivator.Get(), this );
 	}

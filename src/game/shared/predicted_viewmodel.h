@@ -15,7 +15,7 @@
 #include "utlvector.h"
 #include "baseplayer_shared.h"
 #include "shared_classnames.h"
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "weapon_csbase.h"
 	#ifdef CLIENT_DLL
 	#include "c_cs_player.h"
@@ -40,14 +40,14 @@ public:
 	virtual void AddViewModelBob( CBasePlayer *owner, Vector& eyePosition, QAngle& eyeAngles );
 	virtual void ApplyViewModelPitchAndDip( CBasePlayer *owner, Vector& origin, QAngle& angles );
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	virtual void CalcViewModelView( CBasePlayer *owner, const Vector& eyePosition, const QAngle& eyeAngles );
 
 #if defined( CLIENT_DLL )
 	BobState_t	&GetBobState() { return m_BobState; }
 #endif //CLIENT_DLL
 
-#endif //CSTRIKE15
+#endif //CSTRIKE15 && CSTRIKE_DLL
 
 
 #if defined( CLIENT_DLL )
@@ -71,9 +71,9 @@ private:
 
 	CPredictedViewModel( const CPredictedViewModel & ); // not defined, not accessible
 
-#if defined( CSTRIKE15 )
+#if defined( PORTAL2 )
 protected:
-	BobState_t		m_BobState;		// view model head bob state
+//	BobState_t		m_BobState;		// view model head bob state
 	QAngle m_vLoweredWeaponOffset;
 	float m_flInaccuracyTilt;
 	float m_flOldAccuracyDiffSmoothed;

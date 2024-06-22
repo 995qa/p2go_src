@@ -16,7 +16,7 @@
 #include "tier1/keyvalues.h"
 #include "toolframework/itoolframework.h"
 #include "toolframework_client.h"
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "c_cs_player.h"
 #endif
 
@@ -77,6 +77,11 @@ static inline bool ShouldDrawLocalPlayer( C_BasePlayer *pl )
 #endif
 }
 
+int C_BaseCombatWeapon::GetWorldModelIndex(void)
+{
+	return m_iWorldModelIndex;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -123,7 +128,7 @@ void C_BaseCombatWeapon::OnDataChanged( DataUpdateType_t updateType )
 	C_BaseCombatCharacter *pOwner = GetOwner();
 	C_BasePlayer *pPlayer = ToBasePlayer( pOwner );
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	C_CSPlayer *pObservedPlayer = GetHudPlayer();
 	// check if weapon was dropped by local player or the player we are observing
 	if ( pObservedPlayer == pPlayer && pObservedPlayer->State_Get() == STATE_ACTIVE )
@@ -284,7 +289,7 @@ void C_BaseCombatWeapon::DrawCrosshair()
 		else
 			crosshair->ResetCrosshair();
 	}
-	#endif
+#endif
 }
 //-----------------------------------------------------------------------------
 // Purpose: This weapon is the active weapon, and the viewmodel for it was just drawn.
@@ -405,7 +410,6 @@ bool C_BaseCombatWeapon::ShouldSuppressForSplitScreenPlayer( int nSlot )
 //-----------------------------------------------------------------------------
 bool C_BaseCombatWeapon::ShouldDraw( void )
 {
-
 	if ( IsEffectActive( EF_NODRAW ) )
 		return false;
 
@@ -511,6 +515,8 @@ int C_BaseCombatWeapon::DrawModel( int flags, const RenderableInstance_t &instan
 
 void C_BaseCombatWeapon::ApplyThirdPersonStickers( C_BaseAnimating *pWeaponModelTargetOverride )
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+
 #ifdef _DEBUG
 	if (stickers_enabled_thirdperson.GetBool() == 0)
 		return;
@@ -646,7 +652,7 @@ void C_BaseCombatWeapon::ApplyThirdPersonStickers( C_BaseAnimating *pWeaponModel
 	}
 
 	//Msg( "Applied stickers to: %s\n", this->GetName() );
-	
+#endif
 }
 
 //-----------------------------------------------------------------------------

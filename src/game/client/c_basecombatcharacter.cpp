@@ -12,7 +12,7 @@
 //=============================================================================//
 #include "cbase.h"
 #include "c_basecombatcharacter.h"
-#include "c_cs_player.h"
+//#include "c_cs_player.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -67,7 +67,7 @@ void C_BaseCombatCharacter::DoMuzzleFlash()
 void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
-
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// view weapon model cache monitoring
 	// NOTE: expected to be updated ONLY once per frame for the primary player ONLY!
 	// the expectation is that there is ONLY one customer that requires view models
@@ -150,6 +150,7 @@ void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 			modelinfo->TouchWorldWeaponModelCache( worldWeapons, nNumWorldWeapons );
 		}
 	}
+#endif
 }
 
 bool C_BaseCombatCharacter::HasEverBeenInjured( void ) const
@@ -170,7 +171,7 @@ BEGIN_RECV_TABLE_NOBASE( C_BaseCombatCharacter, DT_BCCLocalPlayerExclusive )
 END_RECV_TABLE();
 
 BEGIN_RECV_TABLE_NOBASE( C_BaseCombatCharacter, DT_BCCNonLocalPlayerExclusive )
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// In CS:GO send active weapon index to all players except local
 	RecvPropArray3( RECVINFO_ARRAY(m_hMyWeapons), RecvPropEHandle( RECVINFO( m_hMyWeapons[0] ) ) ),
 #endif

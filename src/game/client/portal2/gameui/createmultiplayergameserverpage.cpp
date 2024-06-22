@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //===========================================================================//
-
+#include <cbase.h>
 #include "CreateMultiplayerGameServerPage.h"
 
 using namespace vgui;

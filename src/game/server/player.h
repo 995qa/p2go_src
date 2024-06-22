@@ -495,10 +495,10 @@ public:
 	void					NotifySinglePlayerGameEnding() { m_bSinglePlayerGameEnding = true; }
 	bool					IsSinglePlayerGameEnding() { return m_bSinglePlayerGameEnding == true; }
 
-	bool					HandleVoteCommands( const CCommand &args );
-	IntervalTimer &			GetLastHeldVoteTimer(){ return m_lastHeldVoteTimer; }
+	//bool					HandleVoteCommands( const CCommand &args );
+	//IntervalTimer &			GetLastHeldVoteTimer(){ return m_lastHeldVoteTimer; }
 
-	CVoteController *		GetTeamVoteController( void );	// returns one of the two team vote controllers, g_voteControllerT or g_voteControllerCT
+	//CVoteController *		GetTeamVoteController( void );	// returns one of the two team vote controllers, g_voteControllerT or g_voteControllerCT
 	
 	// Observer functions
 	virtual bool			StartObserverMode(int mode); // true, if successful
@@ -1070,7 +1070,7 @@ protected:
 	CNetworkVar( bool, m_bCameraManXRay );			// XRay state for cameraman
 	CNetworkVar( bool, m_bCameraManOverview );		// Overview state for cameraman
 	CNetworkVar( bool, m_bCameraManScoreBoard );	// ScoreBoard state for cameraman
-	CNetworkVar( uint8, m_uCameraManGraphs );		// Graphs state for cameraman
+	CNetworkVar( int, m_uCameraManGraphs );		// Graphs state for cameraman
 	CNetworkVar( int,	m_iFOV );			// field of view
 	CNetworkVar( int,	m_iDefaultFOV );	// default field of view
 	CNetworkVar( int,	m_iFOVStart );		// What our FOV started at
@@ -1163,6 +1163,8 @@ private:
 
 	int						m_iUpdateTime;		// stores the number of frame ticks before sending HUD update messages
 	int						m_iClientBattery;	// the Battery currently known by the client.  If this changes, send a new
+
+	int						m_lastx, m_lasty;	// These are the previous update's crosshair angles, DON"T SAVE/RESTORE
 
 	// Autoaim data
 	QAngle					m_vecAutoAim;
@@ -1407,6 +1409,8 @@ private:
 
 	CUtlLinkedList< CPlayerSimInfo >  m_vecPlayerSimInfo;
 	CUtlLinkedList< CPlayerCmdInfo >  m_vecPlayerCmdInfo;
+
+	IntervalTimer m_weaponFiredTimer;
 
 	friend class CMoveHelperServer;
 	Vector m_movementCollisionNormal;

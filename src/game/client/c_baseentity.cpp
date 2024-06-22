@@ -44,7 +44,7 @@
 #include "gamestringpool.h"
 #include "tier1/callqueue.h"
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_gamerules.h"
 #include "c_cs_player.h"
 #endif
@@ -3930,8 +3930,14 @@ static ConVar hermite( "hermite_fix", "1", FCVAR_DEVELOPMENTONLY, "Don't interpo
 
 extern bool g_bHermiteFix;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+#define CL_INTERPOLATE_FLAGS FCVAR_RELEASE
+#else
+#define CL_INTERPOLATE_FLAGS FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY
+#endif
+
 // Defined in engine
-static ConVar cl_interpolate( "cl_interpolate", "1", FCVAR_RELEASE, "Enables or disables interpolation on listen servers or during demo playback" );
+static ConVar cl_interpolate( "cl_interpolate", "1", CL_INTERPOLATE_FLAGS, "Enables or disables interpolation on listen servers or during demo playback" );
 // (static function)
 void C_BaseEntity::InterpolateServerEntities()
 {

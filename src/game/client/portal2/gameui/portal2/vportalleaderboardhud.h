@@ -8,7 +8,7 @@
 #define __VPORTALLEADERBOARDHUD_H__
 
 #include "basemodui.h"
-#include "portal2_leaderboard.h"
+//#include "portal2_leaderboard.h"
 #include "vportalleaderboard.h"
 #include "vgui_controls/imagepanel.h"
 
@@ -54,7 +54,7 @@ protected:
 
 private:
 	void	UpdateFooter();
-	void	UpdateLeaderboard( LeaderboardType type );
+	//void	UpdateLeaderboard( LeaderboardType type );
 	void	UpdateStatPanel();
 	void	ClearData();
 	void	SetMapTitle();
@@ -65,12 +65,12 @@ private:
 
 	void ClockSpinner( bool bVisible );
 
-	CPortalLeaderboardGraphPanel *m_pGraphPanels[NUM_LEADERBOARDS];
-	BaseModUI::GenericPanelList    *m_pStatLists[NUM_LEADERBOARDS];
+	//CPortalLeaderboardGraphPanel *m_pGraphPanels[NUM_LEADERBOARDS];
+	//BaseModUI::GenericPanelList    *m_pStatLists[NUM_LEADERBOARDS];
 
 	char m_szNextMap[ MAX_MAP_NAME ];
 
-	CPortalLeaderboard *m_pLeaderboard;
+	//CPortalLeaderboard *m_pLeaderboard;
 
 	CPortalChallengeStatsPanel *m_pChallengeStatsPanel;
 

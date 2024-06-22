@@ -122,7 +122,8 @@ public:
 	virtual bool			ShouldHideServer( void );
 
 	virtual void			InvalidateMdlCache();
-
+	// conn: there seem to be a lot of functions here that are declared but have their definitions somewhere else depending on the game. the cs_gameinterface.cpp file has many definitions stubbed for partner depot so these wouldn't work anyway
+	// sentry: these have been mostly added back, some are really crippled though, better than nothing
 	// Called to apply lobby settings to a dedicated server
 	virtual void			ApplyGameSettings( KeyValues *pKV );
 
@@ -189,7 +190,7 @@ public:
 	virtual char const * ClientConnectionValidatePreNetChan( bool bGameServer, char const *adr, int nAuthProtocol, uint64 ullSteamID );
 
 	// validate if player is a caster and add them to the active caster list
-	virtual bool ValidateAndAddActiveCaster( const CSteamID &steamID );
+	//virtual bool ValidateAndAddActiveCaster( const CSteamID &steamID );
 
 	// Network channel notification from engine to game server code
 	virtual void OnEngineClientNetworkEvent( edict_t *edictClient, uint64 ullSteamID, int nEventType, void *pvParam ) OVERRIDE;

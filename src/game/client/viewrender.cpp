@@ -58,8 +58,6 @@
 
 #define PARTICLE_USAGE_DEMO									// uncomment to get particle bar thing
 
-
-
 #ifdef PORTAL
 #include "portal_render_targets.h"
 #include "portalrender.h"
@@ -1678,7 +1676,7 @@ void CViewRender::DrawViewModels( const CViewSetup &view, bool drawViewmodel )
 	render->PopView( pRenderContext, GetFrustum() );
 
 	// Render objects that use normal FOV
-	if ( !bDrawScopeLensMask && (opaqueNormalFOVList.Count() > 0 || translucentNormalFOVList.Count() > 0) )
+	if ( (opaqueNormalFOVList.Count() > 0 || translucentNormalFOVList.Count() > 0) )
 	{
 		viewModelSetup.fov = view.fov;
 		render->Push3DView( pRenderContext, viewModelSetup, 0, NULL, GetFrustum() );
@@ -3396,7 +3394,7 @@ void CViewRender::RenderView( const CViewSetup &view, const CViewSetup &hudViewS
 		}
 		#endif
 
-
+		// !!!IMPORTANT!!! SanyaSho: check this if you have broken renderer
 		GetClientMode()->DoPostScreenSpaceEffects( &view );
 
 		CleanupMain3DView( view );
@@ -3510,7 +3508,7 @@ void CViewRender::RenderView( const CViewSetup &view, const CViewSetup &hudViewS
 
 	if( IsPS3() )
 	{
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		extern bool ShouldDrawHudViewfinder();
 		// HUD viewfinder has complex material that isn't handled correctly by deferred queuing in material system, so we shouldn't attempt to 
 		if( !ShouldDrawHudViewfinder() )
@@ -4787,7 +4785,7 @@ void CRendering3dView::SetupRenderablesList( int viewID, bool bFastEntityRenderi
 	SetupRenderInfo_t setupInfo;
 	setupInfo.m_nRenderFrame = m_pMainView->BuildRenderablesListsNumber();	// only one incremented?
 	setupInfo.m_nDetailBuildFrame = m_pMainView->BuildWorldListsNumber();	//
-#if defined( CSTRIKE15 ) && defined(_PS3)
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) && defined(_PS3)
 	setupInfo.m_pWorldListInfo = m_pWorldListInfo[ g_viewBuilder.GetBuildViewID() ];
 	setupInfo.m_pRenderList    = m_pRenderablesList[ g_viewBuilder.GetBuildViewID() ];
 #endif
@@ -7169,7 +7167,7 @@ void CAperturePhotoView::Draw()
 	BuildWorldRenderLists( true, -1, true, false ); // @MULTICORE (toml 8/9/2006): Portal problem, not sending custom vis down
 	if( !bDrawEverything )
 	{
-		memset( m_pRenderablesList->m_RenderGroupCounts, 0, sizeof( m_pRenderablesList->m_RenderGroupCounts ) );
+		memset( m_pRenderables->m_RenderGroupCounts, 0, sizeof( m_pRenderables->m_RenderGroupCounts ) );
 	}
 	
 	BuildRenderableRenderLists( CurrentViewID() );
@@ -7181,11 +7179,11 @@ void CAperturePhotoView::Draw()
 	//set the target entity as the only entity in the renderables list
 	{
 		if( !bDrawEverything )
-			memset( m_pRenderablesList->m_RenderGroupCounts, 0, sizeof( m_pRenderablesList->m_RenderGroupCounts ) );
+			memset( m_pRenderables->m_RenderGroupCounts, 0, sizeof( m_pRenderables->m_RenderGroupCounts ) );
 
 		for( int i = 0; i != iKeepChildren; ++i )
 		{
-			AddIClientRenderableToRenderList( keepHandles[i], m_pRenderablesList );
+			AddIClientRenderableToRenderList( keepHandles[i], m_pRenderables );
 		}
 	}
 
@@ -7202,7 +7200,7 @@ void CAperturePhotoView::Draw()
 	if( bDrawEverything )
 		DrawWorld( pRenderContext, 0.0f );
 
-	DrawOpaqueRenderables( pRenderContext, RENDERABLES_RENDER_PATH_NORMAL, NULL );
+	DrawOpaqueRenderables( pRenderContext, RENDERABLES_RENDER_PATH_NORMAL, DEPTH_MODE_NORMAL, NULL, RENDER_GROUP_OPAQUE ); // TODO: i edited this without being 100% sure im right so if this causes problems, idk
 	if( bDrawEverything )
 	{
 #if defined( PORTAL )

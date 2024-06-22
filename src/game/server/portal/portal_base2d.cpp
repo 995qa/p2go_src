@@ -33,9 +33,11 @@
 #include "tier1/callqueue.h"
 #include "vphysics/player_controller.h"
 #include "saverestore_utlvector.h"
-#include "baseprojector.h"
 #include "prop_weightedcube.h"
-#include "tier0/stackstats.h"
+
+// FIXME:
+//#include "baseprojector.h"
+//#include "tier0/stackstats.h"
 
 #include "portal2/portal_grabcontroller_shared.h"
 

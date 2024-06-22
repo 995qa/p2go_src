@@ -15,7 +15,7 @@
 void RegisterUserMessages()
 {
 	//copy/paste from hl2
-	usermessages->Register( "Geiger", 1 );
+	/*usermessages->Register("Geiger", 1);
 	usermessages->Register( "Train", 1 );
 	usermessages->Register( "HudText", -1 );
 	usermessages->Register( "SayText", -1 );
@@ -93,5 +93,5 @@ void RegisterUserMessages()
 	//usermessages->Register( "MPVSGameStart", sizeof( char ) );
 	//usermessages->Register( "MPVSGameOver", sizeof( BYTE ) );
 	//usermessages->Register( "MPVSRoundEnd", sizeof( BYTE ) );
-#endif // PORTAL2
+#endif // PORTAL2*/
 }

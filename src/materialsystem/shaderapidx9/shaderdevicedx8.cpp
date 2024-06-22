@@ -3691,7 +3691,7 @@ void CShaderDeviceDx8::RefreshFrontBufferNonInteractive()
 
 	bool bInStartupMode = ( m_NonInteractiveRefresh.m_Mode == MATERIAL_NON_INTERACTIVE_MODE_STARTUP );
 	
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 	if ( bInStartupMode )
 	{
 		// Render the initial vtf loading screen to match how we render our Scaleform backgrounds,

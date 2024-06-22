@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <cbase.h>
 #include <stdio.h>
 
 #include "GameConsole.h"
@@ -134,6 +134,14 @@ void CGameConsole::SetParent( int parent )
 	m_pConsole->SetParent( static_cast<vgui::VPANEL>( parent ));
 }
 
+void CGameConsole::Shutdown(void)
+{
+	if (m_pConsole && m_bInitialized)
+	{
+//		HideImmediately();
+		m_pConsole->MarkForDeletion();
+	}
+}
 //-----------------------------------------------------------------------------
 // Purpose: static command handler
 //-----------------------------------------------------------------------------

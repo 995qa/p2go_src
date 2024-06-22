@@ -8,9 +8,9 @@
 #include "cbase.h"
 #include "BuySubMenu.h"
 
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui_controls/WizardPanel.h>
-#include <FileSystem.h>
+#include <filesystem.h>
 #include <game/client/iviewport.h>
 #include <cdll_client_int.h>
 

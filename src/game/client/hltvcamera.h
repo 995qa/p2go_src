@@ -54,8 +54,10 @@ public:
 	int GetCurrentOrLastTarget() { return (m_iTarget1 != 0) ? m_iTarget1 : m_iLastTarget1; }
 	int GetCurrentTargetEntindex() { return m_iTarget1; }
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	void SetWatchingGrenade( C_BaseEntity *pGrenade, bool bWatching );
 	bool IsWatchingGrenade( void ) { return m_bIsFollowingGrenade; }
+#endif
 	void CreateMove(CUserCmd *cmd);
 	void FixupMovmentParents();
 	void PostEntityPacketReceived();
@@ -108,7 +110,9 @@ protected:
 	Vector		m_vIdealOverviewPos;
 	float		m_flLastCamZPos;
 	float		m_flNextIdealOverviewPosUpdate;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	bool		m_bIsFollowingGrenade;
+#endif
 	bool					m_bIsSpecLerping;
 	float					m_flSpecLerpTime;
 	float					m_flSpecLerpEndTime;

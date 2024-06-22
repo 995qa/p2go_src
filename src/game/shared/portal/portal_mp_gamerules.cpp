@@ -16,6 +16,7 @@
 #include "portal_shareddefs.h"
 #include "matchmaking/imatchframework.h"
 #include "matchmaking/mm_helpers.h"
+#include "portal2_usermessages.pb.h"
 
 #ifndef CLIENT_DLL
 #include "player_voice_listener.h"
@@ -25,10 +26,12 @@
 
 	#include "c_portal_player.h"
 	#include "c_user_message_register.h"
+	// TODO: Add these files! - Wonderland_War
+/*
 	#include "c_keyvalue_saver.h"
 	#include "radialmenu_taunt.h"
 	#include "c_portal_mp_stats.h"
-
+	*/
 #else
 
 	#include "eventqueue.h"
@@ -46,8 +49,8 @@
 	#include "team.h"
 	#include "voice_gamemgr.h"
 	#include "globalstate.h"
-	#include "portal_mp_stats.h"
-	#include "portal_ui_controller.h"
+	//#include "portal_mp_stats.h"
+	//#include "portal_ui_controller.h"
 
 #endif	// CLIENT_DLL
 
@@ -81,7 +84,7 @@
 	extern ConVar locator_background_border_color;
 	extern ConVar locator_icon_min_size_non_ss;
 	extern ConVar locator_icon_max_size_non_ss;
-	extern ConVar voice_icons_use_particles;
+	ConVar voice_icons_use_particles("voice_icons_use_particles", "1");
 #endif // CLIENT_DLL
 
 
@@ -189,44 +192,45 @@ static PortalMPViewVectors g_PortalMPViewVectors(
 static const char *s_PreserveEnts[] =
 {
 	"ai_network",
-		"ai_hint",
-		"hl2mp_gamerules",
-		"team_manager",
-		"player_manager",
-		"env_soundscape",
-		"env_soundscape_proxy",
-		"env_soundscape_triggerable",
-		"env_sun",
-		"env_wind",
-		"env_fog_controller",
-		"func_brush",
-		"func_wall",
-		"func_buyzone",
-		"func_illusionary",
-		"infodecal",
-		"info_projecteddecal",
-		"info_node",
-		"info_target",
-		"info_node_hint",
-		"info_player_deathmatch",
-		"info_player_combine",
-		"info_player_rebel",
-		"info_map_parameters",
-		"keyframe_rope",
-		"move_rope",
-		"info_ladder",
-		"player",
-		"point_viewcontrol",
-		"scene_manager",
-		"shadow_control",
-		"sky_camera",
-		"soundent",
-		"trigger_soundscape",
-		"viewmodel",
-		"predicted_viewmodel",
-		"worldspawn",
-		"point_devshot_camera",
-		"", // END Marker
+	"ai_hint",
+	"hl2mp_gamerules",
+	"team_manager",
+	"player_manager",
+	"env_soundscape",
+	"env_soundscape_proxy",
+	"env_soundscape_triggerable",
+	"env_sun",
+	"env_wind",
+	"env_fog_controller",
+	"func_brush",
+	"func_wall",
+	"func_buyzone",
+	"func_illusionary",
+	"infodecal",
+	"info_projecteddecal",
+	"info_node",
+	"info_target",
+	"info_node_hint",
+	"info_player_deathmatch",
+	"info_player_combine",
+	"info_player_rebel",
+	"info_map_parameters",
+	"keyframe_rope",
+	"move_rope",
+	"info_ladder",
+	"player",
+	"point_viewcontrol",
+	"scene_manager",
+	"shadow_control",
+	"sky_camera",
+	"soundent",
+	"trigger_soundscape",
+	"viewmodel",
+	"predicted_viewmodel",
+	"worldspawn",
+	"point_devshot_camera",
+	"env_cascade_light", // CSGO
+	"", // END Marker
 };
 
 CPortalMPGameRules *g_pPortalMPGameRules = NULL;
@@ -327,7 +331,7 @@ CPortalMPGameRules::CPortalMPGameRules()
 	}
 
 	m_bTeamPlayEnabled = teamplay.GetBool();
-	m_flIntermissionEndTime = 0.0f;
+//	m_flIntermissionEndTime = 0.0f;
 	m_flGameStartTime = 0;
 
 	m_hRespawnableItemsAndWeapons.RemoveAll();
@@ -482,12 +486,13 @@ void CPortalMPGameRules::LevelInitPreEntity()
 #ifdef GAME_DLL
 	m_nRPSWinCount[ 0 ] = m_nRPSWinCount[ 1 ] = 0;
 	m_bGladosJustBlewUp = false;
-	
-	CPortalMPStats *pStats = GetPortalMPStats();
-	if ( pStats )
-	{
-		pStats->ClearPerMapStats();
-	}
+
+	// FIXME: - Wonderland_War
+	//CPortalMPStats *pStats = GetPortalMPStats();
+	//if ( pStats )
+	//{
+	//	pStats->ClearPerMapStats();
+	//}
 
 	static ConVarRef flashlightbrightness( "r_flashlightbrightness" );
 	if ( flashlightbrightness.IsValid() )
@@ -544,7 +549,8 @@ bool CPortalMPGameRules::IsChallengeMode()
 CPortalMPGameRules::~CPortalMPGameRules( void )
 {
 #ifdef CLIENT_DLL
-	KeyValueSaver().WriteDirtyKeyValues( PORTAL2_MP_SAVE_FILE );
+	// TODO: ADD C_KeyValueSaver
+	//KeyValueSaver().WriteDirtyKeyValues( PORTAL2_MP_SAVE_FILE );
 #endif
 
 	g_pPortalMPGameRules = NULL;
@@ -571,7 +577,10 @@ void CPortalMPGameRules::CreateStandardEntities( void )
 	Assert( pEnt );
 	
 	// Create stats entities
-	CPortalMPStats::InitPortalMPStats();
+
+	// FIXME: - Wonderland_War
+	//CPortalMPStats::InitPortalMPStats();
+
 #endif
 }
 
@@ -625,7 +634,7 @@ void CPortalMPGameRules::FrameUpdatePostEntityThink( void )
 bool CPortalMPGameRules::IsIntermission( void )
 {
 #ifndef CLIENT_DLL
-	return m_flIntermissionEndTime > gpGlobals->curtime;
+	return GetIntermissionDuration() > gpGlobals->curtime;
 #endif
 
 	return false;
@@ -656,7 +665,7 @@ void CPortalMPGameRules::GoToIntermission( void )
 
 	g_fGameOver = true;
 
-	m_flIntermissionEndTime = gpGlobals->curtime + mp_chattime.GetInt();
+//	m_flIntermissionEndTime = gpGlobals->curtime + mp_chattime.GetInt();
 
 	for ( int i = 0; i < MAX_PLAYERS; i++ )
 	{
@@ -678,7 +687,7 @@ bool CPortalMPGameRules::CheckGameOver()
 	if ( g_fGameOver )   // someone else quit the game already
 	{
 		// check to see if we should change levels now
-		if ( m_flIntermissionEndTime < gpGlobals->curtime )
+//		if ( m_flIntermissionEndTime < gpGlobals->curtime )
 		{
 			ChangeLevel(); // intermission is over			
 		}
@@ -1547,6 +1556,8 @@ void CPortalMPGameRules::SetMapCompleteData( int nPlayer )
 
 void CPortalMPGameRules::StartPlayerTransitionThinks( void )
 {
+	// FIXME: - Wonderland_War
+	/*
 	// Turn off video for all players once they've all connected
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
@@ -1575,6 +1586,7 @@ void CPortalMPGameRules::StartPlayerTransitionThinks( void )
 
 	ResetAllPlayersStats();
 	g_portal_ui_controller.OnLevelStart();
+	*/
 }
 
 
@@ -1673,7 +1685,7 @@ void CPortalMPGameRules::RestartGame()
 
 	m_nNumPortalsPlaced = 0;
 
-	m_flIntermissionEndTime = 0;
+//	m_flIntermissionEndTime = 0;
 	m_flRestartGameTime = 0.0;		
 	m_bCompleteReset = false;
 
@@ -1909,10 +1921,13 @@ void CPortalMPGameRules::SaveMPStats( void )
 		if ( pPlayerTemp == NULL )
 			continue;
 
+		// FIXME: - Wonderland_War
+		/*
 		if ( GetPortalMPStats() )
 		{
 			GetPortalMPStats()->SaveStats( pPlayerTemp );
 		}
+		*/
 	}
 }
 
@@ -1974,10 +1989,25 @@ void CPortalMPGameRules::SetBranchComplete( int nBranch, bool bComplete /*= true
 			CReliableBroadcastRecipientFilter player;
 			player.AddAllPlayers();
 
-			UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
-				WRITE_CHAR( nBranch );
-				WRITE_CHAR( nLevel );
-			MessageEnd();
+//			UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
+//				WRITE_CHAR( nBranch );
+//				WRITE_CHAR( nLevel );
+//			MessageEnd();
+
+			if (bComplete)
+			{
+				CUsrMsg_MPMapCompleted msg;
+				msg.set_branch(nBranch);
+				msg.set_level(nLevel);
+				SendUserMessage(player, UM_MPMapCompleted, msg);
+			}
+			else if (!bComplete)
+			{
+				CUsrMsg_MPMapIncomplete msg;
+				msg.set_branch(nBranch);
+				msg.set_level(nLevel);
+				SendUserMessage(player, UM_MPMapIncomplete, msg);
+			}
 
 			m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] = bComplete;
 			m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] = bComplete;
@@ -2027,7 +2057,8 @@ void CPortalMPGameRules::SetMapComplete( const char *pchName, bool bComplete /*=
 
 		if ( pPlayerTemp == NULL )
 			continue;
-
+		// FIXME: - Wonderland_War
+		/*
 		// tell the gamestats to send off our per map stats data 	
 		if ( GetPortalMPStats() )
 		{
@@ -2036,6 +2067,7 @@ void CPortalMPGameRules::SetMapComplete( const char *pchName, bool bComplete /*=
 			GetPortalMPStats()->SubmitOGSEndOfMapStatsForPlayer( pPlayerTemp, pchName );
 #endif
 		}
+		*/
 
 		// We have to build these key values for each player because they are destroyed in ClientCommandKeyValues
 		KeyValues *kvClientRequest = new KeyValues( "write_stats" );
@@ -2044,7 +2076,8 @@ void CPortalMPGameRules::SetMapComplete( const char *pchName, bool bComplete /*=
 		engine->ClientCommandKeyValues( pPlayerTemp->edict(), kvClientRequest );
 	}
 
-	GetPortalMPStats()->IncrementMapsCompleted();
+	// FIXME: - Wonderland_War
+	//GetPortalMPStats()->IncrementMapsCompleted();
 
 	// Mark it in memory
 	for ( int nBranch = 0; nBranch < MAX_PORTAL2_COOP_BRANCHES; ++nBranch )
@@ -2060,10 +2093,24 @@ void CPortalMPGameRules::SetMapComplete( const char *pchName, bool bComplete /*=
 					CReliableBroadcastRecipientFilter player;
 					player.AddAllPlayers();
 
-					UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
-						WRITE_CHAR( nBranch );
-						WRITE_CHAR( nLevel );
-					MessageEnd();
+//					UserMessageBegin( player, bComplete ? "MPMapCompleted" : "MPMapIncomplete" );
+//						WRITE_CHAR( nBranch );
+//						WRITE_CHAR( nLevel );
+//					MessageEnd();
+					if (bComplete)
+					{
+						CUsrMsg_MPMapCompleted msg;
+						msg.set_branch(nBranch);
+						msg.set_level(nLevel);
+						SendUserMessage(player, UM_MPMapCompleted, msg);
+					}
+					else if (!bComplete)
+					{
+						CUsrMsg_MPMapIncomplete msg;
+						msg.set_branch(nBranch);
+						msg.set_level(nLevel);
+						SendUserMessage(player, UM_MPMapIncomplete, msg);
+					}
 
 					m_bLevelCompletions[ 0 ][ nBranch ][ nLevel ] = bComplete;
 					m_bLevelCompletions[ 1 ][ nBranch ][ nLevel ] = bComplete;
@@ -2128,9 +2175,12 @@ void CPortalMPGameRules::SendAllMapCompleteData( void )
 		}
 	}
 
-	UserMessageBegin( player, "MPMapCompletedData" );
-		WRITE_BITS( buff, nNumBits );
-	MessageEnd();
+//	UserMessageBegin( player, "MPMapCompletedData" );
+//		WRITE_BITS( buff, nNumBits );
+//	MessageEnd();
+	CUsrMsg_MPMapCompletedData msg;
+	msg.set_num_bits(nNumBits);
+	SendUserMessage(player, UM_MPMapCompletedData, msg);
 }
 
 bool CPortalMPGameRules::SupressSpawnPortalgun( int nTeam )
@@ -2151,16 +2201,12 @@ bool CPortalMPGameRules::SupressSpawnPortalgun( int nTeam )
 }
 
 
-CEG_NOINLINE void CPortalMPGameRules::PlayerWinRPS( CBasePlayer* pWinnerPlayer )
+void CPortalMPGameRules::PlayerWinRPS( CBasePlayer* pWinnerPlayer )
 {
 	bool bIsBlueTeam = ( pWinnerPlayer->GetTeamNumber() == TEAM_BLUE );
 	int nWinnerSlot = bIsBlueTeam ? 0 : 1;
 	int nLoserSlot = bIsBlueTeam ? 1 : 0;
-
-#if defined CLIENT_DLL
-	CEG_PROTECT_MEMBER_FUNCTION( CPortalMPGameRules_PlayerWinRPS );
-#endif
-
+	
 	++m_nRPSWinCount[ nWinnerSlot ];
 	m_nRPSWinCount[ nLoserSlot ] = 0;
 
@@ -2353,48 +2399,51 @@ bool CPortalMPGameRules::IsCommunityCoop( void )
 
 #ifdef CLIENT_DLL
 
-static void __MsgFunc_MPMapCompleted( bf_read &msg )
+bool __MsgFunc_MPMapCompleted( const CUsrMsg_MPMapCompleted &msg )
 {
 	CPortalMPGameRules *pRules = PortalMPGameRules();
 	if ( !pRules )
-		return;
+		return true;
 
-	int nBranch = msg.ReadChar();
-	int nLevel = msg.ReadChar();
+	int nBranch = msg.branch();
+	int nLevel = msg.level();
 
 	// Both players
 	pRules->SetMapComplete( 0, nBranch, nLevel );
 	pRules->SetMapComplete( 1, nBranch, nLevel );
+
+	return true;
 }
 USER_MESSAGE_REGISTER( MPMapCompleted );
 
-static void __MsgFunc_MPMapIncomplete( bf_read &msg )
+bool __MsgFunc_MPMapIncomplete( const CUsrMsg_MPMapIncomplete &msg )
 {
 	CPortalMPGameRules *pRules = PortalMPGameRules();
 	if ( !pRules )
-		return;
+		return true;
 
-	int nBranch = msg.ReadChar();
-	int nLevel = msg.ReadChar();
+	int nBranch = msg.branch();
+	int nLevel = msg.level();
 
 	// Both players
 	pRules->SetMapComplete( 0, nBranch, nLevel, false );
 	pRules->SetMapComplete( 1, nBranch, nLevel, false );
+	return true;
 }
 USER_MESSAGE_REGISTER( MPMapIncomplete );
 
-static void __MsgFunc_MPMapCompletedData( bf_read &msg )
+bool __MsgFunc_MPMapCompletedData( const CUsrMsg_MPMapCompletedData &msg )
 {
 	CPortalMPGameRules *pRules = PortalMPGameRules();
 	if ( !pRules )
-		return;
+		return true;
 
 	const int nNumBits = 2 * MAX_PORTAL2_COOP_BRANCHES * MAX_PORTAL2_COOP_LEVELS_PER_BRANCH;
 
 	byte buff[ sizeof( byte ) * 8 + nNumBits / ( sizeof( byte ) * 8 ) ];
 	memset( buff, 0, sizeof(buff) );
 
-	msg.ReadBits( buff, nNumBits );
+	//msg.ReadBits( buff, nNumBits ); TODO
 
 	byte *pCurrent = buff;
 	int nMask = 0x01;
@@ -2420,12 +2469,15 @@ static void __MsgFunc_MPMapCompletedData( bf_read &msg )
 			}
 		}
 	}
+	return true;
 }
 USER_MESSAGE_REGISTER( MPMapCompletedData );
 
 
 void CPortalMPGameRules::LoadMapCompleteData( void )
 {
+	// FIXME: - Wonderland_War
+//#if 0
 	if ( !m_bMapNamesLoaded )
 		return;
 
@@ -2465,6 +2517,8 @@ void CPortalMPGameRules::LoadMapCompleteData( void )
 				if ( m_szLevelNames[ nBranch ][ nLevel ][ 0 ] == '\0' )
 					continue;
 
+				// FIXME: - Wonderland_War
+				
 				CFmtStr tdKey( "MP.complete.%s", m_szLevelNames[ nBranch ][ nLevel ] );
 				TitleDataFieldsDescription_t const *fdKey = TitleDataFieldsDescriptionFindByString( fields, tdKey );
 				int nComplete = 0;
@@ -2478,27 +2532,24 @@ void CPortalMPGameRules::LoadMapCompleteData( void )
 				}
 
 				m_bLevelCompletions[ nPlayer ][ nBranch ][ nLevel ] = ( nComplete != 0 );
+				
 			}
 		}
 	}
 
-	GetClientMenuManagerTaunt().KeyValueProcessor( pPlayer );
-
-	if ( GetPortalMPStats() )
-	{
-		GetPortalMPStats()->RefreshStats( pPlayer, pLocalPlayer );
-	}
-
 	// Let the server know that we loaded completion data on the client for this player
 	engine->ClientCmd( szCommand );
+//#endif
 }
 
-static void __MsgFunc_MPTauntEarned( bf_read &msg )
+bool __MsgFunc_MPTauntEarned( const CUsrMsg_MPTauntEarned &msg )
 {
+	// FIXME: - Wonderland_War
+	/*
 	char szTaunt[ 32 ];
 	msg.ReadString( szTaunt, sizeof( szTaunt ) );
 	bool bAwardSilently = !!msg.ReadByte();
-	
+
 	GetClientMenuManagerTaunt().SetTauntOwned( szTaunt, bAwardSilently );
 
 	//if ( bAwardSilently )
@@ -2516,21 +2567,27 @@ static void __MsgFunc_MPTauntEarned( bf_read &msg )
 			gameeventmanager->FireEventClientSide( event );
 		}
 	}
+	*/
+	return true;
 }
 USER_MESSAGE_REGISTER( MPTauntEarned );
 
-static void __MsgFunc_MPTauntLocked( bf_read &msg )
+bool __MsgFunc_MPTauntLocked( const CUsrMsg_MPTauntLocked &msg )
 {
-	char szTaunt[ 32 ];
-	msg.ReadString( szTaunt, sizeof( szTaunt ) );
+//	char szTaunt[ 32 ];
+//	msg.ReadString( szTaunt, sizeof( szTaunt ) );
 
-	GetClientMenuManagerTaunt().SetTauntLocked( szTaunt );
+	// FIXME: - Wonderland_War
+	//GetClientMenuManagerTaunt().SetTauntLocked( szTaunt );
+	return true;
 }
 USER_MESSAGE_REGISTER( MPTauntLocked );
 
-static void __MsgFunc_MPAllTauntsLocked( bf_read& /*msg*/ )
+bool __MsgFunc_MPAllTauntsLocked( const CUsrMsg_MPAllTauntsLocked& msg )
 {
-	GetClientMenuManagerTaunt().SetAllTauntsLocked();
+	// FIXME: - Wonderland_War
+	//GetClientMenuManagerTaunt().SetAllTauntsLocked();
+	return true;
 }
 USER_MESSAGE_REGISTER( MPAllTauntsLocked );
 
@@ -2597,10 +2654,14 @@ void CC_EarnTaunt( const CCommand &args )
 	CReliableBroadcastRecipientFilter player;
 	player.AddAllPlayers();
 
-	UserMessageBegin( player, "MPTauntEarned" );
-		WRITE_STRING( pNewTaunt );
-		WRITE_BOOL( bAwardSilently );
-	MessageEnd();
+//	UserMessageBegin( player, "MPTauntEarned" );
+//		WRITE_STRING( pNewTaunt );
+//		WRITE_BOOL( bAwardSilently );
+//	MessageEnd();
+	CUsrMsg_MPTauntEarned msg;
+	msg.set_silent(bAwardSilently);
+	msg.set_tauntname(pNewTaunt);
+	SendUserMessage(player, UM_MPTauntEarned, msg);
 }
 ConCommand mp_earn_taunt( "mp_earn_taunt", CC_EarnTaunt, "Unlocks, owns, and puts a taunt in the gesture wheel.", 0 );
 
@@ -2614,9 +2675,12 @@ void CC_LockTaunt( const CCommand &args )
 	CReliableBroadcastRecipientFilter player;
 	player.AddAllPlayers();
 
-	UserMessageBegin( player, "MPTauntLocked" );
-		WRITE_STRING( args[ 1 ] );
-	MessageEnd();
+//	UserMessageBegin( player, "MPTauntLocked" );
+//		WRITE_STRING( args[ 1 ] );
+//	MessageEnd();
+	CUsrMsg_MPTauntLocked msg;
+	msg.set_args(args[1]);
+	SendUserMessage(player, UM_MPTauntLocked, msg);
 }
 ConCommand mp_lock_taunt( "mp_lock_taunt", CC_LockTaunt, "Locks a taunt and removes it from the gesture wheel.", 0 );
 
@@ -2625,8 +2689,11 @@ void CC_LockAllTaunts( const CCommand &args )
 	CReliableBroadcastRecipientFilter player;
 	player.AddAllPlayers();
 
-	UserMessageBegin( player, "MPAllTauntsLocked" );
-	MessageEnd();
+//	UserMessageBegin( player, "MPAllTauntsLocked" );
+//	MessageEnd();
+	CUsrMsg_MPAllTauntsLocked msg;
+	msg.set_dummy(1);
+	SendUserMessage(player, UM_MPAllTauntsLocked, msg);
 }
 ConCommand mp_lock_all_taunts( "mp_lock_all_taunts", CC_LockAllTaunts, "Locks all available taunts and removes them from the gesture wheel.", 0 );
 
@@ -2917,11 +2984,14 @@ int CoopGetNumPortalsPlaced( void )
 
 void CoopSetMapRunTime( float flRunLength )
 {
+	// FIXME: - Wonderland_War
+	/*
 	CPortalMPStats *pStats = GetPortalMPStats();
 	if ( pStats )
 	{
 		pStats->SetTimeToCompleteMap( flRunLength );
 	}
+	*/
 }
 
 void NotifySpeedRunSuccess( int iRunLength, const char* mapname )

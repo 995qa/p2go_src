@@ -7,6 +7,7 @@
 
 //#include "cbase.h"
 
+#include "materialsystem/imaterial.h" // SanyaSho: fix incomplete class access
 #include "custom_material.h"
 #include "composite_texture.h"
 #include "materialsystem/base_visuals_data_processor.h"

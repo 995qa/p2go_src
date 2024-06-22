@@ -11,11 +11,11 @@
 $Games
 {
 //	"CSTRIKE"
-	"CSGO"
+//	"CSGO"
 //	"EPISODIC"
 //	"SDK"
 //	"TF"
-//	"PORTAL2"
+	"PORTAL2"
 //	"SWARM"
 //	"DOTA"
 }

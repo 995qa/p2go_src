@@ -58,7 +58,7 @@ extern ConVar ai_debug_shoot_positions;
 //-----------------------------------------------------------------------------
 PRECACHE_REGISTER_BEGIN( GLOBAL, WeaponResources )
 
-#if !defined( TF_DLL ) && !defined ( DOTA_DLL ) && !defined ( PORTAL2 ) && !defined ( CSTRIKE15 )
+#if !defined( TF_DLL ) && !defined ( DOTA_DLL ) && !defined ( PORTAL2 ) && !( defined ( CSTRIKE15 ) && defined ( CSTRIKE_DLL ) )
 	PRECACHE_INDEX( MODEL, "sprites/zerogxplode.vmt", g_sModelIndexFireball )
 	PRECACHE_INDEX( MODEL, "sprites/steam1.vmt", g_sModelIndexSmoke )
 	PRECACHE_INDEX( MODEL, "sprites/bubble.vmt", g_sModelIndexBubbles )
@@ -139,10 +139,13 @@ void CBaseCombatWeapon::Operator_FrameUpdate( CBaseCombatCharacter *pOperator )
 	// if they're the same, which is the preferred behavior in general.
 	CStudioHdr *w_hdr = GetModelPtr();
 	CStudioHdr *v_hdr = vm->GetModelPtr();
-	if ( w_hdr->GetRenderHdr() != v_hdr->GetRenderHdr() )
+	if (w_hdr != nullptr)
 	{
-		// Animation events are passed back to the weapon's owner/operator
-		DispatchAnimEvents( pOperator );
+		if (w_hdr->GetRenderHdr() != v_hdr->GetRenderHdr())
+		{
+			// Animation events are passed back to the weapon's owner/operator
+			DispatchAnimEvents(pOperator);
+		}
 	}
 
 	// Update and dispatch the viewmodel events

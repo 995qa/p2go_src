@@ -33,6 +33,13 @@ UpgradeLog.htm
 build/
 build-*/
 
+# CS:GO
+_vpc_/
+*.vpc_cache
+generated_proto*/
+*_nut.h
+valveetwprov*
+
 # Windows explorer files
 Thumbs.db
 

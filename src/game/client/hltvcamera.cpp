@@ -22,10 +22,16 @@
 #include "view_shared.h"
 #include "view.h"
 #include "ivrenderview.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "c_plantedc4.h"
 #include "basecsgrenade_projectile.h"
-#include "ivieweffects.h"
 #include "cs_hud_chat.h"
+#else
+#include "hud_basechat.h"
+#include "iinput.h"
+#include "fmtstr.h"
+#endif
+#include "ivieweffects.h"
 #include "in_buttons.h"
 #include <vgui/IInput.h>
 #include "vgui_controls/Controls.h"
@@ -143,9 +149,12 @@ void C_HLTVCamera::Reset()
 	m_angSpecLerpOldAng = QAngle( 0, 0, 0 );
 	m_flSpecLerpEndTime = 0.0f;
 	m_flSpecLerpTime = 1.0f;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	m_bIsFollowingGrenade = false;
+#endif
 }
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 void C_HLTVCamera::SetWatchingGrenade( C_BaseEntity *pGrenade, bool bWatching )
 {
 	if ( bWatching )
@@ -186,9 +195,11 @@ void C_HLTVCamera::SetWatchingGrenade( C_BaseEntity *pGrenade, bool bWatching )
 		}
 	}
 }
+#endif
 
 void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float& fov )
 {
+	bool bManual = !spec_autodirector.GetBool();
  	Vector targetOrigin1, targetOrigin2, cameraOrigin, forward;
 
  	if ( m_iTarget1 == 0 )
@@ -199,6 +210,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 
 	if ( !target1 ) 
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		bool bFoundTarget = false;
 		if ( m_bIsFollowingGrenade )
 		{
@@ -212,6 +224,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 		}
 
 		if ( !bFoundTarget )
+#endif
 			return;
 	}
 	
@@ -241,6 +254,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 	}
 #endif*/
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CBaseCSGrenadeProjectile *pGrenade = dynamic_cast< CBaseCSGrenadeProjectile* >( target1 );
 
 	if ( pGrenade )
@@ -249,9 +263,9 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 		m_bIsFollowingGrenade = true;
 	}
 
-	bool bManual = !spec_autodirector.GetBool();
 	if ( pGrenade && pGrenade->m_nBounces <= 0 )	// chase camera controlled manually
 		bManual = false;
+#endif
 
 	if ( target1->IsPlayer() && target1->IsAlive() && target1->IsDormant() )
 		return;
@@ -266,10 +280,12 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 	{
 		targetOrigin1 += VEC_DUCK_VIEW;
 	}
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	else if ( pGrenade )
 	{
 		targetOrigin1 += 2;//(VEC_DUCK_VIEW/2);
 	}
+#endif
 	else
 	{
 		targetOrigin1 += VEC_VIEW;
@@ -321,6 +337,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
         VectorAngles( forward, cameraAngles );
         cameraAngles.z = 0; // no ROLL
 	}
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	else if ( pGrenade || m_iTarget2 == 0 || m_iTarget2 == m_iTarget1 )
 	{
 		if ( pGrenade )
@@ -361,6 +378,14 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 
 		cameraAngles.z = 0; // no ROLL
 	}
+#else
+	else if (m_iTarget2 == 0 || m_iTarget2 == m_iTarget1)
+	{
+		// look into direction where primary target is looking
+		cameraAngles = target1->EyeAngles();
+		cameraAngles.x = 0; // no PITCH
+	}
+#endif
 	else
 	{
 		// target2 is missing, just keep angelsm, reset offset
@@ -409,6 +434,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 	
   	if ( target2 /*|| pGrenade*/ )
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		if ( pGrenade )
 		{
 			// if we have 2 targets look at point between them
@@ -421,6 +447,7 @@ void C_HLTVCamera::CalcChaseCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 			//cameraAngles.x = clamp( cameraAngles.x, -30, 30 );
 		}
 		else
+#endif
 		{
 			// if we have 2 targets look at point between them
 			forward = ( targetOrigin1 + targetOrigin2 ) / 2 - cameraOrigin;
@@ -463,7 +490,11 @@ Vector C_HLTVCamera::CalcIdealOverviewPosition( Vector vecStartPos, Vector vOldO
 	for ( int i = 0; i < count; i++ )
 	{
 		CBaseEntity *pOther = pEntList[i];
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		if ( dynamic_cast<C_CSPlayer*>(pOther) || dynamic_cast<C_PlantedC4*>(pOther) || dynamic_cast<CBaseCSGrenadeProjectile*>(pOther) )
+#else
+		if ( dynamic_cast<C_BasePlayer*>(pOther) )
+#endif
 		{
 			pFocusEnts[focusCount] = pOther;
 			focusCount++;
@@ -496,12 +527,14 @@ Vector C_HLTVCamera::CalcIdealOverviewPosition( Vector vecStartPos, Vector vOldO
 
 int C_HLTVCamera::GetMode()
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// hacky....
 	if ( dynamic_cast< C_BaseCSGrenadeProjectile* >( GetPrimaryTarget() ) )
 	{
 		m_bIsFollowingGrenade = true;
 		return OBS_MODE_CHASE;
 	}
+#endif
 
 	if ( m_iCameraMan > 0 )
 	{
@@ -511,6 +544,7 @@ int C_HLTVCamera::GetMode()
 			return pCameraMan->GetObserverMode();
 	}
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// to get here, our target is not a grenade, but we think we're still folowing one
  	if ( m_bIsFollowingGrenade == true )
  	{
@@ -526,6 +560,7 @@ int C_HLTVCamera::GetMode()
  			m_bIsFollowingGrenade = false;
  		}
  	}
+#endif
 
 	return m_nCameraMode;	
 }
@@ -543,13 +578,15 @@ C_BaseEntity* C_HLTVCamera::GetPrimaryTarget()
 	}
 
 	if ( m_iTarget1 <= 0 )
-	{
 		return NULL;
-	}
 
 	C_BaseEntity* target = ClientEntityList().GetEnt( m_iTarget1 );
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( !target || (m_bIsFollowingGrenade && dynamic_cast< CBaseCSGrenadeProjectile* >( target ) == NULL) )
+#else
+	if ( !target )
+#endif
 	{
 		C_BaseEntity* oldTarget = ClientEntityList().GetEnt( m_iLastTarget1 );
 		if ( oldTarget )
@@ -569,7 +606,7 @@ C_BasePlayer *C_HLTVCamera::GetCameraMan()
 
 void C_HLTVCamera::CalcInEyeCamView( Vector& eyeOrigin, QAngle& eyeAngles, float& fov )
 {
-	C_BasePlayer *pPlayer = dynamic_cast<C_CSPlayer*>(GetPrimaryTarget());
+	C_BasePlayer *pPlayer = dynamic_cast<C_BasePlayer*>(GetPrimaryTarget());
 
 	if ( !pPlayer )
 		return;
@@ -577,9 +614,11 @@ void C_HLTVCamera::CalcInEyeCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 	if ( !pPlayer->IsAlive() )
 	{
 		// if dead, show from 3rd person
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		C_CSPlayer *pCSPlayer =	static_cast<C_CSPlayer*>( pPlayer );
 		if ( pCSPlayer && pCSPlayer->GetLastKillerIndex() )
 			m_iTarget2 = pCSPlayer->GetLastKillerIndex();
+#endif
 
 		CalcChaseCamView( eyeOrigin, eyeAngles, fov );
 		return;
@@ -696,10 +735,13 @@ void C_HLTVCamera::Accelerate( Vector& wishdir, float wishspeed, float accel )
 	}
 }
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 extern ConVar fov_cs_debug; 
+#endif
 // movement code is a copy of CGameMovement::FullNoClipMove()
 void C_HLTVCamera::CalcRoamingView(Vector& eyeOrigin, QAngle& eyeAngles, float& fov)
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( !CSGameRules() )
 		return;
 
@@ -726,6 +768,7 @@ void C_HLTVCamera::CalcRoamingView(Vector& eyeOrigin, QAngle& eyeAngles, float& 
 		}
 		return;
 	}
+#endif
 
 	// only if PVS isn't locked by auto-director
 	if ( !IsPVSLocked() )
@@ -819,7 +862,11 @@ void C_HLTVCamera::CalcRoamingView(Vector& eyeOrigin, QAngle& eyeAngles, float& 
 	eyeOrigin = m_vCamOrigin;
 	eyeAngles = m_aCamAngle;
 	//fov = m_flFOV;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	fov = fov_cs_debug.GetInt() > 0 ? m_flFOV : CSGameRules()->DefaultFOV();
+#else
+	fov = GameRules()->DefaultFOV();
+#endif
 }
 
 void C_HLTVCamera::CalcFixedView(Vector& eyeOrigin, QAngle& eyeAngles, float& fov)
@@ -828,6 +875,7 @@ void C_HLTVCamera::CalcFixedView(Vector& eyeOrigin, QAngle& eyeAngles, float& fo
 	eyeAngles = m_aCamAngle;
 	fov = m_flFOV;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( m_bIsSpecLerping )
 	{
 		if ( (m_vecSpecLerpIdealPos == m_vCamOrigin && m_angSpecLerpIdealAng == m_aCamAngle) || m_flSpecLerpEndTime <= gpGlobals->curtime )
@@ -846,6 +894,7 @@ void C_HLTVCamera::CalcFixedView(Vector& eyeOrigin, QAngle& eyeAngles, float& fo
 		}
 	}
 	else
+#endif
 	{
 		int nTarget = m_iTarget1;
 		if ( m_iTarget1 == 0 && m_iLastTarget1 == 0 )
@@ -1072,7 +1121,7 @@ void C_HLTVCamera::SetPrimaryTarget( int nEntity )
 					continue;
 
 				CSteamID steamID;
-				if ( player->GetSteamID( &steamID ) && steamID.IsValid() &&
+				if (player->GetSteamID(&steamID) && steamID.IsValid() &&
 					( steamID.GetAccountID() == pParameters->m_uiLockFirstPersonAccountID ) )
 				{
 					// when playback wants to lock to a specific account force PVS lock
@@ -1094,7 +1143,7 @@ void C_HLTVCamera::SetPrimaryTarget( int nEntity )
 
 	m_iTarget1 = nEntity;
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// BUG: This uses the values (mode, target, etc) of the local player, not
 	// the hltv camera... These happen to match so it works, but could be the source
 	// of bugs... Could turn the observer lerp code into it's own class and have hltv/replay/csplayer 
@@ -1144,7 +1193,9 @@ void C_HLTVCamera::SetPrimaryTarget( int nEntity )
 	IGameEvent *event = gameeventmanager->CreateEvent( "hltv_changed_target" );
 	if ( event )
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		event->SetInt("userid", pLocalPlayer->GetUserID() );
+#endif
 		event->SetInt( "mode", m_nCameraMode );
 		event->SetInt( "old_target", m_iLastTarget1 );
 		event->SetInt( "obs_target", m_iTarget1 );
@@ -1313,6 +1364,7 @@ void C_HLTVCamera::Update()
 	{
 		int numFastForwardTicks = 0;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		// Get the team score
 		if ( CSGameRules() )
 		{
@@ -1331,6 +1383,7 @@ void C_HLTVCamera::Update()
 				return;
 			}
 		}
+#endif
 		
 		if ( pParameters->m_uiLockFirstPersonAccountID )
 		{
@@ -1354,8 +1407,12 @@ void C_HLTVCamera::Update()
 								( player->m_lifeState == LIFE_DEAD ) ||
 								( player->GetFlags() & FL_FROZEN ) || // skip freezetime
 								( player->IsObserver() ) ||
-								( player->GetTeamNumber() == TEAM_SPECTATOR ) ||
-								( CSGameRules() && CSGameRules()->IsFreezePeriod() ) )
+								( player->GetTeamNumber() == TEAM_SPECTATOR ) 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+								|| ( CSGameRules() && CSGameRules()->IsFreezePeriod() ) )
+#else
+								)
+#endif
 								break; // break to skip some ticks
 
 							bLockedToRequestedAccount = true;
@@ -1717,6 +1774,7 @@ bool C_HLTVCamera::IsPVSLocked()
 void C_HLTVCamera::SetAutoDirector( AutodirectorState_t eState )
 {
 	//m_iCameraMan = 0;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( eState != AUTODIRECTOR_OFF && spec_autodirector_cameraman.GetInt() > 0 )
 	{
 		// find a cameraman and set m_iCameraMan
@@ -1756,6 +1814,7 @@ void C_HLTVCamera::SetAutoDirector( AutodirectorState_t eState )
 			}
 		}
 	}
+#endif
 
 	if ( CDemoPlaybackParameters_t const *pParameters = engine->GetDemoPlaybackParameters() )
 	{
@@ -1772,6 +1831,7 @@ void C_HLTVCamera::SetAutoDirector( AutodirectorState_t eState )
 	}
 	else // OFF or PAUSED
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		C_CSPlayer *pLocalPlayer = C_CSPlayer::GetLocalCSPlayer();
 		CBaseHudChat *hudChat = ( CBaseHudChat * )GET_HUDELEMENT( CHudChat );
 		if ( hudChat && pLocalPlayer && m_iCameraMan != 0 && IsAutoDirectorOn() )
@@ -1780,6 +1840,7 @@ void C_HLTVCamera::SetAutoDirector( AutodirectorState_t eState )
 			
 			pLocalPlayer->EmitSound("UI.ButtonRolloverLarge");		
 		}
+#endif
 
 		spec_autodirector.SetValue( 0 );
 		m_iCameraMan = 0;

@@ -24,7 +24,27 @@
 #include "steam/steam_api.h"
 #endif
 
+#if defined( CSTRIKE_DLL ) // SanyaSho: remove this if you want to use achievements
 const char *COM_GetModDirectory(); // return the mod dir (rather than the complete -game param, which can be a path)
+#else
+const char *COM_GetModDirectory()
+{
+	static char modDir[MAX_PATH];
+	if( Q_strlen( modDir ) == 0 )
+	{
+		const char *gamedir = CommandLine()->ParmValue( "-game", CommandLine()->ParmValue( "-defaultgamedir", "hl2" ) );
+		Q_strncpy( modDir, gamedir, sizeof( modDir ) );
+		if( strchr( modDir, '/' ) || strchr( modDir, '\\' ) )
+		{
+			Q_StripLastDir( modDir, sizeof( modDir ) );
+			int dirlen = Q_strlen( modDir );
+			Q_strncpy( modDir, gamedir + dirlen, sizeof( modDir ) - dirlen );
+		}
+	}
+
+	return modDir;
+}
+#endif
 
 struct MumbleSharedMemory_t
 {
@@ -170,16 +190,7 @@ void CMumbleSystem::PostRender()
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 	if ( pPlayer )
 	{
-		bool bIsOnTeam = pPlayer->GetTeamNumber() == TEAM_TERRORIST || pPlayer->GetTeamNumber() == TEAM_CT;
-		if ( pPlayer->IsAlive() && bIsOnTeam )
-		{
-			vecOriginPlayer = pPlayer->EyePosition();
-		}
-		else
-		{
-			// a zero player origin disables positional audio
-			vecOriginPlayer = vec3_origin;
-		}
+		vecOriginPlayer = pPlayer->EyePosition();
 		anglesPlayer = pPlayer->GetAbsAngles();
 	}
 	else

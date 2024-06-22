@@ -1,4 +1,4 @@
-//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -183,7 +183,7 @@ bool CGameRules::CanHaveAmmo( CBaseCombatCharacter *pPlayer, int iAmmoIndex )
 	if ( iAmmoIndex > -1 )
 	{
 		// Get the max carrying capacity for this ammo
-		int iMaxCarry = GetAmmoDef()->MaxCarry( iAmmoIndex, pPlayer );
+		int iMaxCarry = GetAmmoDef()->MaxCarry( iAmmoIndex );
 
 		// Does the player have room for more of this type of ammo?
 		if ( pPlayer->GetAmmoCount( iAmmoIndex ) < iMaxCarry )

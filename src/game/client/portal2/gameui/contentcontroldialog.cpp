@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <cbase.h>
 #include <stdio.h>
 #ifdef IS_WINDOWS_PC
 #include <memory.h>

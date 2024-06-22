@@ -58,7 +58,11 @@
 #if defined( INCLUDE_SCALEFORM ) && defined( CSTRIKE_DLL )
 #include "HUD/sfweaponselection.h"
 #include "Scaleform/HUD/sfhudfreezepanel.h"
+#endif
+
+#if defined( CSTRIKE_DLL )
 #include "cs_weapon_parse.h"
+#include "c_cs_player.h"
 #endif
 
 #ifdef DEMOPOLISH_ENABLED
@@ -111,7 +115,7 @@ static ConVar	cl_smoothtime	(
 	true, 2.0
 	 );
 
-#ifdef CSTRIKE15
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 ConVar	spec_freeze_time( "spec_freeze_time", "3.0", FCVAR_RELEASE | FCVAR_REPLICATED, "Time spend frozen in observer freeze cam." );
 ConVar	spec_freeze_traveltime( "spec_freeze_traveltime", "0.3", FCVAR_RELEASE | FCVAR_REPLICATED, "Time taken to zoom in to frame a target in observer freeze cam.", true, 0.01, false, 0 );
 ConVar	spec_freeze_traveltime_long( "spec_freeze_traveltime_long", "0.45", FCVAR_CHEAT | FCVAR_REPLICATED, "Time taken to zoom in to frame a target in observer freeze cam when they are far away.", true, 0.01, false, 0 );
@@ -557,8 +561,10 @@ C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOf
 	m_EyeAngleOffset.Init();
 	m_AimDirection.Init();
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	m_flDuckAmount = 0.0f;
 	m_flDuckSpeed = CS_PLAYER_DUCK_SPEED_IDEAL;
+#endif
 	m_vecLastPositionAtFullCrouchSpeed = vec2_origin;
 
 	m_bHasWalkMovedSinceLastJump = false;
@@ -595,30 +601,11 @@ C_BasePlayer::~C_BasePlayer()
 	}
 }
 
-bool MsgFunc_SendLastKillerDamageToClient( const CCSUsrMsg_SendLastKillerDamageToClient &msg )
-{
-	int nNumHitsGiven = msg.num_hits_given();
-	int nDamageGiven = msg.damage_given();
-	int nNumHitsTaken = msg.num_hits_taken();
-	int nDamageTaken = msg.damage_taken();
-
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	if ( pPlayer )
-	{
-		pPlayer->SetLastKillerDamageAndFreezeframe( nDamageTaken, nNumHitsTaken, nDamageGiven, nNumHitsGiven );
-	}
-
-	return true;
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void C_BasePlayer::Spawn( void )
 {
-	m_UMCMsg_SendLastKillerDamageToClient.Bind< CS_UM_SendLastKillerDamageToClient, CCSUsrMsg_SendLastKillerDamageToClient >
-		( UtlMakeDelegate( MsgFunc_SendLastKillerDamageToClient ));
-
 	// Clear all flags except for FL_FULLEDICT
 	ClearFlags();
 	AddFlag( FL_CLIENT );
@@ -633,8 +620,6 @@ void C_BasePlayer::Spawn( void )
 	Precache();
 
 	SetThink(NULL);
-
-	RANDOM_CEG_TEST_SECRET_LINE_PERIOD( 17, 0, 41, 0 );
 
 	SharedSpawn();
 
@@ -992,14 +977,14 @@ void C_BasePlayer::ClientThink()
 	if ( Plat_FloatTime( ) >= flNextCheck &&
 		spec_lock_to_accountid.GetString( ) &&
 		spec_lock_to_accountid.GetString( )[0] &&
-		IsObserver( ) && 
+		IsObserver( ) &&
 		IsLocalPlayer( this ) )
 	{
 		bool bSwitchTargets = true;
 
 		if ( GetObserverTarget( ) && ( GetObserverMode( ) == OBS_MODE_IN_EYE || GetObserverMode( ) == OBS_MODE_CHASE ) )
 		{
-			C_CSPlayer *pPlayer = dynamic_cast< C_CSPlayer* >( GetObserverTarget( ) );
+			C_BasePlayer *pPlayer = dynamic_cast< C_BasePlayer* >( GetObserverTarget( ) );
 
 			if ( pPlayer )
 			{
@@ -1191,26 +1176,14 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 		}
 		else if ( m_bWasFreezeFraming && GetObserverMode() != OBS_MODE_FREEZECAM )
 		{
-			if ( spec_freeze_panel_extended_time.GetFloat() > 0 )
-			{
-				m_flFreezePanelExtendedStartTime = gpGlobals->curtime;
-				m_bWasFreezePanelExtended = true;
-			}
-			else
-			{
-				bHideFreezePanel = true;
-			}
+			bHideFreezePanel = true;
 
 			view->FreezeFrame(0);
 
 			ConVar *pVar = ( ConVar * )cvar->FindVar( "snd_soundmixer" );
 			pVar->Revert();
 		}
-		else if ( m_bWasFreezePanelExtended && gpGlobals->curtime >= m_flFreezePanelExtendedStartTime + spec_freeze_panel_extended_time.GetFloat() )
-		{
-			bHideFreezePanel = true;
-			m_bWasFreezePanelExtended = false;
-		}
+#if defined( INCLUDE_SCALEFORM )
 		else if ( IsAlive() )
 		{
 			SFHudFreezePanel *pPanel = GET_HUDELEMENT( SFHudFreezePanel );
@@ -1220,6 +1193,7 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 				bHideFreezePanel = true;
 			}	
 		}
+#endif
 		
 		if ( bHideFreezePanel && !g_HltvReplaySystem.GetHltvReplayDelay() && !g_HltvReplaySystem.IsDelayedReplayRequestPending() )
 		{
@@ -1248,7 +1222,7 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 		m_bBonePolishSetup = false;
 	}
 #endif
-
+	/*
 	m_fLastUpdateServerTime = engine->GetLastTimeStamp();
 	m_nLastUpdateTickBase = m_nTickBase;
 	m_nLastUpdateServerTickCount = engine->GetServerTick();
@@ -1315,6 +1289,7 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 				GetClientMode()->UpdateCameraManUIState( eventType, nOptionalParam, steamID.ConvertToUint64() );
 		}
 	}
+	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -1351,9 +1326,7 @@ void C_BasePlayer::OnRestore()
 	}
 
 	// For ammo history icons to current value so they don't flash on level transtions
-	int ammoTypes = GetAmmoDef()->NumAmmoTypes();
-	// ammodef is 1 based, use <=
-	for ( int i = 0; i <= ammoTypes; i++ )
+	for (int i = 0; i < MAX_AMMO_TYPES; i++)
 	{
 		m_iOldAmmo[i] = GetAmmoCount(i);
 	}
@@ -1386,10 +1359,11 @@ void C_BasePlayer::OnDataChanged( DataUpdateType_t updateType )
 			render->SetAreaState( m_Local.m_chAreaBits, m_Local.m_chAreaPortalBits );
 		}
 
-#if !defined( INCLUDE_SCALEFORM ) || !defined( CSTRIKE_DLL )
+#if !defined( INCLUDE_SCALEFORM ) && !defined( CSTRIKE_DLL )
 		// Check for Ammo pickups.
-		int ammoTypes = GetAmmoDef()->NumAmmoTypes();
-		for ( int i = 0; i <= ammoTypes; i++ )
+		//int ammoTypes = GetAmmoDef()->NumAmmoTypes();
+		//for ( int i = 0; i <= ammoTypes; i++ )
+		for (int i = 0; i < MAX_AMMO_TYPES; i++)
 		{
 			if ( GetAmmoCount(i) > m_iOldAmmo[i] )
 			{
@@ -2113,10 +2087,12 @@ void C_BasePlayer::CalcChaseCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 		// if this is a train, we want to be back a little further so we can see more of it
 		flMaxDistance *= 2.5f;
 	}
+#ifdef CSTRIKE_DLL
 	else if ( pGrenade )
 	{
 		flMaxDistance = 64.0f;
 	}
+#endif
 	m_flObserverChaseDistance = clamp( m_flObserverChaseDistance, 16, flMaxDistance );
 	
 	AngleVectors( viewangles, &forward );
@@ -2546,7 +2522,7 @@ bool C_BasePlayer::ShouldDrawLocalPlayer()
 IClientModelRenderable *C_BasePlayer::GetClientModelRenderable()
 {
 
-#if defined ( CSTRIKE15 )// Since cstrike15 does not do glow, we can go ahead and use fast path for teammates.
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )// Since cstrike15 does not do glow, we can go ahead and use fast path for teammates.
 	
 	// We can enable mostly opaque models to cause players to be rendered in both the opaque and the translucent fast paths
 	// allowing both alpha and non alpha materials to show up.
@@ -3763,6 +3739,7 @@ bool C_BasePlayer::GetSteamID( CSteamID *pID )
 
 void C_BasePlayer::OnTimeJumpAllPlayers()
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{
 		C_CSPlayer *pPlayer = ToCSPlayer( UTIL_PlayerByIndex( i ) );
@@ -3771,6 +3748,7 @@ void C_BasePlayer::OnTimeJumpAllPlayers()
 			pPlayer->OnTimeJump();
 		}
 	}
+#endif
 }
 
 
@@ -3807,3 +3785,22 @@ void CC_DumpClientSoundscapeData( const CCommand& args )
 	Msg("End dump.\n");
 }
 static ConCommand soundscape_dumpclient("soundscape_dumpclient", CC_DumpClientSoundscapeData, "Dumps the client's soundscape data.\n", FCVAR_CHEAT);
+
+//-----------------------------------------------------------------------------
+// Purpose: Return the local player, or the player being spectated
+//-----------------------------------------------------------------------------
+C_BasePlayer* GetHudPlayer( void )
+{
+	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
+
+	if ( player && ( player->GetObserverMode() == OBS_MODE_IN_EYE || player->GetObserverMode() == OBS_MODE_CHASE ) )
+	{
+		C_BaseEntity *target = player->GetObserverTarget();
+
+		if( target && target->IsPlayer() )
+		{
+			return ToBasePlayer( target );
+		}
+	}
+	return player;
+}

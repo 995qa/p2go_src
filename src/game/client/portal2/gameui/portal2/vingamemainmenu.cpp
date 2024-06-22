@@ -8,7 +8,7 @@
 
 #include "VInGameMainMenu.h"
 #include "VGenericConfirmation.h"
-#include "vportalleaderboard.h"
+//#include "vportalleaderboard.h"
 #include "VFooterPanel.h"
 #include "VFlyoutMenu.h"
 #include "VHybridButton.h"
@@ -696,7 +696,7 @@ void InGameMainMenu::OnCommand( const char *command )
 			CUIGameData::Get()->ExecuteOverlayCommand( "LobbyInvite" );
 		}
 	}
-	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
+	/*else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
 	{
 #ifdef PORTAL2
 		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
@@ -768,7 +768,7 @@ void InGameMainMenu::OnCommand( const char *command )
 		GameUI().PreventEngineHideGameUI();
 		BASEMODPANEL_SINGLETON.OpenWindow( WT_LEADERBOARD, this, true, pSettings );
 #endif
-	}
+	}*/
 	else if ( !V_stricmp( command, "AudioVideo" ) )
 	{
 		GameUI().PreventEngineHideGameUI();
@@ -1590,17 +1590,22 @@ void InGameMainMenu::UpdateSaveState()
 {
 	// save is disabled in commentary mode
 	bool bInCommentary = engine->IsInCommentaryMode();
-	bool bNoSavesAllowed = bInCommentary || 
-		( V_stristr( engine->GetLevelNameShort(), "sp_a5_credits" ) != NULL );
+	bool bNoSavesAllowed = bInCommentary || FStrEq( engine->GetLevelNameShort(), "sp_a5_credits" );
 #if defined( _GAMECONSOLE )
 	if ( XBX_GetPrimaryUserIsGuest() )
 	{
 		bNoSavesAllowed = true;
 	}
 #endif
+#if 0
 	static ConVarRef map_wants_save_disable( "map_wants_save_disable" );
 	SetControlEnabled( "BtnSaveGame", !bNoSavesAllowed && !map_wants_save_disable.GetBool() );
 	SetControlEnabled( "BtnLoadLastSave", !bNoSavesAllowed );
+#else
+	// FIXME: CGameUIConVarRef is broken?
+	SetControlEnabled( "BtnSaveGame", !bNoSavesAllowed );
+	SetControlEnabled( "BtnLoadLastSave", !bNoSavesAllowed );
+#endif
 }
 
 void InGameMainMenu::ApplySchemeSettings( IScheme *pScheme )

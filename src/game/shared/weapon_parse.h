@@ -21,7 +21,8 @@
 #endif
 
 class IFileSystem;
-class CEconItemView;
+//class CEconItemView;
+typedef void CEconItemView;
 
 typedef unsigned short WEAPON_FILE_INFO_HANDLE;
 

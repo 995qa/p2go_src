@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 
-
+#include <cbase.h>
 #include "OptionsSubKeyboard.h"
 #include "EngineInterface.h"
 #include "VControlsListPanel.h"

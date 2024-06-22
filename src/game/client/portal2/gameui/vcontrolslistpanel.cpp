@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "vcontrolslistpanel.h"
 #include "GameUI_Interface.h"
 #include "EngineInterface.h"

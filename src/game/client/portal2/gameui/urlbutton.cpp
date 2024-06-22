@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include <stdio.h>
 #include <UtlSymbol.h>
 

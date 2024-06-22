@@ -4,6 +4,7 @@
 //
 // $NoKeywords: $
 //===========================================================================//
+#include <cbase.h>
 
 #if defined( _WIN32 ) && !defined( _X360 )
 #include <windows.h>
@@ -58,6 +59,7 @@
 #include "vgui_controls/PHandle.h"
 #include "tier3/tier3.h"
 #include "matsys_controls/matsyscontrols.h"
+#include "basepanel.h"
 #ifndef NO_STEAM
 #include "steam/steam_api.h"
 #endif
@@ -853,7 +855,7 @@ void CGameUI::StartProgressBar()
 //-----------------------------------------------------------------------------
 // Purpose: returns true if the screen should be updated
 //-----------------------------------------------------------------------------
-bool CGameUI::ContinueProgressBar( float progressFraction )
+bool CGameUI::ContinueProgressBar(float progressFraction, bool showDialog)
 {
 	if (!g_hLoadingDialog.Get())
 		return false;
@@ -887,7 +889,7 @@ void CGameUI::StopProgressBar(bool bError, const char *failureReason, const char
 //-----------------------------------------------------------------------------
 // Purpose: sets loading info text
 //-----------------------------------------------------------------------------
-bool CGameUI::SetProgressBarStatusText(const char *statusText)
+bool CGameUI::SetProgressBarStatusText(const char* statusText, bool showDialog)
 {
 	if (!g_hLoadingDialog.Get())
 		return false;
@@ -917,12 +919,12 @@ void CGameUI::SetSecondaryProgressBar(float progress /* range [0..1] */)
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CGameUI::SetSecondaryProgressBarText(const char *statusText)
+void CGameUI::SetSecondaryProgressBarText(const wchar_t* desc)
 {
 	if (!g_hLoadingDialog.Get())
 		return;
 
-	g_hLoadingDialog->SetSecondaryProgressText(statusText);
+//	g_hLoadingDialog->SetSecondaryProgressText(desc);
 }
 
 //-----------------------------------------------------------------------------
@@ -1078,4 +1080,92 @@ bool CGameUI::IsPlayingFullScreenVideo()
 bool CGameUI::IsTransitionEffectEnabled()
 {
 	return GetUiBaseModPanelClass().IsTransitionEffectEnabled();
+}
+
+void CGameUI::StartLoadingScreenForCommand(const char* command)
+{
+#if defined( INCLUDE_SCALEFORM )
+	CLoadingScreenScaleform::LoadDialogForCommand(command);
+#endif
+}
+
+void CGameUI::StartLoadingScreenForKeyValues(KeyValues* keyValues)
+{
+#if defined( INCLUDE_SCALEFORM )
+	CLoadingScreenScaleform::LoadDialogForKeyValues(keyValues);
+#endif
+}
+
+void CGameUI::ShowMessageDialog(const uint nType, vgui::Panel* pOwner)
+{
+//	BasePanel()->ShowMessageDialog(nType, pOwner);
+}
+
+void CGameUI::ShowMessageDialog(const char* messageID, const char* titleID)
+{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+#if defined( INCLUDE_SCALEFORM )
+	((CCStrike15BasePanel*)BasePanel())->OnOpenMessageBox(titleID, messageID, "#SFUI_Legend_Ok", MESSAGEBOX_FLAG_OK, NULL, NULL);
+#endif
+#endif
+}
+
+void CGameUI::CreateCommandMsgBox(const char* pszTitle, const char* pszMessage, bool showOk, bool showCancel, const char* okCommand, const char* cancelCommand, const char* closedCommand, const char* pszLegend)
+{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+#if defined( INCLUDE_SCALEFORM )
+	((CCStrike15BasePanel*)BasePanel())->CreateCommandMsgBox(pszTitle, pszMessage, showOk, showCancel, okCommand, cancelCommand, closedCommand, pszLegend);
+#endif
+#endif
+
+}
+
+void CGameUI::CreateCommandMsgBoxInSlot(ECommandMsgBoxSlot slot, const char* pszTitle, const char* pszMessage, bool showOk, bool showCancel, const char* okCommand, const char* cancelCommand, const char* closedCommand, const char* pszLegend)
+{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+#if defined( INCLUDE_SCALEFORM )
+	((CCStrike15BasePanel*)BasePanel())->CreateCommandMsgBoxInSlot(slot, pszTitle, pszMessage, showOk, showCancel, okCommand, cancelCommand, closedCommand, pszLegend);
+#endif
+#endif
+}
+
+void CGameUI::RestoreTopLevelMenu()
+{
+	BasePanel()->PostMessage(BasePanel(), new KeyValues("RunMenuCommand", "command", "RestoreTopLevelMenu"));
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Updates progress bar
+// Output : Returns true if screen should be redrawn
+//-----------------------------------------------------------------------------
+bool CGameUI::UpdateProgressBar(float progress, const char* statusText, bool showDialog)
+{
+	// if either the progress bar or the status text changes, redraw the screen
+	/*bool bRedraw = false;
+
+	if (ContinueProgressBar(progress, showDialog))
+	{
+		bRedraw = true;
+	}
+
+	if (SetProgressBarStatusText(statusText, showDialog))
+	{
+		bRedraw = true;
+	}
+
+	return bRedraw;*/
+	return GetUiBaseModPanelClass().UpdateProgressBar(progress, statusText);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Updates progress bar
+// Output : Returns true if screen should be redrawn
+//-----------------------------------------------------------------------------
+bool CGameUI::UpdateSecondaryProgressBar(float progress, const wchar_t* desc)
+{
+	// if either the progress bar or the status text changes, redraw the screen
+	SetSecondaryProgressBar(progress);
+	SetSecondaryProgressBarText(desc);
+
+	return true;
 }

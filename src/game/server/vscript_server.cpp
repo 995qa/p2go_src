@@ -18,6 +18,7 @@
 #include "particle_parse.h"
 #if defined( _WIN32 ) || defined( POSIX )
 #include "vscript_server_nut.h"
+#include "portal2_usermessages.pb.h"
 #endif
 
 #ifdef DOTA_DLL
@@ -262,7 +263,7 @@ static void SendToConsole( const char *pszCommand )
 
 static void SendToConsoleServer( const char *pszCommand )
 {
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// Parse the text into distinct commands
 	const char *pCurrentCommand = pszCommand;
 	int nOffsetToNextCommand;
@@ -446,11 +447,17 @@ static float ScriptTraceLine( const Vector &vecStart, const Vector &vecEnd, HSCR
 static void SetDucking( const char *pszLayerName, const char *pszMixGroupName, float factor )
 {
 	CReliableBroadcastRecipientFilter filter;
-	UserMessageBegin( filter, "SetMixLayerTriggerFactor" );
-		WRITE_STRING( pszLayerName );
-		WRITE_STRING( pszMixGroupName );
-		WRITE_FLOAT( factor );
-	MessageEnd();
+//	UserMessageBegin( filter, "SetMixLayerTriggerFactor" );
+	//	WRITE_STRING( pszLayerName );
+//		WRITE_STRING( pszMixGroupName );
+	//	WRITE_FLOAT( factor );
+//	MessageEnd();
+
+	CUsrMsg_SetMixLayerTriggerFactor msg;
+	msg.set_layername(pszLayerName);
+	msg.set_mixgroupname(pszMixGroupName);
+	msg.set_factor(factor);
+	SendUserMessage(filter, UM_SetMixLayerTriggerFactor, msg);
 }
 #endif
 

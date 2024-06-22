@@ -5,6 +5,7 @@
 //=============================================================================//
 
 #include "cbase.h"
+#include "glow_outline_effect.h"
 #include "hud.h"		
 #include "c_props.h"
 #include "iclientvehicle.h"

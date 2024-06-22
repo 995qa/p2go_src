@@ -86,12 +86,26 @@ public:
 
 #define VEC_DEAD_VIEWHEIGHT	g_pGameRules->GetViewVectors()->m_vDeadViewHeight
 
+// If the player (enemy bots) are scaled, adjust the hull
+#define VEC_VIEW_SCALED( player )				( g_pGameRules->GetViewVectors()->m_vView * player->GetModelScale() )
+#define VEC_HULL_MIN_SCALED( player )			( g_pGameRules->GetViewVectors()->m_vHullMin * player->GetModelScale() )
+#define VEC_HULL_MAX_SCALED( player )			( g_pGameRules->GetViewVectors()->m_vHullMax * player->GetModelScale() )
+
+#define VEC_DUCK_HULL_MIN_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vDuckHullMin * player->GetModelScale() )
+#define VEC_DUCK_HULL_MAX_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vDuckHullMax * player->GetModelScale() )
+#define VEC_DUCK_VIEW_SCALED( player )			( g_pGameRules->GetViewVectors()->m_vDuckView * player->GetModelScale() )
+
+#define VEC_OBS_HULL_MIN_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vObsHullMin * player->GetModelScale() )
+#define VEC_OBS_HULL_MAX_SCALED( player )		( g_pGameRules->GetViewVectors()->m_vObsHullMax * player->GetModelScale() )
+
+#define VEC_DEAD_VIEWHEIGHT_SCALED( player )	( g_pGameRules->GetViewVectors()->m_vDeadViewHeight * player->GetModelScale() )
+
 
 #define WATERJUMP_HEIGHT			8
 
 #define MAX_CLIMB_SPEED		200
 
-#if defined(TF_DLL) || defined(TF_CLIENT_DLL) || defined( CSTRIKE15 )
+#if defined(TF_DLL) || defined(TF_CLIENT_DLL) || ( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 
 	#define TIME_TO_DUCK_MSECS		200
 
@@ -113,7 +127,7 @@ inline float FractionUnDucked( int msecs )
 	return clamp( (float)msecs / (float)TIME_TO_UNDUCK_MSECS, 0.0f, 1.0f );
 }
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #define MAX_WEAPON_SLOTS		6	// hud item selection slots
 #define MAX_WEAPON_POSITIONS	6	// max number of items within a slot
 #define MAX_ITEM_TYPES			6	// hud item selection slots
@@ -329,7 +343,7 @@ enum AmmoPosition_t
 
 // Humans only have left and right hands, though we might have aliens with more
 //  than two, sigh
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 
 #define MAX_VIEWMODELS			2
 
@@ -763,6 +777,7 @@ struct FireBulletsInfo_t
 		m_vecDirShooting.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
 #endif
 		m_bPrimaryAttack = true;
+		m_bUseServerRandomSeed = false;
 	}
 
 	FireBulletsInfo_t( int nShots, const Vector &vecSrc, const Vector &vecDir, const Vector &vecSpread, float flDistance, int nAmmoType, bool bPrimaryAttack = true )
@@ -781,6 +796,7 @@ struct FireBulletsInfo_t
 		m_pAdditionalIgnoreEnt = NULL;
 		m_flDamageForceScale = 1.0f;
 		m_bPrimaryAttack = bPrimaryAttack;
+		m_bUseServerRandomSeed = false;
 	}
 
 	int m_iShots;
@@ -797,6 +813,7 @@ struct FireBulletsInfo_t
 	CBaseEntity *m_pAttacker;
 	CBaseEntity *m_pAdditionalIgnoreEnt;
 	bool m_bPrimaryAttack;
+	bool m_bUseServerRandomSeed;
 };
 
 //-----------------------------------------------------------------------------
@@ -996,7 +1013,8 @@ enum
 bool IsHeadTrackingEnabled();
 
 // If this is defined, all of the scopeguard objects are NULL'd out to reduce overhead
-#if defined( CSTRIKE15 ) //&& !defined( _GAMECONSOLE )  // Split screen removed from console.
+// SanyaSho: we don't care about the splitscreen for consoles.
+#if defined( PORTAL2 ) || defined( CSTRIKE15 ) || defined( HL2 ) //&& !defined( _GAMECONSOLE )  // Split screen removed from console.
 #define SPLIT_SCREEN_STUBS
 #endif
 
@@ -1007,8 +1025,10 @@ bool IsHeadTrackingEnabled();
 		#define MAX_SPLITSCREEN_PLAYERS 2
 	#endif
 #elif defined( PORTAL2 )
-	#define MAX_SPLITSCREEN_PLAYERS 2
-#elif defined ( CSTRIKE15 )
+	//#define MAX_SPLITSCREEN_PLAYERS 2
+	// SanyaSho: i don't really care about splitscreen crap in this engine, because we're using SPLIT_SCREEN_STUBS and this only causes more problems.
+	#define MAX_SPLITSCREEN_PLAYERS 1
+#elif defined ( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #if defined( _GAMECONSOLE )
 	#define MAX_SPLITSCREEN_PLAYERS 1 // Split screen removed from console.
 #else

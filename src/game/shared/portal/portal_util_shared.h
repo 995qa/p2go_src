@@ -11,7 +11,7 @@
 #endif
 
 #include "engine/IEngineTrace.h"
-#include "paint_color_manager.h"
+#include "paint/paint_color_manager.h"
 
 extern bool g_bBulletPortalTrace;
 
@@ -27,6 +27,8 @@ extern bool g_bBulletPortalTrace;
 	class CPortal_Base2D;
 	class CBasePlayer;
 #endif
+
+struct PaintTraceData_t;
 
 //When tracing through portals, a line becomes a discontinuous collection of segments as it travels
 struct ComplexPortalTrace_t
@@ -150,7 +152,7 @@ void UTIL_Portal_ComputeMatrix( CPortal_Base2D *pLocalPortal, CPortal_Base2D *pR
 // PAINT
 bool UTIL_IsPaintableSurface( const csurface_t& surface );
 
-float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent );
+float UTIL_PaintBrushEntity( CBaseEntity* pBrushEntity, const Vector& contactPoint, PaintPowerType power, float flPaintRadius, float flAlphaPercent, PaintTraceData_t *pTraceData );
 PaintPowerType UTIL_Paint_TracePower( CBaseEntity* pBrushEntity, const Vector& contactPoint, const Vector& vContactNormal );
 
 // output start point and reflect dir

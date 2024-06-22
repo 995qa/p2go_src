@@ -1,4 +1,4 @@
-//===== Copyright � 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright ? 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: 
 //
@@ -17,12 +17,12 @@
 #include "colorcorrectionmgr.h"
 #include "c_portal_playerlocaldata.h"
 #include "iinput.h"
-#include "paint_power_user.h"
-#include "paintable_entity.h"
+#include "paint/paint_power_user.h"
+#include "paint/paintable_entity.h"
 #include "portal2/portal_grabcontroller_shared.h"
 #include "portal_shareddefs.h"
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	#include "portal2_item_inventory.h"
 #endif
 
@@ -53,7 +53,7 @@ class CMoveData;
 // >> Portal_Player
 //=============================================================================
 class C_Portal_Player : public PaintPowerUser< CPaintableEntity< C_BasePlayer > >
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	, public IInventoryUpdateListener
 #endif
 {
@@ -262,11 +262,11 @@ public:
 	bool m_bSilentDropAndPickup;
 	void ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldingThis );
 	void PickupObject(CBaseEntity *pObject, bool bLimitMassAndSize );
-
-	void SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam );
-	void SetLeaveTractorBeam( CTrigger_TractorBeam *pTractorBeam, bool bKeepFloating );
+#ifndef NO_TRACTOR_BEAM
+	void SetInTractorBeam( C_Trigger_TractorBeam *pTractorBeam );
+	void SetLeaveTractorBeam( C_Trigger_TractorBeam *pTractorBeam, bool bKeepFloating );
 	C_Trigger_TractorBeam* GetTractorBeam( void ) const { return m_PortalLocal.m_hTractorBeam.Get(); }
-
+#endif
 	bool m_bForceFireNextPortal;
 
 	void PreventCrouchJump( CUserCmd* ucmd );
@@ -566,6 +566,8 @@ public: // PAINT SPECIFIC
 
 private: // PAINT SPECIFIC
 	void DecayEyeOffset();
+	
+	void DetermineTraceInfo( Vector &vStart, Vector &vEnd, Vector &vMins, Vector vMaxs, int iTraceType );
 
 	// Find all the contacts
 	void DeterminePaintContacts();
@@ -675,7 +677,7 @@ private:
 	friend class CPortalPlayerShared;
 	friend class CMultiPlayerAnimState;
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 
 	//----------------------------
 	// INVENTORY MANAGEMENT

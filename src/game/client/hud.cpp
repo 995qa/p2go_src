@@ -26,7 +26,7 @@
 #include <vgui_controls/AnimationController.h>
 #include <vgui/ISurface.h>
 #include "hud_lcd.h"
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	#include "c_cs_player.h"
 	#include "cs_gamerules.h"
 #endif
@@ -318,14 +318,14 @@ CHud &GetHud( int nSlot /*= -1*/ )
 	return gHUD[ nSlot ];
 }
 
-bool MsgFunc_ResetHUD( const CCSUsrMsg_ResetHud& msg )
+bool MsgFunc_ResetHUD( const CUsrMsg_ResetHud& msg )
 {
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	return gHUD[ GET_ACTIVE_SPLITSCREEN_SLOT() ].MsgFunc_ResetHUD( msg );
 }
 
 #ifdef CSTRIKE_DLL
-bool MsgFunc_SendAudio( const CCSUsrMsg_SendAudio& msg )
+bool MsgFunc_SendAudio( const CUsrMsg_SendAudio& msg )
 {
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	return gHUD[ GET_ACTIVE_SPLITSCREEN_SLOT() ].MsgFunc_SendAudio( msg );
@@ -341,9 +341,9 @@ public:
 
 	void Init()
 	{
-		m_UMCMsgResetHud.Bind< CS_UM_ResetHud, CCSUsrMsg_ResetHud >( UtlMakeDelegate( MsgFunc_ResetHUD ) );
+		m_UMCMsgResetHud.Bind< UM_ResetHud, CUsrMsg_ResetHud >( UtlMakeDelegate( MsgFunc_ResetHUD ) );
 #ifdef CSTRIKE_DLL
-		m_UMCMsgSendAudio.Bind< CS_UM_SendAudio, CCSUsrMsg_SendAudio >( UtlMakeDelegate( MsgFunc_SendAudio ) );
+		m_UMCMsgSendAudio.Bind< CS_UM_SendAudio, CUsrMsg_SendAudio >( UtlMakeDelegate( MsgFunc_SendAudio ) );
 #endif
 	}
 
@@ -879,7 +879,11 @@ bool CHud::IsHidden( int iHudFlags )
 	C_BasePlayer *pPlayer = GetHudPlayer();
 
 	// Grab the local player
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	C_CSPlayer *localPlayer = C_CSPlayer::GetLocalCSPlayer();
+#else
+	C_BasePlayer* localPlayer = C_BasePlayer::GetLocalPlayer();
+#endif
 
 	if ( !pPlayer )
 		return true;
@@ -921,7 +925,7 @@ bool CHud::IsHidden( int iHudFlags )
 	if ( ( iHudFlags & HIDEHUD_NEEDSUIT ) && ( !pPlayer->IsSuitEquipped() ) )
 		return true;
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( CSGameRules() && CSGameRules()->IsPlayingTraining() )
 	{
 		C_CSPlayer *pCSPlayer = static_cast<C_CSPlayer *>( pPlayer );

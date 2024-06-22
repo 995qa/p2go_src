@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================//
-
+#include <cbase.h>
 #include <stdio.h>
 
 #include "VGuiSystemModuleLoader.h"

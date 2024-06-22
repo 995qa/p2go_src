@@ -19,7 +19,11 @@
 #define PLAYER_UNCONNECTED_NAME	"unconnected"
 #define PLAYER_ERROR_NAME		"ERRORNAME"
 
+#if defined( INCLUDE_SCALEFORM )
 class C_PlayerResource : public C_BaseEntity, public IGameResources, public IShaderDeviceDependentObject
+#else
+class C_PlayerResource : public C_BaseEntity, public IGameResources
+#endif
 {
 	DECLARE_CLASS( C_PlayerResource, C_BaseEntity );
 public:
@@ -60,10 +64,12 @@ public : // IGameResources intreface
 
 	virtual void	ClientThink();
 	virtual	void	OnDataChanged(DataUpdateType_t updateType);
+	virtual void	TeamChanged( void ){ }
+#if defined( INCLUDE_SCALEFORM )
 	virtual void	DeviceLost( void );
 	virtual void	DeviceReset( void *pDevice, void *pPresentParameters, void *pHWnd );
 	virtual void	ScreenSizeChanged( int width, int height ) { }
-	virtual void	TeamChanged( void ){ }
+#endif
 
 	// Returns the xuid for the given player, but only if they are connected
 	XUID			GetXuid( int index );
@@ -71,7 +77,7 @@ public : // IGameResources intreface
 
 protected:
 	virtual void	UpdatePlayerName( int slot );
-	void	UpdateAsLocalizedFakePlayerName( int slot, char const *pchRawPlayerName );
+	//void	UpdateAsLocalizedFakePlayerName( int slot, char const *pchRawPlayerName ); Not used anywhere.
 	void	UpdateXuids( void );
 
 	// Data for each player that's propagated to all clients

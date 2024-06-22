@@ -16,7 +16,7 @@
 
 #ifdef PORTAL2
 #include "ivieweffects.h"
-#include "c_basehlplayer.h"
+#include "c_portal_player.h"
 #endif // PORTAL2
 
 #ifdef SIXENSE
@@ -26,7 +26,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 
 ConVar crosshair( "crosshair", "1", FCVAR_ARCHIVE );
 ConVar cl_observercrosshair( "cl_observercrosshair", "1", FCVAR_ARCHIVE );
@@ -72,7 +72,7 @@ void CHudCrosshair::ApplySchemeSettings( IScheme *scheme )
 //-----------------------------------------------------------------------------
 bool CHudCrosshair::ShouldDraw( void )
 {
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	return false;
 #else
 
@@ -219,14 +219,7 @@ void CHudCrosshair::Paint( void )
 		//VectorAdd( m_curViewOrigin, forward, point );
 		//ScreenTransform( point, screen );
 
-		if ( bStereoActive && ( !tr.allsolid || !tr.startsolid ) )
-		{
-			// NOTE: This isn't exactly right, because the trace above starts with the gun and 
-			// not with the camera origin, so this will be slightly off. It shouldn't really matter.
-			flApparentZ = ( tr.endpos - tr.startpos ).Length();
-		}
-
-		ScreenTransform( tr.endpos, screen );
+		ScreenTransform(tr.endpos, screen);
 	}
 	// TrackIR
 	else
@@ -250,25 +243,6 @@ void CHudCrosshair::Paint( void )
 		else
 		{
 			AngleVectors( m_curViewAngles, &forward );
-		}
-
-		if ( bStereoActive )
-		{
-			C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-			if ( pPlayer && m_clrCrosshair.a() != 0.0f ) // if we have a player and we're not going to ignore the results...
-			{
-				Vector vecEnd = m_curViewOrigin + ( forward * MAX_TRACE_LENGTH );
-
-				trace_t tr;
-				UTIL_TraceLine( m_curViewOrigin, vecEnd, MASK_SHOT, pPlayer, COLLISION_GROUP_NONE, &tr );
-
-				if ( !tr.allsolid || !tr.startsolid )
-				{
-					// NOTE: This isn't exactly right, because the trace above starts with the gun and 
-					// not with the camera origin, so this will be slightly off. It shouldn't really matter.
-					flApparentZ = ( tr.endpos - tr.startpos ).Length();
-				}
-			}
 		}
 	}
 

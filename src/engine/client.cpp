@@ -2174,7 +2174,7 @@ void CClientState::ConsistencyCheck(bool bChanged )
 		//
 		if ( userData && userData[0] == CONSISTENCY_EXACT && length == sizeof( ExactFileUserData ) )
 		{
-#if !defined( CSTRIKE15 )
+#if !defined( CSTRIKE15 ) || defined( PORTAl2 )
 			if ( !CheckCRCs( userData, length, filename ) )
 			{
 				ConColorMsg( red, "Bad CRC for %s\n", filename );

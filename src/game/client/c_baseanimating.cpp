@@ -1217,6 +1217,7 @@ int C_BaseAnimating::LookupBone( const char *szName )
 
 	int ret = Studio_BoneIndexByName( GetModelPtr(), szName );
 
+#if !defined( PORTAL2 )
 	if ( ret == -1 )
 	{
 		// Try to fix up some common old bone names to new bone names, until I can go through the code and fix all cases or write a data-driven solution.
@@ -1238,8 +1239,8 @@ int C_BaseAnimating::LookupBone( const char *szName )
 		}
 
 		//AssertMsg( ret > 0, "Failed to find an alternate bone name!" );
-
 	}
+#endif
 
 	return ret;
 }
@@ -5233,7 +5234,7 @@ void C_BaseAnimating::DoAnimationEvents( CStudioHdr *pStudioHdr )
 	if ( bIsInvisible && !clienttools->IsInRecordingMode() )
 		return;
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	// We already handle muzzle flash events in CSTRIKE15.
 	// Also this code has a bug in that it always uses attachment 1 instead of by name.
 
@@ -6796,7 +6797,7 @@ bool C_BaseAnimating::InitAsClientRagdoll( const matrix3x4_t *pDeltaBones0, cons
 	return InitAsClientRagdoll( pDeltaBones0, pDeltaBones1, pCurrentBonePosition, boneDt, m_vecForce, bleedOut );
 }
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 
 // [msmith] We want shadows for the following entity classes.
 //          We could probably just get rid of this and turn on rtt shadows for everything that would use them.
@@ -7123,7 +7124,11 @@ bool C_BaseAnimating::TestHitboxes( const Ray_t &ray, unsigned int fContentsMask
 	matrix3x4_t *hitboxbones[MAXSTUDIOBONES];
 	HitboxToWorldTransforms( hitboxbones );
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( TraceToStudioCsgoHitgroupsPriority( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetRenderOrigin(), GetModelHierarchyScale(), tr ) )
+#else
+	if( TraceToStudio( physprops, ray, pStudioHdr, set, hitboxbones, fContentsMask, GetRenderOrigin(), GetModelHierarchyScale(), tr ) )
+#endif
 	{
 		mstudiobbox_t *pbox = set->pHitbox( tr.hitbox );
 		const mstudiobone_t *pBone = pStudioHdr->pBone(pbox->bone);

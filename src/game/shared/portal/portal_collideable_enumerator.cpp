@@ -29,13 +29,18 @@ CPortalCollideableEnumerator::CPortalCollideableEnumerator( const CPortal_Base2D
 
 IterationRetval_t CPortalCollideableEnumerator::EnumElement( IHandleEntity *pHandleEntity )
 {
-	EHANDLE hEnt = pHandleEntity->GetRefEHandle();
-	
-	CBaseEntity *pEnt = hEnt.Get();
+#if defined( CLIENT_DLL )
+	IClientEntity *pClientEntity = cl_entitylist->GetClientEntityFromHandle( pHandleEntity->GetRefEHandle() );
+	C_BaseEntity *pEnt = pClientEntity ? pClientEntity->GetBaseEntity() : NULL;
+#else
+	CBaseEntity *pEnt = gEntList.GetBaseEntity( pHandleEntity->GetRefEHandle() );
+#endif
+
 	if( pEnt == NULL ) //I really never thought this would be necessary
 		return ITERATION_CONTINUE;
-	
-	if( hEnt == m_hTestPortal )
+
+	// SanyaSho: i'm not sure that this is correct way to do this check here because we can't cast CPortal_Base2D to CBaseEntity
+	if( pEnt == m_hTestPortal )
 		return ITERATION_CONTINUE; //ignore this portal
 
 	/*if( staticpropmgr->IsStaticProp( pHandleEntity ) )

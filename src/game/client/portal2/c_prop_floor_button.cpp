@@ -5,6 +5,7 @@
 //================================================================//
 
 #include "cbase.h"
+#include "glow_outline_effect.h"
 #include "c_props.h"
 #include "functionproxy.h"
 #include "imaterialproxydict.h"

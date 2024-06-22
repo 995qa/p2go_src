@@ -61,24 +61,24 @@ enum
 
 ConVar locator_fade_time( "locator_fade_time", "0.3", FCVAR_NONE, "Number of seconds it takes for a lesson to fully fade in/out." );
 ConVar locator_lerp_speed( "locator_lerp_speed", "5.0f", FCVAR_NONE, "Speed that static lessons move along the Y axis." );
-ConVar locator_lerp_rest( "locator_lerp_rest", "0.25f", FCVAR_NONE, "Number of seconds before moving from the center." );
+ConVar locator_lerp_rest( "locator_lerp_rest", "2.25f", FCVAR_NONE, "Number of seconds before moving from the center." );
 ConVar locator_lerp_time( "locator_lerp_time", "1.75f", FCVAR_NONE, "Number of seconds to lerp before reaching final destination" );
 ConVar locator_pulse_time( "locator_pulse_time", "1.0f", FCVAR_NONE, "Number of seconds to pulse after changing icon or position" );
-ConVar locator_start_at_crosshair( "locator_start_at_crosshair", "1", FCVAR_NONE, "Start position at the crosshair instead of the top middle of the screen." );
+ConVar locator_start_at_crosshair( "locator_start_at_crosshair", "0", FCVAR_NONE, "Start position at the crosshair instead of the top middle of the screen." );
 
 ConVar locator_topdown_style( "locator_topdown_style", "0", FCVAR_NONE, "Topdown games set this to handle distance and offscreen location differently." );
 
-ConVar locator_background_style( "locator_background_style", "2", FCVAR_NONE, "Setting this to 1 will show rectangle backgrounds behind the items word-bubble pointers." );
-ConVar locator_background_color( "locator_background_color", "16 16 16 100", FCVAR_NONE, "The default color for the background." );
-ConVar locator_background_border_color( "locator_background_border_color", "16 16 16 0", FCVAR_NONE, "The default color for the border." );
+ConVar locator_background_style( "locator_background_style", "0", FCVAR_NONE, "Setting this to 1 will show rectangle backgrounds behind the items word-bubble pointers." );
+ConVar locator_background_color( "locator_background_color", "255 255 255 5", FCVAR_NONE, "The default color for the background." );
+ConVar locator_background_border_color( "locator_background_border_color", "255 255 255 15", FCVAR_NONE, "The default color for the border." );
 ConVar locator_background_thickness_x( "locator_background_thickness_x", "8", FCVAR_NONE, "How many pixels the background borders the left and right." );
 ConVar locator_background_thickness_y( "locator_background_thickness_y", "0", FCVAR_NONE, "How many pixels the background borders the top and bottom." );
 ConVar locator_background_shift_x( "locator_background_shift_x", "3", FCVAR_NONE, "How many pixels the background is shifted right." );
 ConVar locator_background_shift_y( "locator_background_shift_y", "1", FCVAR_NONE, "How many pixels the background is shifted down." );
-ConVar locator_background_border_thickness( "locator_background_border_thickness", "2", FCVAR_NONE, "How many pixels the background borders the left and right." );
+ConVar locator_background_border_thickness( "locator_background_border_thickness", "3", FCVAR_NONE, "How many pixels the background borders the left and right." );
 
-ConVar locator_target_offset_x( "locator_target_offset_x", "-17", FCVAR_NONE, "How many pixels to offset the locator from the target position." );
-ConVar locator_target_offset_y( "locator_target_offset_y", "-64", FCVAR_NONE, "How many pixels to offset the locator from the target position." );
+ConVar locator_target_offset_x( "locator_target_offset_x", "0", FCVAR_NONE, "How many pixels to offset the locator from the target position." );
+ConVar locator_target_offset_y( "locator_target_offset_y", "0", FCVAR_NONE, "How many pixels to offset the locator from the target position." );
 
 ConVar locator_screen_pos_y( "locator_screen_pos_y", "0.35", FCVAR_NONE, "Percentage of the lower half of the screen that the locator will draw at when at its reseting position on the hud." );
 

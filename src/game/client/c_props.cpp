@@ -7,12 +7,11 @@
 
 
 #include "cbase.h"
+#include "glow_outline_effect.h"
 #include "c_physicsprop.h"
 #include "c_physbox.h"
 #include "c_props.h"
-#if defined(CSTRIKE15)
-#include "c_cs_player.h"
-#endif
+
 #define CPhysBox C_PhysBox
 #define CPhysicsProp C_PhysicsProp
 
@@ -102,7 +101,7 @@ void C_DynamicProp::UpdateGlow( void )
 
 	float flAlpha = 0.9f;
 
-#if defined(CSTRIKE15)
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// fade the alpha based on distace
 	C_CSPlayer *pPlayer = GetLocalOrInEyeCSPlayer();
 	if ( pPlayer && m_bShouldGlow )

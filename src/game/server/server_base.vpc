@@ -5,7 +5,6 @@
 //-----------------------------------------------------------------------------
 
 $Macro OUTBINDIR	"$SRCDIR\..\game\$GAMENAME\bin"
-$Macro OUTCEGDIR	"$SRCDIR\..\game\$GAMENAME\bin\ceg"		[$WINDOWS && $CEG]
 $Macro DEVKITBINDIR	"$GAMENAME\bin"							[$X360]
 $Macro GENERATED_PROTO_DIR	"generated_proto"
 
@@ -362,6 +361,7 @@ $Project
 		$File	"$SRVSRCDIR\envmicrophone.h"
 		$File	"$SRVSRCDIR\EnvShake.cpp"
 		$File	"$SRVSRCDIR\EnvSpark.cpp"
+		$File	"$SRVSRCDIR\EnvSpark.h"
 		$File	"$SRCDIR\public\event_flags.h"
 		$File	"$SRVSRCDIR\event_tempentity_tester.h"
 		$File	"$SRCDIR\game\shared\eventlist.cpp"
@@ -736,6 +736,7 @@ $Project
 		$File	"$SRVSRCDIR\world.cpp"
 		$File	"$SRVSRCDIR\world.h"
 		$File	"$SRCDIR\game\shared\mp_shareddefs.cpp"
+		$File	"$SRCDIR\game\shared\SharedFunctorUtils.h"
 		$File	"$SRCDIR\game\server\vote_controller.h"
 		$File	"$SRCDIR\game\server\vote_controller.cpp"
 
@@ -777,18 +778,6 @@ $Project
 				}
 			}
 		}
-
-		$File	"$SRCDIR\common\CegClientWrapper.cpp"
-		{
-			$Configuration
-			{
-				$Compiler
-				{
-					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
-				}
-			}
-		}
-
 
 		$Folder	"Precompiled Header"
 		{
@@ -1107,8 +1096,6 @@ $Project
 		$File	"$SRCDIR\public\bittools.h"
 		$File	"$SRCDIR\game\shared\cellcoord.h"
 		$File   "$SRVSRCDIR\sendprop_priorities.h"
-		$File	"$SRCDIR\common\CegClientWrapper.h"
-		$File	"$SRCDIR\common\cegclient.h"			[$WINDOWS && $CEG]
 	}
 
 	$Folder	"Tools Framework"

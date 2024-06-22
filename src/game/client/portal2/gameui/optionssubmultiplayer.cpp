@@ -7,6 +7,7 @@
 
 #undef fopen
 
+#include <cbase.h>
 #ifdef IS_WINDOWS_PC
 #include <windows.h> // SRC only!!
 #endif

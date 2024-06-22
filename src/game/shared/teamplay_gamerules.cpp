@@ -265,9 +265,9 @@ void CTeamplayRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 
 	// msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
 	// Note, this is case sensitive
-	if ( ( Q_strcmp( pszOldName, pszName ) != 0 ) &&
-		CanClientCustomizeOwnIdentity() )
+	if  (Q_strcmp( pszOldName, pszName ) != 0) 
 	{
+		//Yes the player can change their name its not illegal valve
 		if ( pszOldName[0] != '\0' )
 		{
 			IGameEvent * event = gameeventmanager->CreateEvent( "player_changename" );
@@ -432,15 +432,16 @@ int CTeamplayRules::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled
 
 //=========================================================
 //=========================================================
-// const char *CTeamplayRules::GetTeamID( CBaseEntity *pEntity )
-// {
-// 	if ( pEntity == NULL || pEntity->edict() == NULL )
-// 		return "";
-// 
-// 	// return their team name
-// 	return pEntity->TeamID();
-// }
-
+#ifndef CLIENT_DLL
+ const char *CTeamplayRules::GetTeamID( CBaseEntity *pEntity )
+ {
+ 	if ( pEntity == NULL || pEntity->edict() == NULL )
+ 		return "";
+ 
+ 	// return their team name
+ 	return pEntity->TeamID();
+ }
+#endif
 
 int CTeamplayRules::GetTeamIndex( const char *pTeamName )
 {

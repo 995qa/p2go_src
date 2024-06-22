@@ -17,6 +17,7 @@ $Configuration
 
 	$Compiler
 	{
-		$PreprocessorDefinitions	"$BASE;CSTRIKE15"
+		$PreprocessorDefinitions	"$BASE;CSTRIKE15" //[$CSGO]
+		$PreprocessorDefinitions	"$BASE;PORTAL2" //[$PORTAL2]
 	}
 }

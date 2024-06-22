@@ -30,16 +30,19 @@
 #include "func_portal_orientation.h"
 #include "env_debughistory.h"
 #include "tier1/callqueue.h"
-#include "baseprojector.h"
 #include "tier1/convar.h"
 #include "iextpropportallocator.h"
 #include "matchmaking/imatchframework.h"
+#include "portal2_usermessages.pb.h"
+
+//TODO:
+//#include "baseprojector.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #ifdef PORTAL2
-extern bool UTIL_FizzlePlayerPhotos( CPortal_Player *pPlayer );
+//extern bool UTIL_FizzlePlayerPhotos( CPortal_Player *pPlayer );
 #endif // PORTAL2
 
 static CUtlVector<CProp_Portal *> s_PortalLinkageGroups[256];
@@ -78,17 +81,10 @@ END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( prop_portal, CProp_Portal );
 
-
-
 CProp_Portal::CProp_Portal( void )
-{
-	if( !ms_DefaultPortalSizeInitialized )
-	{
-		ms_DefaultPortalSizeInitialized = true; // for CEG protection
-		CEG_GCV_PRE();
-		ms_DefaultPortalHalfHeight = CEG_GET_CONSTANT_VALUE( DefaultPortalHalfHeight ); // only protecting one to reduce the cost of first-portal check
-		CEG_GCV_POST();
-	}
+{	
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;
+		
 	m_FizzleEffect = PORTAL_FIZZLE_KILLED;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );
 }
@@ -468,15 +464,29 @@ void CProp_Portal::CreatePortalEffect( CBasePlayer* pPlayer, int iEffect, Vector
 		filter.RemoveRecipient( pPlayer );
 	}
 
-	UserMessageBegin( filter, "PortalFX_Surface" );
-	WRITE_SHORT( entindex() );
-	WRITE_SHORT( pPlayer->entindex() );
-	WRITE_BYTE( nTeam );
-	WRITE_BYTE( nPortalNum );
-	WRITE_BYTE( iEffect );
-	WRITE_VEC3COORD( vecOrigin );
-	WRITE_ANGLES( qAngles );
-	MessageEnd();
+//	UserMessageBegin( filter, "PortalFX_Surface" );
+//	WRITE_SHORT( entindex() );
+//	WRITE_SHORT( pPlayer->entindex() );
+//	WRITE_BYTE( nTeam );
+//	WRITE_BYTE( nPortalNum );
+//	WRITE_BYTE( iEffect );
+//	WRITE_VEC3COORD( vecOrigin );
+//	WRITE_ANGLES( qAngles );
+//	MessageEnd();
+
+	CUsrMsg_PortalFX_Surface msg;
+	msg.set_portalent(entindex());
+	msg.set_ownerent(pPlayer->entindex());
+	msg.set_team(nTeam);
+	msg.set_portalnum(nPortalNum);
+	msg.set_effect(iEffect);
+	msg.set_origin_x(vecOrigin.x);
+	msg.set_origin_y(vecOrigin.y);
+	msg.set_origin_z(vecOrigin.z);
+	msg.set_angles_pitch(qAngles.x);
+	msg.set_angles_yaw(qAngles.y);
+	msg.set_angles_roll(qAngles.z);
+	SendUserMessage(filter, UM_PortalFX_Surface, msg);
 }
 
 //-----------------------------------------------------------------------------

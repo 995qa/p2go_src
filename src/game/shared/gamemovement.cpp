@@ -11,7 +11,9 @@
 #include "decals.h"
 #include "coordsize.h"
 #include "rumble_shared.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cstrike15/basecsgrenade_projectile.h"
+#endif
 
 #if defined(HL2_DLL) || defined(HL2_CLIENT_DLL)
 	#include "hl_movedata.h"
@@ -4256,6 +4258,7 @@ void CGameMovement::CategorizePosition( void )
 			else
 			{
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #ifndef CLIENT_DLL
 				CBaseCSGrenadeProjectile* pGrenadeProjectile = dynamic_cast<CBaseCSGrenadeProjectile*>( pm.m_pEnt );
 				if ( pGrenadeProjectile )
@@ -4264,6 +4267,7 @@ void CGameMovement::CategorizePosition( void )
 				}
 				else
 #endif
+#endif
 				{
 					SetGroundEntity( &pm );
 				}
@@ -4271,6 +4275,7 @@ void CGameMovement::CategorizePosition( void )
 		}
 		else
 		{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #ifndef CLIENT_DLL
 			CBaseCSGrenadeProjectile* pGrenadeProjectile = dynamic_cast<CBaseCSGrenadeProjectile*>( pm.m_pEnt );
 			if ( pGrenadeProjectile )
@@ -4278,6 +4283,7 @@ void CGameMovement::CategorizePosition( void )
 				pm.m_pEnt->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
 			}
 			else
+#endif
 #endif
 			{
 				SetGroundEntity( &pm );  // Otherwise, point to index of ent under us.
@@ -4315,6 +4321,7 @@ void CGameMovement::CategorizePosition( void )
 		pm.fraction > 0.0f &&			// must go somewhere
 		pm.fraction < 1.0f ) 			// must hit something
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #ifndef CLIENT_DLL
 		CBaseCSGrenadeProjectile* pGrenadeProjectile = dynamic_cast<CBaseCSGrenadeProjectile*>( pm.m_pEnt );
 		if ( pGrenadeProjectile )
@@ -4322,6 +4329,7 @@ void CGameMovement::CategorizePosition( void )
 			pm.m_pEnt->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
 		}
 		else
+#endif
 #endif
 		{
 			mv->SetAbsOrigin( pm.endpos );
@@ -4393,7 +4401,7 @@ void CGameMovement::CheckFalling( void )
 		}
 	}
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15_REAL )
 	float flFallVel = player->m_Local.m_flFallVelocity;
 	if ( flFallVel > 16.0f && flFallVel <= PLAYER_FATAL_FALL_SPEED )
 	{

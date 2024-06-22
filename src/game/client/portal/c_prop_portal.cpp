@@ -149,31 +149,36 @@ ConVar portal_draw_ghosting( "portal_draw_ghosting", "1", FCVAR_NONE );
 ConVar portal_transmit_light( "portal_transmit_light", "0", FCVAR_CHEAT );
 extern ConVar use_server_portal_particles;
 
-void __MsgFunc_PortalFX_Surface(bf_read &msg)
+bool __MsgFunc_PortalFX_Surface(const CUsrMsg_PortalFX_Surface &msg)
 {
-	int iPortalEnt = msg.ReadShort();		
+	int iPortalEnt = msg.portalent();		
 	C_Prop_Portal *pPortal= dynamic_cast<C_Prop_Portal*>( ClientEntityList().GetEnt( iPortalEnt ) );
 
 	if( !pPortal )
 	{
 		Warning("!!! Failed to find portal %d !!!\n", iPortalEnt );
-		return;
+		return true;
 	}
 
-	int iOwnerEnt = msg.ReadShort();		
+	int iOwnerEnt = msg.ownerent();		
 	C_BaseEntity *pOwner = ClientEntityList().GetEnt( iOwnerEnt );
 
-	int nTeam = msg.ReadByte();
-	int nPortalNum = msg.ReadByte();
-	int nEffect = msg.ReadByte();
+	int nTeam = msg.team();
+	int nPortalNum = msg.portalnum();
+	int nEffect = msg.effect();
 
 	Vector vecOrigin;
-	msg.ReadBitVec3Coord( vecOrigin );
+	vecOrigin.x = msg.origin_x();
+	vecOrigin.y = msg.origin_y();
+	vecOrigin.z = msg.origin_z();
 
 	QAngle qAngle;
-	msg.ReadBitAngles( qAngle );
+	qAngle.x = msg.angles_pitch();
+	qAngle.y = msg.angles_yaw();
+	qAngle.z = msg.angles_roll();
 
 	pPortal->CreateFizzleEffect( pOwner, nEffect, vecOrigin, qAngle, nTeam, nPortalNum );
+	return true;
 }
 
 USER_MESSAGE_REGISTER( PortalFX_Surface );
@@ -183,14 +188,8 @@ C_Prop_Portal::C_Prop_Portal( void )
 	m_fSecondaryStaticAmount( 0.0f ),
 	m_fOpenAmount( 0.0f )
 {
-	if( !ms_DefaultPortalSizeInitialized )
-	{
-		ms_DefaultPortalSizeInitialized = true; // for CEG protection
-
-		CEG_GCV_PRE();
-		ms_DefaultPortalHalfHeight = CEG_GET_CONSTANT_VALUE( DefaultPortalHalfHeight ); // only protecting one to reduce the cost of first-portal check
-		CEG_GCV_POST();
-	}
+	
+	ms_DefaultPortalHalfHeight = DEFAULT_PORTAL_HALF_HEIGHT;// CEG_GET_CONSTANT_VALUE(DefaultPortalHalfHeight); // only protecting one to reduce the cost of first-portal check
 	m_bIsPropPortal = true;	// Member of CPortalRenderable
 	TransformedLighting.m_LightShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
 	CProp_Portal_Shared::AllPortals.AddToTail( this );

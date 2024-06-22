@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================
-#include "glow_outline_effect.h"
+//#include "glow_outline_effect.h"
 
 #ifndef C_PROPS_H
 #define C_PROPS_H

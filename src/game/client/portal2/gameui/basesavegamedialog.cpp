@@ -4,7 +4,7 @@
 //
 //=============================================================================//
 
-
+#include <cbase.h>
 #include "BaseSaveGameDialog.h"
 #include "FileSystem.h"
 #include "savegame_version.h"

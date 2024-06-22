@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include <time.h>
 
 #include "MultiplayerAdvancedDialog.h"

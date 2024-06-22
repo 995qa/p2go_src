@@ -24,7 +24,7 @@
 #include "matchmaking/portal2/imatchext_portal2.h"
 #endif
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_gamerules.h"
 #include "matchmaking/cstrike15/imatchext_cstrike15.h"
 #endif
@@ -88,7 +88,7 @@ void EnableDisableInstructor( void )
 {
 	bool bEnabled = (!sv_gameinstructor_disable.GetBool() && gameinstructor_enable.GetBool());
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( CSGameRules() && CSGameRules()->IsPlayingTraining() )
 	{
 		bEnabled = true;
@@ -253,7 +253,7 @@ bool C_GameInstructor::Init( void )
 
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD( m_nSplitScreenSlot );
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( (!gameinstructor_enable.GetBool() || sv_gameinstructor_disable.GetBool()) && !(CSGameRules() && CSGameRules()->IsPlayingTraining()) )
 #else
 	if ( !gameinstructor_enable.GetBool() || sv_gameinstructor_disable.GetBool() )
@@ -380,7 +380,7 @@ void C_GameInstructor::Update( float frametime )
 
 	UpdateHiddenByOtherElements();
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( (!gameinstructor_enable.GetBool() || m_bNoDraw || m_bHiddenDueToOtherElements) && !(CSGameRules() && CSGameRules()->IsPlayingTraining()) )
 #else
 	if ( !gameinstructor_enable.GetBool() || m_bNoDraw || m_bHiddenDueToOtherElements )
@@ -434,7 +434,6 @@ void C_GameInstructor::Update( float frametime )
 		{
 			// This opportunity has closed
 			CloseOpportunity( pLesson );
-			RANDOM_CEG_TEST_SECRET_PERIOD( 11, 23 );
 			continue;
 		}
 
@@ -549,8 +548,6 @@ void C_GameInstructor::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp( name, "player_death" ) == 0 )
 	{
-		STEAMWORKS_TESTSECRET_AMORTIZE( 37 ); 
-
 		C_BasePlayer *pLocalPlayer = GetLocalPlayer();
 		if ( pLocalPlayer && pLocalPlayer == UTIL_PlayerByUserId( event->GetInt( "userid" ) ) )
 		{
@@ -598,8 +595,6 @@ void C_GameInstructor::FireGameEvent( IGameEvent *event )
 				ConColorMsg( CBaseLesson::m_rgbaVerboseHeader, "GAME INSTRUCTOR: " );
 				ConColorMsg( CBaseLesson::m_rgbaVerbosePlain, "Local player disconnected...\n" );
 			}
-
-			STEAMWORKS_SELFCHECK();
 
 			CloseAllOpenOpportunities();
 		}
@@ -877,7 +872,7 @@ bool C_GameInstructor::ReadSaveData( void )
 			continue;
 		}
 
-		TitleData3::GameInstructorData_t::LessonInfo_t li;
+		TitleData1::GameInstructorData_t::LessonInfo_t li;
 		li.u8dummy = TitleDataFieldsDescriptionGetValue<uint8>( fdKey, pPlayer );
 		
 		pLesson->SetDisplayCount( li.display );
@@ -930,7 +925,7 @@ void C_GameInstructor::KeyValueBuilder( KeyValues *pKeyValues )
 	for ( int i = 0; i < m_Lessons.Count();++i )
 	{
 		CBaseLesson *pLesson = m_Lessons[ i ];
-		TitleData3::GameInstructorData_t::LessonInfo_t li;
+		TitleData1::GameInstructorData_t::LessonInfo_t li;
 		li.u8dummy = 0;
 		li.display = pLesson->GetDisplayCount() & 0xF;
 		li.success = pLesson->GetSuccessCount() & 0xF;
@@ -1332,8 +1327,6 @@ bool C_GameInstructor::UpdateActiveLesson( CBaseLesson *pLesson, const CBaseLess
 	VPROF_BUDGET( "C_GameInstructor::UpdateActiveLesson", "GameInstructor" );
 
 	bool bIsOpen = pLesson->IsInstructing();
-
-	RANDOM_CEG_TEST_SECRET()
 
 	if ( !bIsOpen && !pRootLesson->IsLearned() )
 	{

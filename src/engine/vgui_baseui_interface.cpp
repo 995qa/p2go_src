@@ -1348,7 +1348,7 @@ void CEngineVGui::ActivateGameUI()
 	
 //Reapplying this hack so that the game doesn't pause when the player opens up the menu.
 //This existed initially but was removed with the Portal 2 integration.
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 	if ( sv.IsPlayingSoloAgainstBots() )
 	{
 		Cbuf_AddText( Cbuf_GetCurrentPlayer(), "pause\n" );
@@ -1867,12 +1867,15 @@ void CEngineVGui::UpdateProgressBar( float progress, const char *pDesc, bool sho
 
 			if ( g_ClientGlobalVariables.frametime != 0.0f && g_ClientGlobalVariables.frametime != 0.1f)
 			{
+#if defined ( INCLUDE_SCALEFORM )
 				static ConVarRef host_timescale( "host_timescale" );
 				float timeScale = host_timescale.GetFloat() * sv.GetTimescale();
 				if ( timeScale <= 0.0f )
 					timeScale = 1.0f;
 
 				g_pScaleformUI->RunFrame( g_ClientGlobalVariables.frametime / timeScale );
+#endif
+				break;
 			}
 			else
 			{
@@ -1882,7 +1885,9 @@ void CEngineVGui::UpdateProgressBar( float progress, const char *pDesc, bool sho
 	}
 	else if ( bUpdated )
 	{
+#if defined( INCLUDE_SCALEFORM )
 		g_pScaleformUI->RunFrame( 0 );
+#endif
 		// re-render vgui on screen
 		extern void V_RenderVGuiOnly();
 		V_RenderVGuiOnly();
@@ -1927,12 +1932,15 @@ void CEngineVGui::UpdateSecondaryProgressBar( float progress, const wchar_t *des
 
 			if ( g_ClientGlobalVariables.frametime != 0.0f && g_ClientGlobalVariables.frametime != 0.1f)
 			{
+#if defined( INCLUDE_SCALEFORM )
 				static ConVarRef host_timescale( "host_timescale" );
 				float timeScale = host_timescale.GetFloat() * sv.GetTimescale();
 				if ( timeScale <= 0.0f )
 					timeScale = 1.0f;
 
 				g_pScaleformUI->RunFrame( g_ClientGlobalVariables.frametime / timeScale );
+#endif
+				break;
 			}
 			else
 			{
@@ -1942,7 +1950,9 @@ void CEngineVGui::UpdateSecondaryProgressBar( float progress, const wchar_t *des
 	}
 	else if ( bUpdated )
 	{
+#if defined( INCLUDE_SCALEFORM )
 		g_pScaleformUI->RunFrame( 0 );
+#endif
 		// re-render vgui on screen
 		extern void V_RenderVGuiOnly();
 		V_RenderVGuiOnly();
@@ -2012,9 +2022,11 @@ bool CEngineVGui::Key_Event( const InputEvent_t &event )
 			}
 			else if ( IsGameUIVisible()  )
 			{
+#if defined( CSTIKE15 ) && !defined( PORTAL2 )
 				// gameui_hide on console start button but not ESC key.
 				if ( baseButtonCode != KEY_ESCAPE )
 				{
+#endif
 					// Don't allow hiding of the game ui if there's no level
 					const char *pLevelName = engineClient->GetLevelName();
 					if ( pLevelName && pLevelName[0] )
@@ -2025,7 +2037,9 @@ bool CEngineVGui::Key_Event( const InputEvent_t &event )
 							Cbuf_AddText( Cbuf_GetCurrentPlayer(), "debugsystemui 0" );
 						}
 					}
+#if defined( CSTIKE15 ) && !defined( PORTAL2 )
 				}
+#endif
 			}
 			else if ( !cv_ignore_ui_activate_key.GetBool() )
 			{
@@ -2939,7 +2953,7 @@ void VGui_SetGameDLLPanelsVisible( bool show )
 
 void CEngineVGui::SetProgressLevelName( const char *levelName )
 {
-//	staticGameUIFuncs->SetProgressLevelName( levelName );
+	staticGameUIFuncs->SetProgressLevelName( levelName );
 }
 
 void CEngineVGui::OnToolModeChanged( bool bGameMode )

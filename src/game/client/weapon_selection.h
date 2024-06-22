@@ -47,9 +47,11 @@ public:
 	virtual void CycleToNextWeapon( void ) = 0;
 	virtual void CycleToPrevWeapon( void ) = 0;
 	virtual void SwitchToLastWeapon( void );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	virtual void CycleToNextGrenadeOrBomb( void ) = 0;
 	virtual void CycleToNextGrenadeBombOrMelee( void ) = 0;
 	virtual void CycleToNextNonGrenadeOrBomb( void ) = 0;
+#endif
 	virtual C_BaseCombatWeapon *GetWeaponInSlot( int iSlot, int iSlotPos ) = 0;
 	virtual void SelectWeaponSlot( int iSlot ) = 0;
 	virtual C_BaseCombatWeapon	*GetFirstPos( int iSlot );
@@ -84,12 +86,14 @@ public:
 	void UserCmd_NextGrenadeWeapon( void );
 	void UserCmd_NextItemWeapon( void );
 	void UserCmd_NextNonGrenadeWeapon( void );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	virtual void UserCmd_GamePadSlot1( void )=0;
 	virtual void UserCmd_GamePadSlot2( void )=0;
 	virtual void UserCmd_GamePadSlot3( void )=0;
 	virtual void UserCmd_GamePadSlot4( void )=0;
 	virtual void UserCmd_GamePadSlot5( void )=0;
 	virtual void UserCmd_GamePadSlot6( void )=0;
+#endif
 
 	virtual void		SelectSlot( int iSlot );
 

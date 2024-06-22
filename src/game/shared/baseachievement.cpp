@@ -17,7 +17,7 @@
 #endif // CLIENT_DLL
 
 #include <vgui/ISystem.h>
-#include "../../src/public/vgui_controls/Controls.h"
+#include "vgui_controls/Controls.h"
 
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
@@ -748,8 +748,8 @@ void CBaseAchievement::SetAssetAward( const char* assetAwardName )
 //-----------------------------------------------------------------------------
 bool CBaseAchievement::CheckAchievementsEnabled( void )
 {
-	if ( g_pGameRules && !g_pGameRules->CheckAchievementsEnabled( GetAchievementID() ) )
-		return false;
+//	if ( g_pGameRules && !g_pGameRules->CheckAchievementsEnabled( GetAchievementID() ) )
+//		return false;
 
 	return m_pAchievementMgr->CheckAchievementsEnabled();
 }

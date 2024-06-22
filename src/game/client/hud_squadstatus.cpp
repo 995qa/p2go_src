@@ -19,6 +19,7 @@
 #include "tier0/memdbgon.h"
 
 ConVar player_squad_transient_commands( "player_squad_transient_commands", "1", FCVAR_REPLICATED );
+CUserMessageBinder m_UMCMsgSquadMemberDied;
 
 //-----------------------------------------------------------------------------
 // Purpose: Shows the sprint power bar
@@ -34,7 +35,7 @@ public:
 	virtual void OnThink( void );
 	bool ShouldDraw();
 
-	void MsgFunc_SquadMemberDied(bf_read &msg);
+	void MsgFunc_SquadMemberDied(const CUsrMsg_SquadMemberDied &msg);
 
 protected:
 	virtual void Paint();
@@ -62,7 +63,7 @@ private:
 
 
 DECLARE_HUDELEMENT( CHudSquadStatus );
-DECLARE_HUD_MESSAGE( CHudSquadStatus, SquadMemberDied );
+//DECLARE_HUD_MESSAGE( CHudSquadStatus, SquadMemberDied );
 
 using namespace vgui;
 
@@ -82,7 +83,7 @@ CHudSquadStatus::CHudSquadStatus( const char *pElementName ) : CHudElement( pEle
 //-----------------------------------------------------------------------------
 void CHudSquadStatus::Init( void )
 {
-	HOOK_HUD_MESSAGE( CHudSquadStatus, SquadMemberDied );
+	//HOOK_HUD_MESSAGE( CHudSquadStatus, SquadMemberDied );
 	m_iSquadMembers = 0;
 	m_iSquadMedics = 0;
 	m_bSquadMemberAdded = false;
@@ -197,7 +198,7 @@ void CHudSquadStatus::OnThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: Notification of squad member being killed
 //-----------------------------------------------------------------------------
-void CHudSquadStatus::MsgFunc_SquadMemberDied(bf_read &msg)
+void CHudSquadStatus::MsgFunc_SquadMemberDied(const CUsrMsg_SquadMemberDied &msg)
 {
 	m_bSquadMemberJustDied = true;
 }

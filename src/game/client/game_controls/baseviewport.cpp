@@ -52,7 +52,7 @@
 
 #ifdef PORTAL2
 #include "radialmenu.h"
-#include "vgui/portal_stats_panel.h"
+//#include "vgui/portal_stats_panel.h"
 #endif // PORTAL2
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -76,7 +76,15 @@ vgui::Panel *g_lastPanel = NULL; // used for mouseover buttons, keeps track of t
 vgui::Button *g_lastButton = NULL; // used for mouseover buttons, keeps track of the last active button
 using namespace vgui;
 
-ConVar hud_autoreloadscript("hud_autoreloadscript", "0", FCVAR_NONE, "Automatically reloads the animation script each time one is ran");
+void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue );
+ConVar hud_autoreloadscript("hud_autoreloadscript", "0", FCVAR_NONE, "Automatically reloads the animation script each time one is ran", hud_autoreloadscript_callback);
+void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+	if ( GetClientMode() && GetClientMode()->GetViewportAnimationController() )
+	{
+		GetClientMode()->GetViewportAnimationController()->SetAutoReloadScript( hud_autoreloadscript.GetBool() );
+	}
+}
 
 static ConVar cl_leveloverviewmarker( "cl_leveloverviewmarker", "0", FCVAR_CHEAT );
 
@@ -174,7 +182,7 @@ CBaseViewport::CBaseViewport() : vgui::EditablePanel( NULL, "CBaseViewport" )
 	m_bHasParent = false;
 	m_pActivePanel = NULL;
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	m_pLastActivePanel = NULL;
 #endif
 
@@ -237,8 +245,10 @@ void CBaseViewport::CreateDefaultPanels( void )
 	AddNewPanel( CreatePanelByName( PANEL_SCOREBOARD ), "PANEL_SCOREBOARD" );
 	AddNewPanel( CreatePanelByName( PANEL_INFO ), "PANEL_INFO" );
 	AddNewPanel( CreatePanelByName( PANEL_SPECGUI ), "PANEL_SPECGUI" );
+#if !defined( TF_CLIENT_DLL )
 	AddNewPanel( CreatePanelByName( PANEL_SPECMENU ), "PANEL_SPECMENU" );
 	AddNewPanel( CreatePanelByName( PANEL_NAV_PROGRESS ), "PANEL_NAV_PROGRESS" );
+#endif // !TF_CLIENT_DLL
 }
 
 void CBaseViewport::UpdateAllPanels( void )
@@ -268,19 +278,21 @@ IViewPortPanel* CBaseViewport::CreatePanelByName(const char *szPanelName)
 	{
 		newpanel = new CTextWindow( this );
 	}
-	/*	else if ( Q_strcmp(PANEL_OVERVIEW, szPanelName) == 0 )
+/*	else if ( Q_strcmp(PANEL_OVERVIEW, szPanelName) == 0 )
 	{
 	newpanel = new CMapOverview( this );
 	}
 	*/
-	//else if ( Q_strcmp(PANEL_TEAM, szPanelName) == 0 )
-	//{
-	//	newpanel = new CTeamMenu( this );
-	//}
+	else if ( Q_strcmp(PANEL_TEAM, szPanelName) == 0 )
+	{
+		newpanel = new CTeamMenu( this );
+	}
+#if !defined( TF_CLIENT_DLL )
 	else if ( Q_strcmp(PANEL_NAV_PROGRESS, szPanelName) == 0 )
 	{
 		newpanel = new CNavProgress( this );
 	}
+#endif	// TF_CLIENT_DLL
 #ifdef PORTAL2
 	else if ( Q_strcmp( PANEL_RADIAL_MENU, szPanelName ) == 0 )
 	{
@@ -301,6 +313,7 @@ bool CBaseViewport::AddNewPanel( IViewPortPanel* pPanel, char const *pchDebugNam
 {
 	if ( !pPanel )
 	{
+		DevMsg("CBaseViewport::AddNewPanel(%s): NULL panel.\n", pchDebugName );
 		return false;
 	}
 
@@ -453,11 +466,11 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 				// so we can restore it later
 				if ( pPanel->CanReplace( m_pActivePanel->GetName() ) )
 				{
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 					m_pLastActivePanel = m_pActivePanel;
 #endif
 
-#ifdef CSTRIKE15 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 					// in cs, if the scoreboard tries to hide the spectator via this method, just skip it
 					IViewPortPanel* pSpecGuiPanel = FindPanelByName(PANEL_SPECGUI);
 					if ( pSpecGuiPanel != m_pActivePanel )
@@ -466,13 +479,17 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 						m_pActivePanel->ShowPanel( false );
 					}
 #else
+#if defined( INCLUDE_SCALEFORM )
 					SFDevMsg("CBaseViewport::ShowPanel(0) %s\n", m_pActivePanel->GetName());
+#else
+					DevMsg("CBaseViewport::ShowPanel(0) %s\n", m_pActivePanel->GetName());
+#endif
 					m_pActivePanel->ShowPanel( false );
 #endif
 				}
 				else
 				{
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 					m_pLastActivePanel = pPanel;
 #endif
 					return;
@@ -491,21 +508,29 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 			m_pActivePanel = NULL;
 		}
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		// restore the previous active panel if it exists
 		if( m_pLastActivePanel )
 		{
 			m_pActivePanel = m_pLastActivePanel;
 			m_pLastActivePanel = NULL;
 
+#if defined( INCLUDE_SCALEFORM )
 			SFDevMsg("CBaseViewport::ShowPanel(1) %s\n", m_pActivePanel->GetName());
+#else
+			DevMsg("CBaseViewport::ShowPanel(1) %s\n", m_pActivePanel->GetName());
+#endif
 			m_pActivePanel->ShowPanel( true );
 		}
 #endif
 	}
 
 	// just show/hide panel
+#if defined( INCLUDE_SCALEFORM )
 	SFDevMsg("CBaseViewport::ShowPanel(%d) %s\n", (int)state, pPanel->GetName());
+#else
+	DevMsg("CBaseViewport::ShowPanel(%d) %s\n", (int)state, pPanel->GetName());
+#endif
 	pPanel->ShowPanel( state );
 
 	UpdateAllPanels(); // let other panels rearrange
@@ -546,7 +571,7 @@ void CBaseViewport::RecreatePanel( const char *szPanelName )
 			m_pActivePanel = NULL;
 		}
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		if ( m_pLastActivePanel == panel )
 		{
 			m_pLastActivePanel = NULL;
@@ -585,7 +610,7 @@ void CBaseViewport::RemoveAllPanels( void)
 	m_Panels.RemoveAll();
 	m_UnorderedPanels.RemoveAll();
 	m_pActivePanel = NULL;
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	m_pLastActivePanel = NULL;
 #endif
 
@@ -712,7 +737,7 @@ void CBaseViewport::OnThink()
 	if( m_pActivePanel && !m_pActivePanel->IsVisible() )
 	{
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		if( m_pLastActivePanel )
 		{
 			if ( m_pLastActivePanel->CanBeReopened() )
@@ -731,7 +756,11 @@ void CBaseViewport::OnThink()
 			m_pActivePanel = NULL;
 	}
 
+	// TF does this in OnTick in TFViewport.  This remains to preserve old
+	// behavior in other games
+#if !defined( TF_CLIENT_DLL )
 	m_pAnimController->UpdateAnimations( gpGlobals->curtime );
+#endif
 
 	// check the auto-reload cvar
 	m_pAnimController->SetAutoReloadScript(hud_autoreloadscript.GetBool());

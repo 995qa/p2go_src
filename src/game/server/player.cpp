@@ -93,8 +93,6 @@
 #include "playerdecals_signature.h"
 #endif
 
-#include "CegClientWrapper.h"
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -140,7 +138,7 @@ extern ConVar sv_maxunlag;
 extern ConVar sv_turbophysics;
 extern ConVar *sv_maxreplay;
 
-extern ConVar sv_coaching_enabled;
+//extern ConVar sv_coaching_enabled;
 
 extern CServerGameDLL g_ServerGameDLL;
 
@@ -219,7 +217,7 @@ void CC_GiveCurrentAmmo( void )
 				if( ammoIndex != -1 )
 				{
 					int giveAmount;
-					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex, pPlayer);
+					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex);
 					pPlayer->GiveAmmo( giveAmount, GetAmmoDef()->GetAmmoOfIndex(ammoIndex)->pName );
 				}
 			}
@@ -234,7 +232,7 @@ void CC_GiveCurrentAmmo( void )
 				if( ammoIndex != -1 )
 				{
 					int giveAmount;
-					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex, pPlayer);
+					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex);
 					pPlayer->GiveAmmo( giveAmount, GetAmmoDef()->GetAmmoOfIndex(ammoIndex)->pName );
 				}
 			}
@@ -715,8 +713,10 @@ CBasePlayer::CBasePlayer( )
 
 	m_iCoachingTeam = 0;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	m_flDuckAmount = 0.0f;
 	m_flDuckSpeed = CS_PLAYER_DUCK_SPEED_IDEAL;
+#endif
 	m_vecLastPositionAtFullCrouchSpeed = vec2_origin;
 	m_flNextDecalTime = 0.0f; // initialize to let this player spray
 	m_bNextDecalTimeExpedited = false;
@@ -1796,11 +1796,13 @@ void CBasePlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	g_pGameRules->PlayerKilled( this, info );
 
-	#if !defined( _GAMECONSOLE ) || defined ( CSTRIKE15 )
+	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	gamestats->Event_PlayerKilled( this, info );
 	#endif
 
 	RumbleEffect( RUMBLE_STOP_ALL, 0, RUMBLE_FLAGS_NONE );
+
+	ClearUseEntity();
 
 	ForceDropOfCarriedPhysObjects();
 	
@@ -2188,7 +2190,7 @@ void CBasePlayer::ShowViewPortPanel( const char * name, bool bShow, KeyValues *d
 		subkey = data->GetFirstSubKey(); // reset 
 	}
 
-	CCSUsrMsg_VGUIMenu msg;
+	CUsrMsg_VGUIMenu msg;
 
 	msg.set_name( name );
 	msg.set_show( bShow );
@@ -2196,7 +2198,7 @@ void CBasePlayer::ShowViewPortPanel( const char * name, bool bShow, KeyValues *d
 	// write additional data (be careful not more than 192 bytes!)
 	while ( subkey )
 	{
-		CCSUsrMsg_VGUIMenu::Subkey *pMsgSubkey = msg.add_subkeys();
+		CUsrMsg_VGUIMenu::Subkey *pMsgSubkey = msg.add_subkeys();
 
 		pMsgSubkey->set_name( subkey->GetName() );
 		pMsgSubkey->set_str( subkey-> GetString() );
@@ -2204,11 +2206,11 @@ void CBasePlayer::ShowViewPortPanel( const char * name, bool bShow, KeyValues *d
 		subkey = subkey->GetNextKey();
 	}
 
-//	int x = 1;
+//	int x = 1; idk honestly it was left commented but i feel like this wasnt intended
 //	if ( bShow )
 //		x++;
 
-	SendUserMessage( filter, CS_UM_VGUIMenu, msg );
+	SendUserMessage( filter, UM_VGUIMenu, msg );
 }
 
 
@@ -2391,8 +2393,8 @@ void CBasePlayer::StopObserverMode()
 	CSingleUserRecipientFilter filter( this );
 	filter.MakeReliable();	
 	
-	CCSUsrMsg_StopSpectatorMode msg;
-	SendUserMessage( filter, CS_UM_StopSpectatorMode, msg );
+/*	CUsrMsg_StopSpectatorMode msg;
+	SendUserMessage( filter, UM_StopSpectatorMode, msg );*/
 }
 
 bool CBasePlayer::StartObserverMode(int mode)
@@ -4424,9 +4426,9 @@ void CBasePlayer::UpdateGeigerCounter( void )
 		CSingleUserRecipientFilter user( this );
 		user.MakeReliable();
 
-		CCSUsrMsg_Geiger msg;
+		CUsrMsg_Geiger msg;
 		msg.set_range( range );
-		SendUserMessage( user, CS_UM_Geiger, msg );
+		SendUserMessage( user, UM_Geiger, msg );
 	}
 
 	// reset counter and semaphore
@@ -5080,7 +5082,7 @@ void CBasePlayer::InitialSpawn( void )
 {
 	m_iConnected = PlayerConnected;
 	m_flInitialSpawnTime = gpGlobals->curtime;
-	#if !defined( _GAMECONSOLE ) || defined ( CSTRIKE15 )
+	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
 	gamestats->Event_PlayerConnected( this );
 	#endif
 }
@@ -5286,8 +5288,10 @@ void CBasePlayer::Spawn( void )
 	m_bKilledByHeadshot = false;
 	m_iDeathPostEffect = 0;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	m_flDuckAmount = 0;
 	m_flDuckSpeed = CS_PLAYER_DUCK_SPEED_IDEAL;
+#endif
 }
 
 void CBasePlayer::UpdateMapEntityPointers( void )
@@ -5540,6 +5544,7 @@ void CBasePlayer::NotifyNearbyRadiationSource( float flRange )
 
 void CBasePlayer::AllowImmediateDecalPainting()
 {
+#if defined( CSTRIKE_DLL )
 	// No decal expediting during warmup
 	if ( CSGameRules() )
 	{
@@ -5556,6 +5561,7 @@ void CBasePlayer::AllowImmediateDecalPainting()
 		m_flNextDecalTime -= ( PLAYERDECALS_COOLDOWN_SECONDS - 3 );
 		m_bNextDecalTimeExpedited = true;
 	}
+#endif
 }
 
 void CBasePlayer::PushAwayDecalPaintingTime( float flTime )
@@ -5725,7 +5731,7 @@ bool CBasePlayer::GetInVehicle( IServerVehicle *pVehicle, int nRole )
 	SetMoveType( MOVETYPE_NOCLIP );
 
 	// This is a hack to fixup the player's stats since they really didn't "cheat" and enter noclip from the console
-	#if !defined( _GAMECONSOLE ) || defined ( CSTRIKE15 )
+	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
 	gamestats->Event_DecrementPlayerEnteredNoClip( this );
 	#endif
 
@@ -6535,10 +6541,12 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 			return true;
 		}
 	}
+	/*
 	else if ( HandleVoteCommands( args ) )
 	{
 		return true;
 	}
+	*/
 	else if ( stricmp( cmd, "spectate" ) == 0 ) // join spectator team & start observer mode
 	{
 		if ( GetTeamNumber() == TEAM_SPECTATOR )
@@ -6750,6 +6758,7 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 		
 		return true;
 	}
+	/*
 	else if ( stricmp( cmd, "spec_player_by_accountid" ) == 0 )
 	{
 		if ( GetObserverMode( ) == OBS_MODE_ROAMING || GetObserverMode( ) == OBS_MODE_FIXED )
@@ -6768,7 +6777,7 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 			}
 		}
 	}
-
+	*/
 	else if ( stricmp( cmd, "spec_goto" ) == 0 ) // chase next player
 	{
 		if ( !sv_cheats->GetBool() && IsAlive()/* || (pPlayer->GetObserverMode() != OBS_MODE_ROAMING && pPlayer->GetObserverMode() != OBS_MODE_FIXED)*/ )
@@ -6882,6 +6891,7 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 		}
 		return true;
 	}
+	/*
 	else if ( stricmp( cmd, "cameraman_request" ) == 0 )
 	{
 		CSteamID steamID;
@@ -6894,6 +6904,7 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 			}
 		}
 	}
+	*/
 	else if ( stricmp( cmd, "cameraman_ui_state" ) == 0 )
 	{
 		if ( GetTeamNumber() != TEAM_SPECTATOR )
@@ -7146,9 +7157,9 @@ void CBasePlayer::UpdateClientData( void )
 		m_fInitHUD = false;
 		gInitHUD = false;
 
-		CCSUsrMsg_ResetHud msg;
+		CUsrMsg_ResetHud msg;
 		msg.set_reset( 0 );
-		SendUserMessage( user, CS_UM_ResetHud, msg );
+		SendUserMessage( user, UM_ResetHud, msg );
 
 		if ( !m_fGameHUDInitialized )
 		{
@@ -7170,8 +7181,8 @@ void CBasePlayer::UpdateClientData( void )
 	CWorld *world = GetWorldEntity();
 	if ( world && world->GetDisplayTitle() )
 	{
-		CCSUsrMsg_GameTitle msg;
-		SendUserMessage( user, CS_UM_GameTitle, msg );
+		CUsrMsg_GameTitle msg;
+		SendUserMessage( user, UM_GameTitle, msg );
 
 		world->SetDisplayTitle( false );
 	}
@@ -7250,12 +7261,12 @@ void CBasePlayer::RumbleEffect( unsigned char index, unsigned char rumbleData, u
 	CSingleUserRecipientFilter filter( this );
 	filter.MakeReliable();
 
-	CCSUsrMsg_Rumble msg;
+	CUsrMsg_Rumble msg;
 	msg.set_index( index );
 	msg.set_data( rumbleData );
 	msg.set_flags( rumbleFlags	);
 
-	SendUserMessage( filter, CS_UM_Rumble, msg );	
+	SendUserMessage( filter, UM_Rumble, msg );
 }
 
 void CBasePlayer::EnableControl(bool fControl)
@@ -7274,9 +7285,9 @@ void CBasePlayer::CheckTrainUpdate( void )
 		CSingleUserRecipientFilter user( this );
 		user.MakeReliable();
 
-		CCSUsrMsg_Train msg;
+		CUsrMsg_Train msg;
 		msg.set_train( m_iTrain & 0xF );
-		SendUserMessage( user, CS_UM_Train, msg );
+		SendUserMessage( user, UM_Train, msg );
 
 		m_iTrain &= ~TRAIN_NEW;
 	}
@@ -7997,7 +8008,7 @@ BEGIN_DATADESC( CRevertSaved )
 
 END_DATADESC()
 
-CEG_NOINLINE CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration, float flHoldTime, float flLoadTime )
+CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration, float flHoldTime, float flLoadTime )
 {
 	CRevertSaved *pRevertSaved = (CRevertSaved *) CreateEntityByName( "player_loadsaved" );
 
@@ -8013,8 +8024,6 @@ CEG_NOINLINE CBaseEntity *CreatePlayerLoadSave( Vector vOrigin, float flDuration
 
 	return pRevertSaved;
 }
-
-CEG_PROTECT_FUNCTION( CreatePlayerLoadSave );
 
 void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
@@ -9501,7 +9510,7 @@ void CBasePlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo
 	BaseClass::Event_KilledOther( pVictim, info );
 	if ( pVictim != this )
 	{
-		#if !defined( _GAMECONSOLE ) || defined ( CSTRIKE15 )
+		#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
 		gamestats->Event_PlayerKilledOther( this, pVictim, info );
 		#endif
 	}
@@ -9801,18 +9810,11 @@ void CBasePlayer::UpdateFXVolume( void )
 	}
 }
 
-
+/*
 CVoteController* CBasePlayer::GetTeamVoteController()
 {
 	switch ( GetAssociatedTeamNumber( ) )
 	{
-	case TEAM_CT:
-		return g_voteControllerCT;
-
-	case TEAM_TERRORIST:
-		return g_voteControllerT;
-
-	// SPECTATOR or other
 	default:
 		return g_voteControllerGlobal;
 	}
@@ -9909,7 +9911,7 @@ bool CBasePlayer::HandleVoteCommands( const CCommand &args )
 
 	return false;
 }
-
+*/
 
 #if !defined(NO_STEAM)
 //-----------------------------------------------------------------------------

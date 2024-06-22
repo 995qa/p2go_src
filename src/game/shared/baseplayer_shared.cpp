@@ -12,6 +12,7 @@
 #include "collisionutils.h"
 #include "vphysics/player_controller.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
+#include "portal_grabcontroller_shared.h"
 
 #if defined CLIENT_DLL
 #define CPhysicsProp C_PhysicsProp
@@ -28,11 +29,7 @@
 	#include "view.h"
 	#include "c_physicsprop.h"
 	#include "c_physbox.h"
-
-#if defined( CSTRIKE15 )
-	#include "weapon_selection.h"
-	#include "c_cs_player.h"
-#endif
+	//#include "haptics\haptic_utils.h"
 
 	#define CRecipientFilter C_RecipientFilter
 
@@ -47,13 +44,6 @@
 	#include "ammodef.h"
 	#include "props.h"
 	#include "physobj.h"
-
-#if defined( CSTRIKE15 )
-	#include "weapon_c4.h"
-	#include "cs_shareddefs.h"
-	#include "cs_gamerules.h"
-#include "cs_player.h"
-#endif
 
 	#if defined( PORTAL )
 		#include "portal_player.h"
@@ -373,11 +363,11 @@ void CBasePlayer::ItemPostFrame()
 		{
 			int iPrimaryAmmoType = pWeapon->GetPrimaryAmmoType();
 			if ( iPrimaryAmmoType >= 0 )
-				SetAmmoCount( GetAmmoDef()->MaxCarry( iPrimaryAmmoType, this ), iPrimaryAmmoType );
+				SetAmmoCount( GetAmmoDef()->MaxCarry( iPrimaryAmmoType), iPrimaryAmmoType );
 
 			int iSecondaryAmmoType = pWeapon->GetSecondaryAmmoType();
 			if ( iSecondaryAmmoType >= 0 )
-				SetAmmoCount( GetAmmoDef()->MaxCarry( iSecondaryAmmoType, this ), iSecondaryAmmoType );
+				SetAmmoCount( GetAmmoDef()->MaxCarry( iSecondaryAmmoType), iSecondaryAmmoType );
 		}
 		else
 		{
@@ -822,7 +812,7 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 		IPhysicsSurfaceProps *physprops = MoveHelper()->GetSurfaceProps();
 		
 // footstep sounds
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		const char *pRawSoundName = physprops->GetString( stepSoundName );
 		const char *pSoundName = NULL;
 		int const nStepCopyLen = V_strlen(pRawSoundName) + 4;
@@ -925,36 +915,6 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 	ep.m_nSoundEntryVersion = params.m_nSoundEntryVersion;
 
 	EmitSound( filter, entindex(), ep );
-
-	// Step Suit
-	if (CCSPlayer *pThisCsPlayer = dynamic_cast<CCSPlayer *>(this))
-	{
-		if (pThisCsPlayer->IsBot() && pThisCsPlayer->HasHeavyArmor())
-		{
-			extern ISoundEmitterSystemBase *soundemitterbase;
-			static const char * const k_HeavyStepSoundName = "Heavy.Step";
-			static HSOUNDSCRIPTHASH const k_HeavyStepSoundHash = soundemitterbase->HashSoundName( k_HeavyStepSoundName );
-			ep.m_pSoundName = k_HeavyStepSoundName;
-			ep.m_hSoundScriptHash = k_HeavyStepSoundHash;
-			EmitSound(filter, entindex(), ep);
-		}
-	}
-	CSoundParameters paramsSuitSound;
-	if (!CBaseEntity::GetParametersForSound((GetTeamNumber() == TEAM_CT) ? "CT_Default.Suit" : "T_Default.Suit", paramsSuitSound, NULL))
-		return;
-
-	EmitSound_t epSuitSound;
-	epSuitSound.m_nChannel = CHAN_AUTO;
-	epSuitSound.m_pSoundName = paramsSuitSound.soundname;
-	epSuitSound.m_flVolume = fvol;
-	epSuitSound.m_SoundLevel = paramsSuitSound.soundlevel;
-	epSuitSound.m_nFlags = 0;
-	epSuitSound.m_nPitch = paramsSuitSound.pitch;
-	epSuitSound.m_pOrigin = &vecOrigin;
-	epSuitSound.m_hSoundScriptHash = paramsSuitSound.m_hSoundScriptHash;
-	epSuitSound.m_nSoundEntryVersion = paramsSuitSound.m_nSoundEntryVersion;
-
-	EmitSound(filter, entindex(), epSuitSound);
 
 }
 
@@ -1108,7 +1068,7 @@ bool CBasePlayer::Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelindex 
 			pViewModel->RemoveEffects( EF_NODRAW );
 		ResetAutoaim( );
 		OnSwitchWeapons( pWeapon );
-#if defined ( CLIENT_DLL ) && defined ( CSTRIKE15 )
+#if defined ( CLIENT_DLL ) && ( defined ( CSTRIKE15 ) && defined ( CSTRIKE_DLL ) )
 		CBaseHudWeaponSelection *pHudSelection = GetHudWeaponSelection();
 		if ( pHudSelection )
 		{
@@ -1195,6 +1155,12 @@ void CBasePlayer::SimulatePlayerSimulatedEntities( void )
 			continue;
 		}
 
+#if defined( CLIENT_DLL )
+		if ( e->IsClientCreated() && prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
+		{
+			continue;
+		}
+#endif
 		Assert( e->IsPlayerSimulated() );
 		Assert( e->GetSimulatingPlayer() == this );
 
@@ -1344,7 +1310,7 @@ CBaseEntity *CBasePlayer::FindUseEntity()
 
 	const int NUM_TANGENTS = 8;
 
-#if defined( CSTRIKE15 ) && defined( GAME_DLL )
+#if ( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) ) && defined( GAME_DLL )
 	const int NUM_TRACES = 1;
 #else
 	const int NUM_TRACES = NUM_TANGENTS;
@@ -1382,7 +1348,7 @@ CBaseEntity *CBasePlayer::FindUseEntity()
 			float centerZ = CollisionProp()->WorldSpaceCenter().z;
 			delta.z = IntervalDistance( tr.endpos.z, centerZ + CollisionProp()->OBBMins().z, centerZ + CollisionProp()->OBBMaxs().z );
 			float dist = delta.Length();
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 			CCSPlayer *pPlayer = dynamic_cast<CCSPlayer*>( pObject );
 			if ( (pPlayer && pPlayer->IsBot() && dist < PLAYER_USE_BOT_RADIUS) || dist < PLAYER_USE_RADIUS )
 			{
@@ -1438,7 +1404,7 @@ CBaseEntity *CBasePlayer::FindUseEntity()
 		}
 	}
 
-#if defined( CSTRIKE15 ) && defined( GAME_DLL )
+#if ( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) ) && defined( GAME_DLL )
 	CCSPlayer* pPlayer = ToCSPlayer( this );
 	const float MIN_DOT_FOR_WEAPONS = 0.99f;
 #endif
@@ -1457,7 +1423,7 @@ CBaseEntity *CBasePlayer::FindUseEntity()
 
 		float fMinimumDot = pObject->GetUseLookAtAngle();
 
-#if defined( CSTRIKE15 ) && defined( GAME_DLL )
+#if ( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) ) && defined( GAME_DLL )
 		CWeaponCSBase *pWeapon = dynamic_cast<CWeaponCSBase*>( pObject );
 		CSWeaponType nWepType = WEAPONTYPE_UNKNOWN;
 		if ( pWeapon )
@@ -1637,7 +1603,7 @@ void CBasePlayer::PlayerUse ( void )
 
 	CBaseEntity *pUseEntity = FindUseEntity();
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// in counterstrike 15, we need to allow the buy menu to open more easily
 	// The old code defaulted to using whatever you were pointing at.
 	// This code first checks to see if you're in a buy zone.  If that's true, 
@@ -1800,7 +1766,7 @@ void CBasePlayer::PlayerUse ( void )
 			pUseEntity->AcceptInput( "Use", this, this, emptyVariant, USE_OFF );
 		}
 	}
-#if !defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	else if ( m_afButtonPressed & IN_USE )
 	{
 		// [sbodenbender] buymenu is mapped to use; bring up buy if nothing to use
@@ -2271,7 +2237,7 @@ void CBasePlayer::CalcViewRoll( QAngle& eyeAngles )
 	eyeAngles[ROLL] += side;
 }
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #if defined( CLIENT_DLL )
 extern ConVar cl_use_new_headbob;
 //ConVar cl_headbob_freq( "cl_headbob_freq", "12", FCVAR_CLIENTDLL );
@@ -2282,7 +2248,7 @@ ConVar cl_headbob_land_dip_amt("cl_headbob_land_dip_amt", "4", FCVAR_CLIENTDLL )
 
 void CBasePlayer::CalcViewBob( Vector& eyeOrigin )
 {
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #if defined( CLIENT_DLL )
 		if ( cl_use_new_headbob.GetBool() == false )
 			return;
@@ -2442,8 +2408,10 @@ void CBasePlayer::SharedSpawn()
 
 	m_hUseEntity = NULL;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	m_flDuckAmount = 0;
 	m_flDuckSpeed = CS_PLAYER_DUCK_SPEED_IDEAL;
+#endif
 }
 
 
@@ -3202,7 +3170,6 @@ void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
 								}
 							}
 						}
-						}
 					}
 				}
 			}
@@ -3517,11 +3484,13 @@ bool CBasePlayer::IsCoach( void ) const
 
 int CBasePlayer::GetCoachingTeam( void ) const
 {
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( sv_coaching_enabled.GetBool() && ( GetTeamNumber() == TEAM_SPECTATOR ) )
 	{
 		return m_iCoachingTeam;
 	}
 	else
+#endif
 	{ 
 		return 0;
 	}

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#include <cbase.h>
 #include "winlite.h"
 #include "Sys_Utils.h"
 #include "EngineInterface.h"

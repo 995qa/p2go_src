@@ -19,7 +19,7 @@
 //
 // Helper functions for creating key values
 //
-void AddDataToKV( KeyValues* pKV, const char* name, int data )
+/*void AddDataToKV(KeyValues* pKV, const char* name, int data)
 {
 	pKV->SetInt( name, data );
 }
@@ -57,7 +57,7 @@ void AddPositionDataToKV( KeyValues* pKV, const char* name, const Vector &data )
 	pKV->SetFloat( CFmtStr("%s%s", name, "_X"), data.x );
 	pKV->SetFloat( CFmtStr("%s%s", name, "_Y"), data.y );
 	pKV->SetFloat( CFmtStr("%s%s", name, "_Z"), data.z );
-}
+}*/
 
 //=============================================================================//
 
@@ -65,7 +65,7 @@ void AddPositionDataToKV( KeyValues* pKV, const char* name, const Vector &data )
 //
 // Helper functions for creating key values from arrays
 //
-void AddArrayDataToKV( KeyValues* pKV, const char* name, const short *data, unsigned size )
+/*void AddArrayDataToKV(KeyValues* pKV, const char* name, const short* data, unsigned size)
 {
 	for( unsigned i=0; i<size; ++i )
 		pKV->SetInt( CFmtStr("%s_%d", name, i) , data[i] );
@@ -86,11 +86,11 @@ void AddStringDataToKV( KeyValues* pKV, const char* name, const char*data )
 		return;
 
 	pKV->SetString( name, data );
-}
+}*/
 //=============================================================================//
 
 
-void IGameStatTracker::PrintGamestatMemoryUsage( void )
+/*void IGameStatTracker::PrintGamestatMemoryUsage(void)
 {
 	StatContainerList_t* pStatList = GetStatContainerList();
 	if( !pStatList )
@@ -103,6 +103,6 @@ void IGameStatTracker::PrintGamestatMemoryUsage( void )
 	{
 		pStatList->operator []( i )->PrintMemoryUsage();
 	}
-}
+}*/
 
 #endif // _GAMECONSOLE

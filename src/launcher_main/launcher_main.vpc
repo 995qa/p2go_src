@@ -10,12 +10,22 @@ $Macro OUTBINDIR	"$SRCDIR\..\game"
 // Must be built explicitly as "default" in order to build a compliant submittable Disc.
 // Renames will not work.
 $Macro OUTBINNAME	"default"
-$Macro OUTBINNAME	"csgo"	[$WIN32]
-$Macro OUTBINNAME	"csgo_win64"	[$WIN64]
-$Macro OUTBINNAME	"csgo_osx" [$OSX32]
-$Macro OUTBINNAME	"csgo_osx64" [$OSX64]
-$Macro OUTBINNAME	"csgo_linux" [$LINUX32]
-$Macro OUTBINNAME	"csgo_linux64" [$LINUX64]
+
+// CSGO
+$Macro OUTBINNAME	"csgo"	[$WIN32 && $CSGO]
+$Macro OUTBINNAME	"csgo_win64"	[$WIN64 && $CSGO]
+$Macro OUTBINNAME	"csgo_osx" [$OSX32 && $CSGO]
+$Macro OUTBINNAME	"csgo_osx64" [$OSX64 && $CSGO]
+$Macro OUTBINNAME	"csgo_linux" [$LINUX32 && $CSGO]
+$Macro OUTBINNAME	"csgo_linux64" [$LINUX64 && $CSGO]
+
+// PORTAL2
+$Macro OUTBINNAME	"portal2"	[$WIN32 && $PORTAL2]
+$Macro OUTBINNAME	"portal2_win64"	[$WIN64 && $PORTAL2]
+$Macro OUTBINNAME	"portal2_osx" [$OSX32 && $PORTAL2]
+$Macro OUTBINNAME	"portal2_osx64" [$OSX64 && $PORTAL2]
+$Macro OUTBINNAME	"portal2_linux" [$LINUX32 && $PORTAL2]
+$Macro OUTBINNAME	"portal2_linux64" [$LINUX64 && $PORTAL2]
 
 $Include "$SRCDIR\vpc_scripts\source_exe_base.vpc"
 

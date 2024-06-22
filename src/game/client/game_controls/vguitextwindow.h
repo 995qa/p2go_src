@@ -54,7 +54,6 @@ public:
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
-	void		 ShowPanel2( bool bShow );
 	bool		 HasMotd();
 	virtual void PaintBackground();
 
@@ -92,7 +91,7 @@ protected:
 	virtual void OnCommand( const char *command );
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
 
-	int GetNumSecondsRequiredByServer() const;
+	//int GetNumSecondsRequiredByServer() const;
 	int GetNumSecondsSponsorRequiredRemaining() const;
 
 	bool		m_bHasMotd;

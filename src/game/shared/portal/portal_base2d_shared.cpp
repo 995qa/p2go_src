@@ -518,7 +518,7 @@ void CPortal_Base2D::TeleportTouchingEntity( CBaseEntity *pOther )
 				punchAngles.x = -punchMag;
 			}
 
-			pOtherAsPlayer->SetPunchAngle( punchAngles );
+			pOtherAsPlayer->SetViewPunchAngle( punchAngles );
 		}
 
 		// Reorient the velocity		
@@ -754,11 +754,14 @@ void CPortal_Base2D::TeleportTouchingEntity( CBaseEntity *pOther )
 			pController->CheckPortalOscillation( this, pOther, pHoldingPlayer );
 		}
 
+		//FIXME:
+#if !defined ( NO_PROJECTED_WALL )
 		for ( int i = 0; i < IProjectedWallEntityAutoList::AutoList().Count(); ++i )
 		{
 			CProjectedWallEntity *pWall = static_cast< CProjectedWallEntity* >( IProjectedWallEntityAutoList::AutoList()[i] );
 			pWall->DisplaceObstructingEntity( pOther, true );
 		}
+#endif
 
 		// For alternate ticks, if we're going to simulate physics again make sure the grab controller's target position is up to date with the
 		// teleported object position.
@@ -784,7 +787,7 @@ void CPortal_Base2D::TeleportTouchingEntity( CBaseEntity *pOther )
 				//we need to make sure the held object and player don't interpenetrate when the player's shape changes
 				Vector vTargetPosition;
 				QAngle qTargetOrientation;
-				UpdateGrabControllerTargetPosition( pOtherAsPlayer, &vTargetPosition, &qTargetOrientation );
+				UpdateGrabControllerTargetPosition( pOtherAsPlayer, &vTargetPosition, &qTargetOrientation, false );
 
 				pHeldEntity->Teleport( &vTargetPosition, &qTargetOrientation, 0 );
 

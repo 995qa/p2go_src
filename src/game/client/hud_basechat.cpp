@@ -20,7 +20,7 @@
 #include <keyvalues.h>
 #include "ienginevgui.h"
 #include "c_playerresource.h"
-#include "cstrike15/c_cs_playerresource.h"
+//#include "cstrike15/c_cs_playerresource.h"
 #include "ihudlcd.h"
 #include "vgui/IInput.h"
 #include "vgui/ILocalize.h"
@@ -81,7 +81,7 @@ static const char *gBugTokenTable[] = {
 
 
 // [jason] Forward Printf messages to the Scaleform voicestatus panel
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 inline void CS15ForwardStatusMsg( const char* text, int clientid )
 {
 	/* Removed for partner depot */
@@ -286,11 +286,7 @@ wchar_t* ReadChatTextString( const char *szString, wchar_t *pOut, int outSize, b
 	pOut[0] = 0;
 	if ( const char *pszEntIndex = StringAfterPrefix( szString, "#ENTNAME[" ) )
 	{
-		int iEntIndex = V_atoi( pszEntIndex );
-		if ( C_CS_PlayerResource *pCSPR = ( C_CS_PlayerResource* ) GameResources() )
-		{
-			pCSPR->GetDecoratedPlayerName( iEntIndex, pOut, outSize, ( EDecoratedPlayerNameFlag_t ) ( k_EDecoratedPlayerNameFlag_DontUseNameOfControllingPlayer | k_EDecoratedPlayerNameFlag_DontUseAssassinationTargetName ) );
-		}
+		//int iEntIndex = V_atoi( pszEntIndex );
 		if ( !pOut[0] )
 		{
 			if ( const char *pszCloseBracket = V_strnchr( pszEntIndex, ']', 64 ) )
@@ -761,7 +757,7 @@ CBaseHudChat::CBaseHudChat( const char *pElementName )
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( NULL, "resource/ChatScheme.res", "ChatScheme" );
 	SetScheme( scheme);
 
-#if !defined( CSTRIKE15 )
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	g_pVGuiLocalize->AddFile( "resource/chat_%language%.txt" );
 #endif
 
@@ -898,7 +894,7 @@ void CBaseHudChat::Init( void )
 //			iSize - 
 //			*pbuf - 
 //-----------------------------------------------------------------------------
-bool CBaseHudChat::MsgFunc_SayText( const CCSUsrMsg_SayText &msg )
+bool CBaseHudChat::MsgFunc_SayText( const CUsrMsg_SayText &msg )
 {
 	int client = msg.ent_idx();
 	const char *szString =  msg.text().c_str();
@@ -938,7 +934,7 @@ int CBaseHudChat::GetFilterForString( const char *pString )
 //-----------------------------------------------------------------------------
 // Purpose: Reads in a player's Chat text from the server
 //-----------------------------------------------------------------------------
-bool CBaseHudChat::MsgFunc_SayText2( const CCSUsrMsg_SayText2 &msg )
+bool CBaseHudChat::MsgFunc_SayText2( const CUsrMsg_SayText2 &msg )
 {
 	// Got message during connection
 	if ( !g_PR )
@@ -1002,7 +998,8 @@ bool CBaseHudChat::MsgFunc_SayText2( const CCSUsrMsg_SayText2 &msg )
 // any string that starts with the character '#' is a message name, and is used to look up the real message in titles.txt
 // the next ( optional) one to four strings are parameters for that string ( which can also be message names if they begin with '#')
 //-----------------------------------------------------------------------------
-bool CBaseHudChat::MsgFunc_TextMsg( const CCSUsrMsg_TextMsg &msg )
+#define MAX_DECORATED_PLAYER_NAME_LENGTH ( ( MAX_NETWORKID_LENGTH * 10 ) + 20 ) //I got lazy and plopped this rather useless define here
+bool CBaseHudChat::MsgFunc_TextMsg( const CUsrMsg_TextMsg &msg )
 {
 	char szString[2048] = {};
 	int msg_dest = msg.msg_dst();
@@ -1017,10 +1014,6 @@ bool CBaseHudChat::MsgFunc_TextMsg( const CCSUsrMsg_TextMsg &msg )
 		{
 			int iEntIndex = V_atoi( pszEntIndex );
 			wchar_t wszPlayerName[MAX_DECORATED_PLAYER_NAME_LENGTH] = {};
-			if ( C_CS_PlayerResource *pCSPR = ( C_CS_PlayerResource* ) GameResources() )
-			{
-				pCSPR->GetDecoratedPlayerName( iEntIndex, wszPlayerName, sizeof( wszPlayerName ), ( EDecoratedPlayerNameFlag_t ) ( k_EDecoratedPlayerNameFlag_DontUseNameOfControllingPlayer | k_EDecoratedPlayerNameFlag_DontUseAssassinationTargetName ) );
-			}
 			if ( wszPlayerName[0] )
 			{
 				szString[0] = 0;
@@ -1842,7 +1835,7 @@ void	CBaseHudChat::ChatPrintfW( int iPlayerIndex, int iFilter, const wchar_t *ws
 	}
 
 	// Forward message to Scaleform for display
-#if defined( CSTRIKE15 ) 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) 
 
 	if ( iFilter != CHAT_FILTER_NONE )
 	{
@@ -1900,7 +1893,7 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 		return;
 
 	// [jason] Forward message to Scaleform for display
-#if defined( CSTRIKE15 ) 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) 
 
 	if ( iFilter != CHAT_FILTER_NONE )
 	{

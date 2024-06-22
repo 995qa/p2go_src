@@ -56,8 +56,22 @@ public:
 	virtual void OnLevelLoadingStarted( const char *levelName, bool bShowProgressDialog );
 	virtual void OnLevelLoadingFinished( bool bError, const char *failureReason, const char *extendedReason );
 	virtual void OnDisconnectFromServer_OLD( uint8 eSteamLoginFailure, const char *username ) { OnDisconnectFromServer( eSteamLoginFailure ); }
+	virtual void StartLoadingScreenForCommand(const char* command);
+	virtual void StartLoadingScreenForKeyValues(KeyValues* keyValues);
+
+	// Xbox 360
+	virtual void ShowMessageDialog(const uint nType, vgui::Panel* pOwner = NULL);
+	virtual void ShowMessageDialog(const char* messageID, const char* titleID);
+
+	virtual void CreateCommandMsgBox(const char* pszTitle, const char* pszMessage, bool showOk = true, bool showCancel = false, const char* okCommand = NULL, const char* cancelCommand = NULL, const char* closedCommand = NULL, const char* pszLegend = NULL);
+	virtual void CreateCommandMsgBoxInSlot(ECommandMsgBoxSlot slot, const char* pszTitle, const char* pszMessage, bool showOk = true, bool showCancel = false, const char* okCommand = NULL, const char* cancelCommand = NULL, const char* closedCommand = NULL, const char* pszLegend = NULL);
+
+	// CSGO backports to hl2go
+	virtual void RestoreTopLevelMenu();
 
 	// progress
+	virtual bool UpdateProgressBar(float progress, const char* statusText, bool showDialog = true);
+	virtual bool UpdateSecondaryProgressBar(float progress, const wchar_t* desc);
 	virtual bool UpdateProgressBar(float progress, const char *statusText);
 	// Shows progress desc, returns previous setting... (used with custom progress bars )
 	virtual bool SetShowProgressText( bool show );
@@ -97,13 +111,13 @@ private:
 	void SendConnectedToGameMessage();
 
 	virtual void StartProgressBar();
-	virtual bool ContinueProgressBar(float progressFraction);
+	virtual bool ContinueProgressBar(float progressFraction, bool showDialog = true);
 	virtual void StopProgressBar(bool bError, const char *failureReason, const char *extendedReason = NULL);
-	virtual bool SetProgressBarStatusText(const char *statusText);
+	virtual bool SetProgressBarStatusText(const char* statusText, bool showDialog = true);
 
 	//!! these functions currently not implemented
 	virtual void SetSecondaryProgressBar(float progress /* range [0..1] */);
-	virtual void SetSecondaryProgressBarText(const char *statusText);
+	virtual void SetSecondaryProgressBarText(const wchar_t* desc);
 
 	bool FindPlatformDirectory(char *platformDir, int bufferSize);
 	void GetUpdateVersion( char *pszProd, char *pszVer);

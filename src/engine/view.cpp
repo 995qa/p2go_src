@@ -158,7 +158,9 @@ void V_RenderVGuiOnly( void )
 
 	CMatRenderContextPtr pRenderContext;
 	pRenderContext.GetFrom( materials );
+#if defined( INCLUDE_SCALEFORM )
 	pRenderContext->RenderScaleformSlot(SF_RESERVED_BEGINFRAME_SLOT);
+#endif
 	pRenderContext.SafeRelease();
 
 	EngineVGui()->Simulate();
@@ -174,7 +176,9 @@ void V_RenderVGuiOnly( void )
 	g_EngineRenderer->FrameEnd( );
 
 	pRenderContext.GetFrom( materials );
+#if defined( INCLUDE_SCALEFORM )
 	pRenderContext->RenderScaleformSlot(SF_RESERVED_ENDFRAME_SLOT);
+#endif
 	pRenderContext.SafeRelease();
 
 	materials->EndFrame();

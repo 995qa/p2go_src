@@ -19,7 +19,7 @@ typedef enum
 } LegAnimType_t;
 
 
-#ifdef CSTRIKE15
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 enum PlayerAnimEvent_t
 {
 	PLAYERANIMEVENT_FIRE_GUN_PRIMARY=0,
@@ -73,7 +73,7 @@ public:
 
 	virtual void SetForceAimYaw( bool bForce ) = 0;
 
-#ifdef CSTRIKE15
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	// This is called by both the client and the server in the same way to trigger events for
 	// players firing, jumping, throwing grenades, etc.
 	virtual void DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 ) = 0;

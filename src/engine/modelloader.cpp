@@ -2796,7 +2796,7 @@ void Mod_LoadCubemapSamples( void )
 //-----------------------------------------------------------------------------
 void Mod_LoadSimpleWorldModel( const char *pMapBaseName )
 {
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 	// We only load the world imposter models for specific maps on cstrike15
 	if( !( V_stristr( pMapBaseName, "de_lake" ) ||
 		   V_stristr( pMapBaseName, "de_stmarc" ) ||
@@ -4228,7 +4228,7 @@ model_t	*CModelLoader::LoadModel( model_t *mod, REFERENCETYPE *pReferencetype )
 				// PORTAL2: we aren't using per-map excludes, we just need a few textures excluded in SP
 				if ( V_stristr( m_szBaseName, "sp_" ) )
 				{
-					v_snprintf( szExcludePath, sizeof( szExcludePath ), "//MOD/maps/sp_exclude.lst" );
+					V_snprintf( szExcludePath, sizeof( szExcludePath ), "//MOD/maps/sp_exclude.lst" );
 				}
 #else
 				char szExcludePath[MAX_PATH];

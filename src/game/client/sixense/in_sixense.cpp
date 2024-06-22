@@ -1065,7 +1065,7 @@ void SixenseInput::SetOneToOneMode( bool bOnOrOff )
 		m_bIs1to1ModeLocked = true;
 
 		// Start glowing
-		m_nGlowIndex = g_GlowObjectManager.RegisterGlowObject( GetHeldObject(), glowColor, 0.25f, GET_ACTIVE_SPLITSCREEN_SLOT() );
+		m_nGlowIndex = GlowObjectManager().RegisterGlowObject( GetHeldObject(), glowColor, 0.25f, GET_ACTIVE_SPLITSCREEN_SLOT() );
 
 		if ( !sixense_dist_one_to_one_enabled.GetInt() )
 		{
@@ -1086,7 +1086,7 @@ void SixenseInput::SetOneToOneMode( bool bOnOrOff )
 		// Stop glowing
 		if ( m_nGlowIndex != -1 )
 		{
-			g_GlowObjectManager.UnregisterGlowObject( m_nGlowIndex );
+			GlowObjectManager().UnregisterGlowObject( m_nGlowIndex );
 			m_nGlowIndex = -1;
 		}
 

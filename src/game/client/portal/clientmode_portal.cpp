@@ -14,8 +14,6 @@
 #include "clientmode_portal.h"
 #include "usermessages.h"
 #include "prediction.h"
-#include "portal2/vgui/portalclientscoreboard.h"
-#include "portal2/vgui/surveypanel.h"
 #include "hud_macros.h"
 #include "radialmenu.h"
 #include "glow_outline_effect.h"
@@ -24,13 +22,18 @@
 #include "radialmenu.h"
 #include "fmtstr.h"
 #include "ivieweffects.h"
-
+#include "portal2_usermessages.pb.h"
+#if 0
+#include "portal2/vgui/portalclientscoreboard.h"
+#include "portal2/vgui/surveypanel.h"
+#endif
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 // default FOV for HL2
 ConVar default_fov( "default_fov", "75", FCVAR_CHEAT );
 ConVar fov_desired( "fov_desired", "75", FCVAR_ARCHIVE | FCVAR_USERINFO, "Sets the base field-of-view.", true, 75.0, true, 90.0 );
+
 extern ConVar hide_gun_when_holding;
 extern ConVar v_viewmodel_fov;
 
@@ -41,7 +44,6 @@ ConVar cl_finale_completed( "cl_finale_completed", "0", FCVAR_HIDDEN );
 #define DEATH_CC_LOOKUP_FILENAME "materials/correction/cc_death.raw"
 #define DEATH_CC_FADE_SPEED 0.05f
 
-
 // The current client mode. Always ClientModeNormal in HL.
 static IClientMode *g_pClientMode[ MAX_SPLITSCREEN_PLAYERS ];
 IClientMode *GetClientMode()
@@ -49,12 +51,15 @@ IClientMode *GetClientMode()
 	ASSERT_LOCAL_PLAYER_RESOLVABLE();
 	return g_pClientMode[ GET_ACTIVE_SPLITSCREEN_SLOT() ];
 }
+
 //extern EHANDLE g_eKillTarget1;
 //extern EHANDLE g_eKillTarget2;
 
 vgui::HScheme g_hVGuiCombineScheme = 0;
 
 #define SCREEN_FILE		"scripts/vgui_screens.txt"
+
+// TODO(SanyaSho): Move this VOX crap into a different file and reorganize clientmode_portal.cpp!
 
 // Voice data
 void VoxCallback( IConVar *var, const char *oldString, float oldFloat )
@@ -74,7 +79,6 @@ void VoxCallback( IConVar *var, const char *oldString, float oldFloat )
 }
 ConVar voice_vox( "voice_vox", "1", FCVAR_ARCHIVE, "Voice chat uses a vox-style always on", false, 0, true, 1, VoxCallback );
 
-//--------------------------------------------------------------------------------------------------------
 class CVoxManager : public CAutoGameSystem
 {
 public:
@@ -97,9 +101,6 @@ public:
 		}
 	}
 };
-
-
-//--------------------------------------------------------------------------------------------------------
 static CVoxManager s_VoxManager;
 
 //-----------------------------------------------------------------------------
@@ -120,32 +121,63 @@ protected:
 		SetPaintBackgroundEnabled( false );
 	}
 
-	virtual IViewPortPanel *CreatePanelByName( const char *szPanelName );
+	virtual void CreateDefaultPanels( void ) { /* don't create any panels yet*/ };
 };
 
-IViewPortPanel* CHudViewport::CreatePanelByName( const char *szPanelName )
+// SanyaSho: add new viewport panel from latest DOD port code
+class PortalViewport : public CBaseViewport
 {
-	IViewPortPanel* newpanel = NULL;
+private:
+	DECLARE_CLASS_SIMPLE( PortalViewport, CBaseViewport );
 
-	if ( Q_strcmp( PANEL_SCOREBOARD, szPanelName) == 0 )
-	{
-		newpanel = new CPortalClientScoreBoardDialog( this );
-		return newpanel;
-	}
-	else if ( Q_strcmp( PANEL_SURVEY, szPanelName) == 0 )
-	{
-		newpanel = new CSurveyPanel( this );
-		return newpanel;
-	}
-	/*else if ( Q_strcmp(PANEL_INFO, szPanelName) == 0 )
-	{
-		newpanel = new CHL2MPTextWindow( this );
-		return newpanel;
-	}*/
+public:
 
-	return BaseClass::CreatePanelByName( szPanelName ); 
+	virtual IViewPortPanel *CreatePanelByName( const char *szPanelName );
+	virtual void CreateDefaultPanels( void );
+
+	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+
+	// Never show the background
+	virtual void ShowBackGround( bool bShow ) {}
+};
+
+IViewPortPanel *PortalViewport::CreatePanelByName( const char *szPanelName )
+{
+	IViewPortPanel *newpanel = NULL;
+
+	if( FStrEq( szPanelName, PANEL_SCOREBOARD ) )
+	{
+		//newpanel = new CPortalClientScoreBoardDialog( this );
+	}
+	else if( FStrEq( szPanelName, PANEL_SURVEY ) )
+	{
+		//newpanel = new CSurveyPanel( this );
+	}
+	else
+	{
+		// create a generic base panel, don't add twice
+		newpanel = BaseClass::CreatePanelByName( szPanelName );
+	}
+
+	return newpanel;
 }
 
+void PortalViewport::CreateDefaultPanels( void )
+{
+	AddNewPanel( CreatePanelByName( PANEL_SCOREBOARD ), "PANEL_SCOREBOARD" );
+	AddNewPanel( CreatePanelByName( PANEL_SURVEY ), "PANEL_SURVEY" );
+
+	BaseClass::CreateDefaultPanels();
+}
+
+void PortalViewport::ApplySchemeSettings( vgui::IScheme *pScheme )
+{
+	BaseClass::ApplySchemeSettings( pScheme );
+
+	GetHud().InitColors( pScheme );
+
+	SetPaintBackgroundEnabled( false );
+}
 
 class CHLModeManager : public IVModeManager
 {
@@ -176,6 +208,7 @@ void CHLModeManager::Init( void )
 		ACTIVE_SPLITSCREEN_PLAYER_GUARD( i );
 		g_pClientMode[ i ] = GetClientModeNormal();
 	}
+
 	PanelMetaClassMgr()->LoadMetaClassDefinitionFile( SCREEN_FILE );
 }
 
@@ -204,7 +237,7 @@ void CHLModeManager::LevelInit( const char *newmap )
 		g_bForceCLPredictOff = false;
 	}
 
-	g_nKillCamMode		= OBS_MODE_NONE;
+	g_nKillCamMode = OBS_MODE_NONE;
 }
 
 void CHLModeManager::LevelShutdown( void )
@@ -217,10 +250,11 @@ void CHLModeManager::LevelShutdown( void )
 }
 
 //--------------------------------------------------------------------------------------------------------
-static void __MsgFunc_TransitionFade( bf_read &msg )
+bool __MsgFunc_TransitionFade( const CUsrMsg_TransitionFade &msg )
 {
-	float flFadeTime = msg.ReadFloat();
+	float flFadeTime = msg.fadetime();
 	GetClientModePortalNormal()->StartTransitionFade( flFadeTime );
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -241,32 +275,39 @@ ClientModePortalNormal::~ClientModePortalNormal()
 
 void ClientModePortalNormal::Init()
 {
-	BaseClass::Init();
-
 	HOOK_MESSAGE( TransitionFade );
 
 	InitRadialMenuHudElement();
+
+	BaseClass::Init();
 }
 
 void ClientModePortalNormal::InitViewport()
 {
-	m_pViewport = new CHudViewport();
+	m_pViewport = new PortalViewport();
 	m_pViewport->Start( gameuifuncs, gameeventmanager );
 }
 
-CEG_NOINLINE void ClientModePortalNormal::LevelInit( const char *newmap )
+void ClientModePortalNormal::InitViewport( bool bOnlyBaseClass )
 {
-	CEG_PROTECT_VIRTUAL_FUNCTION( ClientModePortalNormal_LevelInit );
+	BaseClass::InitViewport();
 
+	if( !bOnlyBaseClass )
+	{
+		m_pViewport = new PortalViewport();
+		m_pViewport->Start( gameuifuncs, gameeventmanager );
+	}
+}
+
+void ClientModePortalNormal::LevelInit( const char *newmap )
+{
 	// Load color correction lookup for the death effect
-	/*
 	m_CCDeathHandle = g_pColorCorrectionMgr->AddColorCorrection( DEATH_CC_LOOKUP_FILENAME );
 	if ( m_CCDeathHandle != INVALID_CLIENT_CCHANDLE )
 	{
 		g_pColorCorrectionMgr->SetColorCorrectionWeight( m_CCDeathHandle, 0.0f );
 	}
 	m_flDeathCCWeight = 0.0f;
-	*/
 
 	m_hCurrentColorCorrection = NULL;
 		
@@ -277,9 +318,18 @@ CEG_NOINLINE void ClientModePortalNormal::LevelInit( const char *newmap )
 
 void ClientModePortalNormal::LevelShutdown( void )
 {
-	// g_pColorCorrectionMgr->RemoveColorCorrection( m_CCDeathHandle );
-	// m_CCDeathHandle = INVALID_CLIENT_CCHANDLE;
-	return BaseClass::LevelShutdown();
+	g_pColorCorrectionMgr->RemoveColorCorrection( m_CCDeathHandle );
+	m_CCDeathHandle = INVALID_CLIENT_CCHANDLE;
+
+	// Unregister all glow boxes here otherwise they would leak
+	GlowObjectManager().UnregisterAllGlowBoxes();
+
+	// Remove any lingering debug overlays, since it's possible they won't get cleaned up automatically later.
+	// This is in response to anecdotal reports that players can 'mark' the world with showimpacts or grenade trajectories,
+	// then use them to their advantage on subsequent games played immediately on the same map.
+	debugoverlay->ClearAllOverlays();
+
+	BaseClass::LevelShutdown();
 }
 
 void ClientModePortalNormal::OnColorCorrectionWeightsReset( void )
@@ -288,7 +338,6 @@ void ClientModePortalNormal::OnColorCorrectionWeightsReset( void )
 
 	C_Portal_Player *pPlayer = C_Portal_Player::GetLocalPortalPlayer();
 	
-	/*
 	// if the player is dead, fade in the death color correction
 	if ( m_CCDeathHandle != INVALID_CLIENT_CCHANDLE && ( pPlayer != NULL ) )
 	{
@@ -317,7 +366,6 @@ void ClientModePortalNormal::OnColorCorrectionWeightsReset( void )
 
 	// Only blend between environmental color corrections if there is no death-induced color correction
 	if ( m_flDeathCCWeight == 0.0f )
-	*/
 	{
 		C_ColorCorrection *pNewColorCorrection = pPlayer ? pPlayer->GetActiveColorCorrection() : NULL;
 		C_ColorCorrection *pOldColorCorrection = m_hCurrentColorCorrection;
@@ -335,6 +383,16 @@ void ClientModePortalNormal::OnColorCorrectionWeightsReset( void )
 			m_hCurrentColorCorrection = pNewColorCorrection;
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void ClientModePortalNormal::Update()
+{
+	BaseClass::Update();
+
+	UpdatePostProcessingEffects();
 }
 
 //-----------------------------------------------------------------------------
@@ -362,8 +420,6 @@ void ClientModePortalNormal::SetBlurFade( float scale )
 //--------------------------------------------------------------------------------------------------------
 void ClientModePortalNormal::StartTransitionFade( float flFadeTime )
 {
-	STEAMWORKS_SELFCHECK(); 
-
 	// Screen fade to black
 	ScreenFade_t sf;
 	memset( &sf, 0, sizeof( sf ) );
@@ -388,7 +444,7 @@ void ClientModePortalNormal::DoPostScreenSpaceEffects( const CViewSetup *pSetup 
 
 	MDLCACHE_CRITICAL_SECTION();
 
-	g_GlowObjectManager.RenderGlowEffects( pSetup, GetSplitScreenPlayerSlot() );
+	GlowObjectManager().RenderGlowEffects( pSetup, GetSplitScreenPlayerSlot() );
 
 	if ( m_BlurFadeScale )
 	{
@@ -452,27 +508,55 @@ private:
 	{
 		SetAsFullscreenViewportInterface();
 	}
-};
 
-class ClientModePortalNormalFullscreen : public	ClientModePortalNormal
-{
-	DECLARE_CLASS_SIMPLE( ClientModePortalNormalFullscreen, ClientModePortalNormal );
-public:
-	virtual void InitViewport()
+	virtual void SetUpPopup( void )
 	{
-		// Skip over BaseClass!!!
-		BaseClass::ClientModeShared::InitViewport();
-		m_pViewport = new FullscreenPortalViewport();
-		m_pViewport->Start( gameuifuncs, gameeventmanager );
+	}
+
+	virtual void ApplySchemeSettings( vgui::IScheme *pScheme )
+	{
+		BaseClass::ApplySchemeSettings( pScheme );
+
+		SetMouseInputEnabled( false );
+		SetKeyBoardInputEnabled( false );
 	}
 };
 
-//--------------------------------------------------------------------------------------------------------
-static ClientModePortalNormalFullscreen g_FullscreenClientMode;
-IClientMode *GetFullscreenClientMode( void )
+class ClientModePortalFullscreen : public ClientModePortalNormal
 {
-	return &g_FullscreenClientMode;
+	DECLARE_CLASS_SIMPLE( ClientModePortalFullscreen, ClientModePortalNormal );
+
+public:
+	virtual void InitViewport()
+	{
+		// dgoodenough - fix up GCC shortcoming.
+		// PS3_BUILDFIX
+		// FIXME - there may be a way to do this more elegantly under GCC, but for now,
+		// just write a second ClientModeCSNormal::InitViewport(); that takes a bool
+		// parameter that allows skipping the init on the immediate BaseClass
+		// Skip over BaseClass!!!
+		//BaseClass::BaseClass::InitViewport();
+		BaseClass::InitViewport( true );
+		m_pViewport = new FullscreenPortalViewport();
+		m_pViewport->Start( gameuifuncs, gameeventmanager );
+	}
+
+	virtual void Init( void )
+	{
+		BaseClass::Init();
+	}
+
+	virtual void FireGameEvent( IGameEvent *event )
+	{
+		BaseClass::FireGameEvent( event );
+	}
+} g_ClientModeFullscreen;
+
+IClientMode *GetFullscreenClientMode()
+{
+	return &g_ClientModeFullscreen;
 }
+
 
 ClientModePortalNormal* GetClientModePortalNormal()
 {
@@ -481,7 +565,5 @@ ClientModePortalNormal* GetClientModePortalNormal()
 	return static_cast< ClientModePortalNormal* >( GetClientModeNormal() );
 }
 
-
 static CHLModeManager g_HLModeManager;
 IVModeManager *modemanager = &g_HLModeManager;
-

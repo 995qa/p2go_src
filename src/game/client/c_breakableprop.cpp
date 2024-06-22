@@ -14,6 +14,10 @@
 #include "c_breakableprop.h"
 #include "view.h"
 
+#if defined( PORTAL2 )
+#include "portal_grabcontroller_shared.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 

@@ -31,10 +31,11 @@
 #include <vgui_controls/EditablePanel.h>
 #include "vgui_int.h"
 #include "cdll_client_int.h"
-#include "c_cs_playerresource.h"
-#include "c_cs_player.h"
-#include "cs_gamerules.h"
-#include "weapon_c4.h"
+#include "iinput.h"
+//#include "c_cs_playerresource.h"
+//#include "c_cs_player.h"
+//#include "cs_gamerules.h"
+//#include "weapon_c4.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -128,81 +129,14 @@ int GetSpectatorTarget( void )
 	}
 }
 
-// this is meant to be called on a bot character
-// note: This is quite similar to CCSPlayer::CanControlBot.  This is here since calling into the CCSPlayer was unrealistic in some code paths
-// TODO: Fix this so it ACTUALLY calls CanControlBot, there are bugs otherwise (and will be more) do to them being different functions
-bool CanControlSpectatedTarget( void )
-{
-	C_CSPlayer * player = ( C_CSPlayer* )C_BasePlayer::GetLocalPlayer();
-
-    if ( !player || ( player->GetPendingTeamNumber() != player->GetTeamNumber() ) )
-        return false;
-
-	C_CSPlayer * target = dynamic_cast<C_CSPlayer*>(player->GetObserverTarget());
-	if ( !target )
-		return false;
-
-	if ( !target->IsAlive() )
-		return false;
-		
-	if ( !target->IsOtherSameTeam( GetLocalPlayerTeam() ) || target->IsOtherEnemy( player ) )
-		return false;
-
-	C_CS_PlayerResource *pCSPR = ( C_CS_PlayerResource* )GameResources();
-	int entIndex = target->entindex();
-		
-	bool targetIsFakePlayer = pCSPR->IsFakePlayer( entIndex );
-	if ( !targetIsFakePlayer )
-		return false;
-
-	AssertMsg(pCSPR, "Expected PlayerResources to exsist");
-	AssertMsg(entIndex > 0 && entIndex <= MAX_PLAYERS, "Bad entity index for player");
-
-
-	// need to duplicate some of the checks that CanControlBot already does so they match up....	
-	// Can't control a bot that is setting a bomb
-	const CC4 *pC4 = dynamic_cast<CC4*>( target->GetActiveWeapon() );
-	if ( pC4 && pC4->m_bStartedArming )
-		return false;
-
-	if ( CSGameRules() && CSGameRules()->IsRoundOver() ) 
-		return false;
-
-	if ( CSGameRules() && CSGameRules()->IsFreezePeriod() )
-		return false;
-
-	return  true;	
-}
-
-bool CanSeeSpectatorOnlyTools( void )
-{
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	if ( !pPlayer )
-		return false;
-
-	if ( pPlayer->IsHLTV() )
-		return true;
-
-	if ( pPlayer->IsSpectator() )
-	{
-		if ( sv_competitive_official_5v5.GetBool() )
-			return true;
-
-		if ( CSGameRules() && CSGameRules()->IsQueuedMatchmaking() )
-			return true;
-	}
-		
-	return false;
-}
-
 bool CanToggleXRayView( void )
 {
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 	if ( !pPlayer )
 		return false;
 
-	if ( CanSeeSpectatorOnlyTools() )
-		return true;
+	//if ( CanSeeSpectatorOnlyTools() )
+	//	return true;
 
 	return false;
 }
@@ -1037,7 +971,6 @@ static unsigned char ComputeDistanceFade( C_BaseEntity *pEntity, float flMinDist
 	return clamp( nAlpha, 0, 255 );
 }
 
-
 //-----------------------------------------------------------------------------
 // Compute fade amount
 //-----------------------------------------------------------------------------
@@ -1407,7 +1340,7 @@ void UTIL_GetClientStatusText( char *buffer, int nSize )
 	if ( !buffer || nSize==0 ) {return;}
 	buffer[0] = 0;
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	extern float g_flReadyToCheckForPCBootInvite;
 	bool bStartupFinished = g_flReadyToCheckForPCBootInvite && ( ( Plat_FloatTime() - g_flReadyToCheckForPCBootInvite ) > 1.5f );
 	if ( bStartupFinished )

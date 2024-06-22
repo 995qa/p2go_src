@@ -3,7 +3,7 @@
 // Purpose: 
 //
 //=============================================================================
-
+#include <cbase.h>
 #include "CustomTabExplanationDialog.h"
 #include "BasePanel.h"
 #include "convar.h"

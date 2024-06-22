@@ -37,7 +37,7 @@
 
 
 #include "igamemovement.h"
-#include "c_weapon_paintgun.h"
+#include "paint/c_weapon_paintgun.h"
 #include "c_weapon_portalgun.h"
 
 #include "cam_thirdperson.h"
@@ -416,7 +416,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_Portal_Player, DT_Portal_Player, CPortal_Player)
 
 	RecvPropBool( RECVINFO( m_bPotatos ) ),
 
-	RecvPropDataTable( RECVINFO_DT( m_StatsThisLevel ), 0, &REFERENCE_RECV_TABLE( DT_PortalPlayerStatistics ) ),
+//	RecvPropDataTable( RECVINFO_DT( m_StatsThisLevel ), 0, &REFERENCE_RECV_TABLE( DT_PortalPlayerStatistics ) ),
 
 END_RECV_TABLE()
 
@@ -602,7 +602,7 @@ void C_Portal_Player::UpdateOnRemove( void )
 		m_pHeldEntityThirdpersonClone = NULL;
 	}
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	m_Inventory.RemoveListener( this );
 
 	RemoveClientsideWearables();
@@ -1733,6 +1733,7 @@ int C_Portal_Player::DrawModel( int flags, const RenderableInstance_t &instance 
 		m_nLastFrameDrawn = gpGlobals->framecount;
 		m_nLastDrawnStudioFlags = flags;
 	}
+
 	return BaseClass::DrawModel( flags, instance );
 }
 
@@ -1888,8 +1889,9 @@ ShadowType_t C_Portal_Player::ShadowCastType( void )
 
 bool C_Portal_Player::ShouldDraw( void )
 {
-	if ( !BaseClass::ShouldDraw() )
-		return false;
+	// HACK: For some reason playermodel is not visible through portals
+	//if ( !BaseClass::ShouldDraw() )
+	//	return false;
 
 	if ( !IsAlive() )
 	{
@@ -2252,7 +2254,7 @@ void C_Portal_Player::OnDataChanged( DataUpdateType_t type )
 	{
 		if ( m_bWasAlivePreUpdate && !IsAlive() )
 		{
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 			RemoveClientsideWearables();
 #endif
 		}
@@ -2448,7 +2450,7 @@ Vector C_Portal_Player::GetAutoaimVector( float flDelta )
 {
 	// Never autoaim a predicted weapon (for now)
 	Vector	forward;
-	AngleVectors( EyeAngles() + m_Local.m_vecPunchAngle, &forward );
+	AngleVectors( EyeAngles() + m_Local.m_viewPunchAngle, &forward );
 	return	forward;
 }
 
@@ -2668,12 +2670,10 @@ void C_Portal_Player::CreatePingPointer( Vector vecDestintaion )
 	}
 }
 
-CEG_NOINLINE void C_Portal_Player::DestroyPingPointer( void )
+void C_Portal_Player::DestroyPingPointer( void )
 {
 	if ( m_PointLaser )
 	{
-		CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_DestroyPingPointer )
-
 		// stop the effect
 		m_PointLaser->StopEmission( false, true, false );
 		m_PointLaser = NULL;
@@ -2971,7 +2971,7 @@ void C_Portal_Player::CalcPortalView( Vector &eyeOrigin, QAngle &eyeAngles, floa
 		}
 	}
 
-	VectorAdd( eyeAngles, m_Local.m_vecPunchAngle, eyeAngles );
+	VectorAdd( eyeAngles, m_Local.m_viewPunchAngle, eyeAngles );
 
 	if ( !prediction->InPrediction() )
 	{
@@ -3143,7 +3143,7 @@ static ConVar portal_deathcam_gib_pitch( "portal_deathcam_gib_pitch", "25.f", FC
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-CEG_NOINLINE void C_Portal_Player::TurnOnTauntCam( void )
+void C_Portal_Player::TurnOnTauntCam( void )
 {
 	if ( !IsLocalPlayer( this ) )
 		return;
@@ -3177,8 +3177,6 @@ CEG_NOINLINE void C_Portal_Player::TurnOnTauntCam( void )
 		m_TauntCameraData.m_flLag = -1.0f;
 		m_TauntCameraData.m_vecHullMin.Init( -1.0f, -1.0f, -1.0f );
 		m_TauntCameraData.m_vecHullMax.Init( 1.0f, 1.0f, 1.0f );
-
-		CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_TurnOnTauntCam )
 
 		QAngle vecCameraOffset( m_vecRemoteViewAngles.x, m_vecRemoteViewAngles.y, flDist );
 		input->CAM_ToThirdPerson();
@@ -3237,8 +3235,6 @@ void C_Portal_Player::TurnOffTauntCam( void )
 		return;
 
 	ACTIVE_SPLITSCREEN_PLAYER_GUARD_ENT( this );
-
-	CEG_PROTECT_MEMBER_FUNCTION( C_Portal_Player_TurnOffTauntCam )
 
 	if ( m_bTauntRemoteView )
 	{
@@ -3392,7 +3388,6 @@ void C_Portal_Player::TauntCamInterpolation()
 			}
 
 			m_TauntCameraData.m_flYaw = flBestYaw;
-
 			float flRotMultiplier = m_bFinishingTaunt ? cl_taunt_finish_speed.GetFloat() : 0.5f;
 			vecCamOffset[ PITCH ] = ApproachAngle( m_flTauntCamTargetPitch, vecCamOffset[ PITCH ], flSpeed * flRotMultiplier );
 			vecCamOffset[ YAW ] = ApproachAngle( m_flTauntCamTargetYaw, vecCamOffset[ YAW ], flSpeed * flRotMultiplier );
@@ -3667,6 +3662,19 @@ void C_Portal_Player::ApplyPredictedPortalTeleportation( C_Portal_Base2D *pEnter
 	if( pGhost )
 	{
 		C_PortalGhostRenderable::CreateInversion( pGhost, pEnteredPortal, gpGlobals->curtime );
+	}
+	
+	// p2asw: This fixes an issue where the viewmodel's last facing doesn't reorient in multiplayer when teleporting
+	if ( prediction->IsFirstTimePredicted() )
+	{
+		for ( int i = 0; i < MAX_VIEWMODELS; i++ )
+		{
+			CBaseViewModel *pViewModel = GetViewModel( i );
+			if ( !pViewModel )
+				continue;
+
+			pViewModel->m_vecLastFacing = pEnteredPortal->m_matrixThisToLinked.ApplyRotation( pViewModel->m_vecLastFacing );
+		}
 	}
 
 	//Warning( "C_Portal_Player::ApplyPredictedPortalTeleportation() ent:%i slot:%i\n", entindex(), engine->GetActiveSplitScreenPlayerSlot() );
@@ -3979,7 +3987,7 @@ void C_Portal_Player::ClientPlayerRespawn()
 	// clear animation state
 	m_PlayerAnimState->ClearAnimationState();
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 	UpdateInventory();
 	UpdateClientsideWearables();
 #endif
@@ -3995,7 +4003,7 @@ int C_Portal_Player::GetDefaultFOV( void ) const
 }
 
 
-#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR )
+#if !defined( NO_STEAM ) && !defined( NO_STEAM_GAMECOORDINATOR ) && 0
 
 //-----------------------------------------------------------------------------
 // Purpose: Request this player's inventories from the steam backend

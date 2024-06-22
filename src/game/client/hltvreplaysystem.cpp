@@ -2,12 +2,17 @@
 #include "cbase.h"
 #include "hltvreplaysystem.h"
 #include "hltvcamera.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cs_gamerules.h"
+#endif
 #include "iviewrender.h"
 #include "engine/IEngineSound.h"
 #include "netmessages.h"
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 #include "cstrike15/c_cs_player.h"
+#endif
 #include "ihltv.h"
+#include "steam/steam_api.h"
 
 ConVar snd_deathcam_replay_mix( "snd_deathcam_replay_mix", "0", 0, "When set to non-0, client switches to DeathCam_Replay_Mix mixgroup during deathcam replay" );
 ConVar spec_replay_review_sound( "spec_replay_review_sound", "1", FCVAR_CLIENTDLL, "When set to non-0, a sound effect is played during Killer Replay" );
@@ -23,7 +28,9 @@ ConVar spec_replay_autostart( "spec_replay_autostart", "1", FCVAR_CLIENTDLL | FC
 ConVar spec_replay_autostart_delay( "spec_replay_autostart_delay", "1.5", FCVAR_CLIENTDLL, "Time in freeze panel before switching to Killer Replay automatically" ); // original tuning: 2.4; MattWood 12/3/15: 1.5
 ConVar spec_replay_victim_pov( "spec_replay_victim_pov", "0", FCVAR_CLIENTDLL, "Killer Replay - replay from victim's point of view (1); the default is killer's (0). Experimental." );
 CHltvReplaySystem g_HltvReplaySystem;
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 extern void CS_FreezePanel_OnHltvReplayButtonStateChanged();
+#endif
 
 CHltvReplaySystem::CHltvReplaySystem()
 {
@@ -62,7 +69,7 @@ int CL_GetHltvReplayDelay() { return g_HltvReplaySystem.GetHltvReplayDelay(); }
 void CHltvReplaySystem::EmitTimeJump()
 {
 	GetHud().OnTimeJump();
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	C_BasePlayer::OnTimeJumpAllPlayers();
 #endif
 	//GetHud().UpdateHud( true ); // may call SFUniqueAlerts::ShowHltvReplayAlertPanel
@@ -102,11 +109,13 @@ void CHltvReplaySystem::OnHltvReplay( const CSVCMsg_HltvReplay  &msg )
 					pPlayer->EmitSound( "Deathcam.Review_End" );
 			}
 			engine->SetMixLayerLevel( s_nReplayLayerIndex, 0.0f );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) // SanyaSho: don't print junk to the console
 			IGameEvent *pEvent = gameeventmanager->CreateEvent( "hide_freezepanel" );
 			if ( pEvent )
 			{
 				gameeventmanager->FireEventClientSide( pEvent );
 			}
+#endif
 			if ( snd_deathcam_replay_mix.GetBool() )
 			{
 				ConVar *pSoundmixer = ( ConVar * )cvar->FindVar( "snd_soundmixer" );
@@ -197,7 +206,9 @@ void CHltvReplaySystem::OnHltvReplayTick()
 	m_bWaitingForHltvReplayTick = false;
 	m_nHltvReplayBeginTick = gpGlobals->tickcount;
 	Update();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	CS_FreezePanel_OnHltvReplayButtonStateChanged();
+#endif
 }
 
 
@@ -323,7 +334,9 @@ void CHltvReplaySystem::Update()
 	bool bHltvReplayButtonTimeOutChanged = UpdateHltvReplayButtonTimeOutState();
 	if ( bLocalPlayerChanged || bHltvReplayButtonTimeOutChanged )
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		CS_FreezePanel_OnHltvReplayButtonStateChanged();
+#endif
 		if ( m_LocalPlayer.m_bLastSeenAlive && !m_nHltvReplayDelay ) // || m_bHltvReplayButtonTimedOut would cancel pending replay start, but we already don't allow replays right before time-out events
 			CancelDelayedHltvReplay(); // we can't have a replay if we see the player alive in real-time timeline
 	}
@@ -625,7 +638,9 @@ void CHltvReplaySystem::CancelDelayedHltvReplay()
 	if ( m_DelayedReplay.IsValid() )
 	{
 		m_DelayedReplay.Stop();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		CS_FreezePanel_OnHltvReplayButtonStateChanged();
+#endif
 	}
 }
 
@@ -763,6 +778,7 @@ void CHltvReplaySystem::OnPlayerDeath( IGameEvent *event )
 			}
 		}
 	}
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	else if (
 		iPlayerIndexKiller <= MAX_PLAYERS // the killer must be an actual player (not e.g. a bomb) for replay to make sense
 		&& !m_LocalPlayer.m_bLastSeenAlive && spec_replay_autostart.GetBool()
@@ -790,6 +806,7 @@ void CHltvReplaySystem::OnPlayerDeath( IGameEvent *event )
 			}
 		}
 	}
+#endif
 
 	if ( isLocalVictim || m_DelayedReplay.nRequest >= 0 )
 	{// Some interesting event happened, and we are not replaying anything else. Store some stats that may or may not be useful for later replay
@@ -827,7 +844,9 @@ bool CHltvReplaySystem::PrepareHltvReplayCountdown()
 			}
 			// DevMsg( "%.2f Replay: starting to fade out\n", gpGlobals->curtime ); // replayfade
 		}
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		CS_FreezePanel_OnHltvReplayButtonStateChanged();
+#endif
 	}
 	return bCountdownStarted;
 }
@@ -853,12 +872,17 @@ void CHltvReplaySystem::CacheRagdollBones()
 	PurgeRagdollBoneCache();
 	if ( !spec_replay_cache_ragdolls.GetBool() )
 		return;
+	
 	C_BaseEntityIterator iterator;
 	C_BaseEntity *pEnt;
 	int nRagdollsCached = 0;
 	while ( ( pEnt = iterator.Next() ) != NULL )
 	{
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		if ( C_CSRagdoll * pRagdoll = dynamic_cast< C_CSRagdoll * >( pEnt ) )
+#else
+		if ( C_ClientRagdoll * pRagdoll = dynamic_cast< C_ClientRagdoll * >( pEnt ) )
+#endif
 		{
 			if ( int nEntIndex = pRagdoll->entindex() )
 			{
@@ -962,6 +986,7 @@ float CHltvReplaySystem::GetReplayMessageTime()
 {
 	static ConVarRef spec_replay_message_time( "spec_replay_message_time" );
 	float flReplayMessageTime = spec_replay_message_time.GetFloat();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( CCSGameRules* pRules = CSGameRules() )
 	{
 		if ( pRules->m_iRoundWinStatus != WINNER_NONE )
@@ -969,6 +994,7 @@ float CHltvReplaySystem::GetReplayMessageTime()
 			flReplayMessageTime = spec_replay_autostart_delay.GetFloat();
 		}
 	}
+#endif
 	return flReplayMessageTime;
 }
 
@@ -977,6 +1003,7 @@ bool CHltvReplaySystem::UpdateHltvReplayButtonTimeOutState()
 {
 	bool bTimedOut = false;
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	if ( CCSGameRules* pRules = CSGameRules() )
 	{
 		if ( pRules->IsWarmupPeriod() && !pRules->IsWarmupPeriodPaused() )
@@ -992,6 +1019,7 @@ bool CHltvReplaySystem::UpdateHltvReplayButtonTimeOutState()
 			}
 		}
 	}
+#endif
 
 	bool bStateUpdated = ( m_bHltvReplayButtonTimedOut != bTimedOut );
 	m_bHltvReplayButtonTimedOut = bTimedOut;

@@ -12,14 +12,15 @@
 #include "ammodef.h"
 #include "util_shared.h"
 #include "weapon_parse.h"
-#include "econ_item_view.h"
+//#include "econ_item_view.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 CWeaponDatabase g_WeaponDatabase;
 
-extern void LoadEquipmentData();
+// SanyaSho: Econ stuff
+//extern void LoadEquipmentData();
 
 // The sound categories found in the weapon classname.txt files
 // This needs to match the WeaponSound_t enum in weapon_parse.h
@@ -386,6 +387,7 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 
 const char* FileWeaponInfo_t::GetWorldModel( const CEconItemView* pWepView, int iTeam ) const
 {
+	/*
 	if ( pWepView && pWepView->IsValid() )
 	{
 		const char *pchWorldOverride = pWepView->GetStaticData()->GetEntityOverrideModel();
@@ -397,6 +399,7 @@ const char* FileWeaponInfo_t::GetWorldModel( const CEconItemView* pWepView, int 
 		return pWepView->GetItemDefinition()->GetWorldDisplayModel();
 	}
 	else
+	*/
 	{
 		return szWorldModel;
 	}
@@ -404,6 +407,7 @@ const char* FileWeaponInfo_t::GetWorldModel( const CEconItemView* pWepView, int 
 
 const char* FileWeaponInfo_t::GetViewModel( const CEconItemView* pWepView, int iTeam ) const
 {
+	/*
 	if ( pWepView && pWepView->IsValid() )
 	{
 		const char *pchViewOverride = pWepView->GetStaticData()->GetViewOverrideModel();
@@ -415,6 +419,7 @@ const char* FileWeaponInfo_t::GetViewModel( const CEconItemView* pWepView, int i
 		return pWepView->GetItemDefinition()->GetBasePlayerDisplayModel();
 	}
 	else
+	*/
 	{
 		return szViewModel;
 	}
@@ -422,6 +427,7 @@ const char* FileWeaponInfo_t::GetViewModel( const CEconItemView* pWepView, int i
 
 const char* FileWeaponInfo_t::GetWorldDroppedModel( const CEconItemView* pWepView, int iTeam ) const
 {
+	/*
 	if ( pWepView && pWepView->IsValid() )
 	{
 		const char *pchWorldDroppedModel = pWepView->GetItemDefinition()->GetWorldDroppedModel();
@@ -430,13 +436,14 @@ const char* FileWeaponInfo_t::GetWorldDroppedModel( const CEconItemView* pWepVie
 			return pchWorldDroppedModel;
 		}
 	}
+	*/
 	
 	return szWorldDroppedModel;
 }
 
 const char* FileWeaponInfo_t::GetPrimaryAmmo( const CEconItemView* pWepView ) const
 {
-
+	/*
 	if ( pWepView && pWepView->IsValid() )
 	{
 		// TODO: replace visual data with attributes when attributes support strings.
@@ -447,6 +454,7 @@ const char* FileWeaponInfo_t::GetPrimaryAmmo( const CEconItemView* pWepView ) co
 			return pszString;
 		}
 	}
+	*/
 
 	return szAmmo1;
 }
@@ -454,7 +462,7 @@ const char* FileWeaponInfo_t::GetPrimaryAmmo( const CEconItemView* pWepView ) co
 
 int FileWeaponInfo_t::GetPrimaryAmmoType( const CEconItemView* pWepView ) const
 {
-
+	/*
 	if ( pWepView && pWepView->IsValid() )
 	{
 		// TODO: replace visual data with attributes when attributes support strings.
@@ -465,6 +473,7 @@ int FileWeaponInfo_t::GetPrimaryAmmoType( const CEconItemView* pWepView ) const
 			return GetAmmoDef()->Index( pszString );
 		}
 	}
+	*/
 
 	return iAmmoType;
 }
@@ -553,7 +562,8 @@ bool CWeaponDatabase::LoadManifest()
 		}
 	}
 
-	LoadEquipmentData();
+	// SanyaSho: Econ stuff
+	//LoadEquipmentData();
 
 	return true;
 }

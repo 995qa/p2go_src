@@ -91,7 +91,7 @@ extern void longjmp( jmp_buf, int ) __attribute__((noreturn));
 #include "xbox/xbox_win32stubs.h"
 #endif
 
-#if !defined( _GAMECONSOLE ) && ( defined(GAME_DLL) || defined(CLIENT_DLL) )
+#if !defined( _GAMECONSOLE ) && ( (defined(GAME_DLL) || defined(CLIENT_DLL)) && defined(CSTRIKE15) && defined(CSTRIKE_DLL) )
 	// Protobuf headers interfere with the valve min/max/malloc overrides. so we need to do all
 	// this funky wrapping to make the include happy.
 	#include <tier0/valve_minmax_off.h>

@@ -102,6 +102,62 @@ public:
 
 	// Validates if client profile can set a stat or get awarded an achievement
 	virtual bool AllowClientProfileUpdate( KeyValues *kvUpdate );
+
+	//
+	// CSGO
+	//
+
+	// Defines dedicated server search key
+	virtual KeyValues *DefineDedicatedSearchKeys( KeyValues *pSettings, bool bNeedOfficialServer, int nSearchPass )
+	{
+		return NULL;
+	}
+
+	// Sets the bspname key given a mapgroup
+	virtual void SetBspnameFromMapgroup( KeyValues *pSettings )
+	{
+	}
+
+	virtual KeyValues *ExtendTeamLobbyToGame( KeyValues *pSettings )
+	{
+		KeyValues *pUpdate = KeyValues::FromString(
+				"update",
+				" update { "
+				" system { "
+				" network LIVE "
+				" netFlag #empty#"
+				" } "
+				" options { "
+				" bypasslobby 1"
+				" } "
+				" game {"
+				" } "
+				" members {"
+				" } "
+				" } "
+		);
+
+		// Add in bsp name from map group name
+		const char *pMapGroupName = pSettings->GetString( "game/mapgroupname", NULL );
+		Assert( pMapGroupName );
+		const char *pMapName = pSettings->GetString( "game/map", NULL );
+		Assert( pMapName );
+
+		DevMsg( "CMatchTitleGameSettingsMgr::ExtendTeamLobbyToGame\n" );
+		KeyValuesDumpAsDevMsg( pUpdate );
+
+		return pUpdate;
+	}
+
+	// Retrieves the indexed formula from the match system settings file. (MatchSystem.360.res)
+	char const *CMatchTitleGameSettingsMgr::GetFormulaAverage( int index )
+	{
+		return "newValue";
+	}
+
+	virtual void UpdateTeamProperties( KeyValues *pCurrentSettings, KeyValues *pTeamProperties )
+	{
+	}
 };
 
 CMatchTitleGameSettingsMgr g_MatchTitleGameSettingsMgr;
@@ -360,7 +416,7 @@ void AppendToRollup( char const *sz, CRC32_t &u )
 	char const *p2 = p1;
 	while ( *p2 )
 	{
-		while ( *p2 && !isupper( *p2 ) )
+		while ( *p2 && !V_isupper( *p2 ) )
 		{
 			++ p2;
 		}
@@ -546,9 +602,8 @@ KeyValues * CMatchTitleGameSettingsMgr::DefineSessionSearchKeys( KeyValues *pSet
 
 	pResult->SetInt( "numPlayers", pSettings->GetInt( "members/numPlayers", XBX_GetNumGameUsers() ) );
 	
-	if ( IsX360() )
+	/*if( IsX360() )
 	{
-
 		if ( char const *szValue = pSettings->GetString( "game/mode", NULL ) )
 		{
 			static ContextValue_t values[] = {
@@ -584,7 +639,7 @@ KeyValues * CMatchTitleGameSettingsMgr::DefineSessionSearchKeys( KeyValues *pSet
 		}
 
 	}
-	else
+	else*/
 	{
 
 		if ( char const *szValue = pSettings->GetString( "game/state", NULL ) )

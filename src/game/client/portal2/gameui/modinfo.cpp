@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-
+#include <cbase.h>
 #include "ModInfo.h"
 #include "KeyValues.h"
 #include "vgui_controls/Controls.h"

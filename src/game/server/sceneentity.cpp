@@ -543,7 +543,7 @@ public:
 	float					m_flAutomationDelay;
 	float					m_flAutomationTime;
 
-	// A pause from an input require	s another input to unpause (it's a hard pause)
+	// A pause from an input requires another input to unpause (it's a hard pause)
 	bool					m_bPausedViaInput;
 
 // Moved for cache [9/22/2010 tom]
@@ -1953,13 +1953,13 @@ void CSceneEntity::DispatchStartSpeak( CChoreoScene *scene, CBaseFlex *actor, CC
 					{
 						if ( CanEmitCaption( hash ) )
 						{
-							CCSUsrMsg_CloseCaption msg;
+							CUsrMsg_CloseCaption msg;
 							msg.set_hash( hash );
 							msg.set_duration( clamp( (int)( duration * 10.0f ), 0, 65535 ) );
 							msg.set_from_player( 0 );
 
 							// Send caption and duration hint down to client
-							SendUserMessage( filter, CS_UM_CloseCaption, msg );
+							SendUserMessage( filter, UM_CloseCaption, msg );
 						}
 					}
 				}

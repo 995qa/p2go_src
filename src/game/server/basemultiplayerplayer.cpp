@@ -13,7 +13,7 @@
 #include "usermessages.h"
 
 ConVar sv_allchat("sv_allchat", "1", FCVAR_NOTIFY, "Players can receive all other players' text chat, team restrictions apply");
-
+ConVar sv_deadtalk( "sv_deadtalk", "0", FCVAR_NOTIFY, "Dead players can speak (voice, text) to the living" );
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
 
@@ -190,19 +190,20 @@ void CBaseMultiplayerPlayer::Spawn( void )
 	BaseClass::Spawn();
 }
 
-void CBaseMultiplayerPlayer::AwardAchievement( int iAchievement, int iCount )
+void CBaseMultiplayerPlayer::AwardAchievement(int iAchievement, int iCount)
 {
-	Assert( iAchievement >= 0 && iAchievement < 0xFFFF );		// must fit in short
+	Assert(iAchievement >= 0 && iAchievement < 0xFFFF);		// must fit in short
 
-	CSingleUserRecipientFilter filter( this );
+	CSingleUserRecipientFilter filter(this);
 
-	int userID = GetPlayerInfo()->GetUserID();
-
-	CCSUsrMsg_AchievementEvent msg;
-	msg.set_achievement( iAchievement );
-	msg.set_count( iCount );
-	msg.set_user_id( userID );
-	SendUserMessage( filter, CS_UM_AchievementEvent, msg );
+/*	UserMessageBegin(filter, "AchievementEvent");
+	WRITE_SHORT(iAchievement);
+	WRITE_SHORT(iCount);
+	MessageEnd();*/
+	CUsrMsg_AchievementEvent msg;
+	msg.set_achievement(iAchievement);
+	msg.set_count(iCount);
+	SendUserMessage( filter, UM_AchievementEvent, msg );
 }
 
 #ifdef _DEBUG

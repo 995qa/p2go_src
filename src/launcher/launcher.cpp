@@ -105,9 +105,13 @@ int MessageBox( HWND hWnd, const char *message, const char *header, unsigned uTy
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#if defined ( CSTRIKE15 )
+#if defined ( CSTRIKE15 ) && !defined( PORTAL2 )
 
 #define DEFAULT_HL2_GAMEDIR	"csgo"
+
+#elif defined( PORTAL2 )
+
+#define DEFAULT_HL2_GAMEDIR	"portal2"
 
 #else
 
@@ -1536,13 +1540,22 @@ extern "C" DLL_EXPORT int LauncherMain( int argc, char **argv )
 	UTIL_ComputeBaseDir();
 #endif // _PS3
 
-#if defined (CSTRIKE15)
+#if defined (CSTRIKE15) && !defined (PORTAL2)
 
 	// GS - If we didn't specify a game name then default to CSGO
 	// This is required for running from a HDD Boot Game package
 	if ( CommandLine()->CheckParm( "-game") == NULL )
 	{
 		CommandLine()->AppendParm( "-game", "csgo" );
+	}
+
+#elif defined(PORTAL2)
+
+	// GS - If we didn't specify a game name then default to P2
+	// This is required for running from a HDD Boot Game package
+	if ( CommandLine()->CheckParm( "-game") == NULL )
+	{
+		CommandLine()->AppendParm( "-game", "portal2" );
 	}
 
 #if defined _PS3

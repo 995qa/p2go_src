@@ -22,16 +22,15 @@
 
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Button.h>
-
+#include "fmtstr.h"
 #include <game/client/iviewport.h>
 
-#include "cs_gamerules.h"
+//#include "cs_gamerules.h"
 
 #include "matchmaking/imatchframework.h"
 #include "tier1/netadr.h"
 
 #include "gametypes/igametypes.h"
-#include "gameui_interface.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -207,7 +206,7 @@ void CTextWindow::ShowText( const char *text)
 void CTextWindow::ShowURL( const char *URL, bool bAllowUserToDisable )
 {
 #if defined( ENABLE_CHROMEHTMLWINDOW )
-	if ( bAllowUserToDisable && cl_disablehtmlmotd.GetBool() && !GetNumSecondsRequiredByServer() )
+	if ( bAllowUserToDisable && cl_disablehtmlmotd.GetBool())
 	{
 		// User has disabled HTML TextWindows. Show the fallback as text only.
 		if ( g_pStringTableInfoPanel )
@@ -415,7 +414,7 @@ void CTextWindow::ShowFile( const char *filename )
 
 		char buffer[2048];
 			
-		int size = min( g_pFullFileSystem->Size( f ), sizeof(buffer)-1 ); // just allow 2KB
+		int size = MIN( g_pFullFileSystem->Size( f ), sizeof(buffer)-1 ); // just allow 2KB
 
 		g_pFullFileSystem->Read( buffer, size, f );
 		g_pFullFileSystem->Close( f );
@@ -466,7 +465,7 @@ void CTextWindow::Update( void )
 	}
 }
 
-int CTextWindow::GetNumSecondsRequiredByServer() const
+/*int CTextWindow::GetNumSecondsRequiredByServer() const
 {
 	if ( !g_pGameTypes )
 		return 0;
@@ -478,7 +477,7 @@ int CTextWindow::GetNumSecondsRequiredByServer() const
 	if ( numSecondsRequired > 35 )
 		numSecondsRequired = 35; // never allow > 35 second ads
 	return numSecondsRequired;
-}
+}*/
 
 int CTextWindow::GetNumSecondsSponsorRequiredRemaining() const
 {
@@ -486,10 +485,10 @@ int CTextWindow::GetNumSecondsSponsorRequiredRemaining() const
 	if ( !m_bForcingWindowCloseRegardlessOfTime )
 	{
 		int numSecondsShownAlready = int( Plat_MSTime() - m_uiTimestampStarted ) / 1000;
-		int numSecondsRequired = GetNumSecondsRequiredByServer();
+		//int numSecondsRequired = GetNumSecondsRequiredByServer();
 
-		if ( ( numSecondsRequired > 0 ) && ( numSecondsShownAlready < numSecondsRequired ) )
-			numSecondsRemaining = ( numSecondsRequired - numSecondsShownAlready );
+		//if ( ( numSecondsRequired > 0 ) && ( numSecondsShownAlready < numSecondsRequired ) )
+		//	numSecondsRemaining = ( numSecondsRequired - numSecondsShownAlready );
 	}
 
 	static ConVarRef cv_ignore_ui_activate_key( "ignore_ui_activate_key" );
@@ -633,37 +632,6 @@ void CTextWindow::ShowPanel( bool bShow )
 {
 	g_pInputSystem->SetSteamControllerMode( bShow ? "MenuControls" : NULL, this );
 
-	if (bShow) 
-		return;
-
-	if ( BaseClass::IsVisible() == bShow )
-		return;
-
-	m_pViewPort->ShowBackGround( bShow );
-
-	ShowHtmlString( sBrowserClose );
-	SetVisible( false );
-	SetMouseInputEnabled( false );
-	GetHud(0).EnableHud();
-
-	if ( !bShow && ( Plat_FloatTime() - m_dblTimeExecutedExitCommand > 1.0 ) )
-	{	// If something is trying to hide us and it's not because user clicked
-		// the OKAY button, then trigger the commands associated with OKAY button
-		m_bForcingWindowCloseRegardlessOfTime = true;
-		OnCommand( "okay" );
-	}
-
-	// reset motd
-	m_bHasMotd = false;
-}
-
-void CTextWindow::ShowPanel2( bool bShow )
-{
-	if ( (CSGameRules() && CSGameRules()->IsQueuedMatchmaking()) || sv_disable_motd.GetBool() )
-		bShow = false;
-
-	g_pInputSystem->SetSteamControllerMode( bShow ? "MenuControls" : NULL, this );
-
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
@@ -690,7 +658,20 @@ void CTextWindow::ShowPanel2( bool bShow )
 	}
 	else
 	{
-		ShowPanel( false );
+		ShowHtmlString( sBrowserClose );
+		SetVisible( false );
+		SetMouseInputEnabled( false );
+		GetHud(0).EnableHud();
+
+		if ( Plat_FloatTime() - m_dblTimeExecutedExitCommand > 1.0 )
+		{	// If something is trying to hide us and it's not because user clicked
+			// the OKAY button, then trigger the commands associated with OKAY button
+			m_bForcingWindowCloseRegardlessOfTime = true;
+			OnCommand( "okay" );
+		}
+
+		// reset motd
+		m_bHasMotd = false;
 	}
 }
 
@@ -699,7 +680,7 @@ void CTextWindow::PaintBackground()
 	BaseClass::PaintBackground();
 
 	if ( m_uiTimestampStarted && IsVisible() &&
-		CSGameRules() && CSGameRules()->IsQueuedMatchmaking() &&
+	//	CSGameRules() && CSGameRules()->IsQueuedMatchmaking() &&
 		( int( Plat_MSTime() - m_uiTimestampStarted ) > 1000*cl_motd_competitive_timeout.GetInt() ) )
 	{
 		m_bForcingWindowCloseRegardlessOfTime = true;

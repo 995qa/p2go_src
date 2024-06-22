@@ -32,7 +32,9 @@
 #endif
 
 // This enables the l4d style of culling all cvars that are not marked FCVAR_RELEASE :
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 #define CULL_ALL_CVARS_NOT_FCVAR_RELEASE
+#endif
 
 //-----------------------------------------------------------------------------
 // Statically constructed list of ConCommandBases, 

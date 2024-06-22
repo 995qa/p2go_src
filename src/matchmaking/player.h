@@ -13,7 +13,11 @@ class PlayerLocal;
 
 #include "mm_framework.h"
 #include "matchmaking/iplayer.h"
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 #include "matchmaking/cstrike15/imatchext_cstrike15.h"
+#elif defined( PORTAL2 )
+#include "matchmaking/portal2/imatchext_portal2.h"
+#endif
 #include "playerrankingdata.h"
 #include "mathlib/expressioncalculator.h"
 

@@ -18,6 +18,18 @@
 #define DEFAULT_GRAVITY_STRING	"800"
 #endif
 
+float GetCurrentGravity( void )
+{
+#if defined( TF_CLIENT_DLL ) || defined( TF_DLL )
+	if (TFGameRules())
+	{
+		return (sv_gravity.GetFloat() * TFGameRules()->GetGravityMultiplier());
+	}
+#endif 
+
+	return sv_gravity.GetFloat();
+}
+
 ConVar	sv_gravity		( "sv_gravity", DEFAULT_GRAVITY_STRING, FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_RELEASE, "World gravity." );
 
 ConVar	sv_stopspeed	( "sv_stopspeed","80", FCVAR_NOTIFY | FCVAR_REPLICATED |  FCVAR_RELEASE, "Minimum stopping speed when on ground." );
@@ -29,7 +41,7 @@ ConVar	sv_specnoclip	( "sv_specnoclip", "1", FCVAR_ARCHIVE | FCVAR_NOTIFY | FCVA
 ConVar	sv_maxspeed		( "sv_maxspeed", "320", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_RELEASE);
 
 ConVar	sv_accelerate	( "sv_accelerate", "5.5", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_RELEASE, "Linear acceleration amount (old value is 5.6)" );
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 ConVar	sv_accelerate_use_weapon_speed	( "sv_accelerate_use_weapon_speed", "1", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_RELEASE );
 ConVar	sv_accelerate_debug_speed	( "sv_accelerate_debug_speed", "0", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_RELEASE );
 #endif

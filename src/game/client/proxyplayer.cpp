@@ -12,12 +12,12 @@
 #include "materialsystem/itexture.h"
 #include "materialsystem/imaterialsystem.h"
 #include "functionproxy.h"
-#include "c_cs_player.h"
-#include "weapon_csbase.h"
+//#include "c_cs_player.h"
+//#include "weapon_csbase.h"
 #include "predicted_viewmodel.h"
-#include "cs_client_gamestats.h"
-#include "econ/econ_item_schema.h"
-#include "cstrike15_gcconstants.h"
+//#include "cs_client_gamestats.h"
+//#include "econ/econ_item_schema.h"
+//#include "cstrike15_gcconstants.h"
 
 #include "imaterialproxydict.h"
 // memdbgon must be the last include file in a .cpp file!!!
@@ -291,6 +291,9 @@ void CEntityRandomProxy::OnBind( void *pC_BaseEntity )
 }
 
 EXPOSE_MATERIAL_PROXY( CEntityRandomProxy, EntityRandom );
+
+// SanyaSho: disable CSGO-only proxies for non-CSGO
+#if defined( CSTRIKE_DLL )
 
 #include "utlrbtree.h"
 
@@ -741,9 +744,11 @@ EXPOSE_MATERIAL_PROXY(CStickerPeelProxy, StickerPeel);
 //-----------------------------------------------------------------------------
 // CrosshairColor proxy
 //-----------------------------------------------------------------------------
+#ifdef HL2MP
 extern ConVar cl_crosshaircolor_r;
 extern ConVar cl_crosshaircolor_g;
 extern ConVar cl_crosshaircolor_b;
+
 class CCrossHairColorProxy : public CResultProxy
 {
 public:
@@ -779,7 +784,7 @@ void CCrossHairColorProxy::OnBind(void *pC_BaseEntity)
 }
 
 EXPOSE_MATERIAL_PROXY(CCrossHairColorProxy, CrossHairColor);
-
+#endif
 
 float g_flEconInspectPreviewTime = 0;
 
@@ -806,3 +811,4 @@ void CEconInspectPreviewTimeProxy::OnBind( void *pC_BaseEntity )
 
 EXPOSE_MATERIAL_PROXY( CEconInspectPreviewTimeProxy, EconInspectPreviewTime );
 
+#endif
