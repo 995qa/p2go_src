@@ -104,6 +104,7 @@ $Group "csgo_partner"
 
 	// SanyaSho: P2:GO stuff goes here...
 	"vaudio_minimp3"
+	"vaudio_opus"
 }
 
 $Group "csgo_partner_linux"

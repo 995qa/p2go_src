@@ -1388,6 +1388,11 @@ $Project "soundtest"
 	"unittests/soundtest/soundtest.vpc" [$WINDOWS]
 }
 
+$Project "vaudio_opus"
+{
+	"engine/voice_codecs/opus/vaudio_opus.vpc" [$WINDOWS||$POSIX]
+}
+
 $Project "vaudio_speex"
 {
 	"engine/voice_codecs/speex/vaudio_speex.vpc" [$WINDOWS||$POSIX]
