@@ -101,6 +101,9 @@ $Group "csgo_partner"
 	"vscript"
 	"vstdlib"
 	"vtf"
+
+	// SanyaSho: P2:GO stuff goes here...
+	"vaudio_minimp3"
 }
 
 $Group "csgo_partner_linux"

@@ -1743,6 +1743,12 @@ $Project "vaudio_miles"
 	"engine/voice_codecs/miles/vaudio_miles.vpc" [$WINDOWS||$POSIX]
 }
 
+$Project "vaudio_minimp3"
+{
+	"engine/voice_codecs/minimp3/vaudio_minimp3.vpc"
+}
+
+
 $Project "vbsp"
 {
 	"utils/vbsp/vbsp.vpc" [$WINDOWS]
