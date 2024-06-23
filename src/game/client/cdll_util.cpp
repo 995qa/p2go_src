@@ -32,10 +32,7 @@
 #include "vgui_int.h"
 #include "cdll_client_int.h"
 #include "iinput.h"
-//#include "c_cs_playerresource.h"
-//#include "c_cs_player.h"
-//#include "cs_gamerules.h"
-//#include "weapon_c4.h"
+#include "c_playerresource.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -1340,7 +1337,6 @@ void UTIL_GetClientStatusText( char *buffer, int nSize )
 	if ( !buffer || nSize==0 ) {return;}
 	buffer[0] = 0;
 
-#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	extern float g_flReadyToCheckForPCBootInvite;
 	bool bStartupFinished = g_flReadyToCheckForPCBootInvite && ( ( Plat_FloatTime() - g_flReadyToCheckForPCBootInvite ) > 1.5f );
 	if ( bStartupFinished )
@@ -1348,15 +1344,14 @@ void UTIL_GetClientStatusText( char *buffer, int nSize )
 	if ( nSize <= 2 )
 		return;
 
-	C_CS_PlayerResource *pCSPR = ( C_CS_PlayerResource* )GameResources();
-	if (pCSPR)
+	if( g_PR )
 	{
 		Q_snprintf( buffer, nSize, "%sPlayers: ", ( bStartupFinished ? "+" : "" ) );
 		for ( int i = 1; i <= MAX_PLAYERS; i++ )
 		{
-			if ( pCSPR->IsConnected(i) )
+			if ( g_PR->IsConnected(i) )
 			{
-				const char *name = pCSPR->GetPlayerName(i);
+				const char *name = g_PR->GetPlayerName(i);
 				if (name && name[0])
 				{
 					V_strncat( buffer, name, nSize );
@@ -1366,7 +1361,6 @@ void UTIL_GetClientStatusText( char *buffer, int nSize )
 		}
 		buffer[nSize-1]=0;
 	}
-#endif
 }
 
 void UTIL_ClearTrace( trace_t &trace )

@@ -50,6 +50,7 @@ using namespace vgui;
 using namespace BaseModUI;
 
 //=============================================================================
+float g_flReadyToCheckForPCBootInvite = 0;
 static ConVar connect_lobby( "connect_lobby", "", FCVAR_HIDDEN, "Sets the lobby ID to connect to on start." );
 static ConVar ui_old_options_menu( "ui_old_options_menu", "0", FCVAR_HIDDEN, "Brings up the old tabbed options dialog from Keyboard/Mouse when set to 1." );
 static ConVar ui_play_online_browser( "ui_play_online_browser",
@@ -128,6 +129,11 @@ CEG_NOINLINE MainMenu::MainMenu( Panel *parent, const char *panelName ):
 	m_nPinFromLeft = 0;
 	m_nPinFromBottom = 0;
 	m_nFooterOffsetY = 0;
+
+	// SanyaSho: i don't know where i can put this
+	// Make sure we check for invites after the main menu is fully ready
+	extern float g_flReadyToCheckForPCBootInvite;
+	g_flReadyToCheckForPCBootInvite = Plat_FloatTime();
 }
 
 //=============================================================================
@@ -940,7 +946,7 @@ void MainMenu::OnThink()
 void MainMenu::OnOpen()
 {
 	static bool s_bConnectLobbyChecked = false;
-	if ( IsPC() && connect_lobby.GetString()[0] && !s_bConnectLobbyChecked )
+	if ( IsPC() && connect_lobby.GetString()[0] && !s_bConnectLobbyChecked && g_flReadyToCheckForPCBootInvite && ( ( Plat_FloatTime() - g_flReadyToCheckForPCBootInvite ) > 2.5f ) )
 	{
 		// if we were launched with "+connect_lobby <lobbyid>" on the command line, join that lobby immediately
 		uint64 nLobbyID = 0ull;
