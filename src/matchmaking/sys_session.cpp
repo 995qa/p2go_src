@@ -3255,8 +3255,8 @@ void CSysSessionClient::Steam_OnLobbyEntered( LobbyEnter_t *pLobbyEnter )
 			dataCount = steamapicontext->SteamMatchmaking()->GetLobbyDataCount( m_lobby.m_uiLobbyID );
 			for ( i=0; i < dataCount; i++ )
 			{
-				char key[64];
-				char val[64];
+				char key[64] = { 0 };
+				char val[64] = { 0 };
 				steamapicontext->SteamMatchmaking()->GetLobbyDataByIndex( m_lobby.m_uiLobbyID,
 					i, key, sizeof(key), val, sizeof( val ));
 				DevMsg( "Lobby data: %s = %s\n", key, val );

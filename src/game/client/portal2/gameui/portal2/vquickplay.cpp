@@ -11,7 +11,9 @@
 #include "vhybridbutton.h"
 #include "vgenericwaitscreen.h"
 #include "vgenericconfirmation.h"
+#ifdef PORTAL2_PUZZLEMAKER
 #include "c_community_coop.h"
+#endif
 #include "vgui/ISurface.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

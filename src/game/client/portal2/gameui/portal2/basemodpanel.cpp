@@ -128,16 +128,6 @@
 #include "c_community_coop.h"
 #endif // PORTAL2_PUZZLEMAKER
 
-//-----------------------------------------------------------------------------
-// Purpose: Helper function for Steam's remote storage interface
-//-----------------------------------------------------------------------------
-#ifndef CSTRIKE15 // CSGO branch has this defined elsewhere
-ISteamRemoteStorage *GetISteamRemoteStorage()
-{
-	return (steamapicontext != NULL) ? steamapicontext->SteamRemoteStorage() : NULL;
-}
-#endif // CSTRIKE15
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -146,24 +136,11 @@ static LoggingFileHandle_t s_WorkshopLogHandle;
 using namespace BaseModUI;
 using namespace vgui;
 
-#include "iconsole.h"
-
-#ifndef CSTRIKE15 // CSGO branch has this defined elsewhere
-Color g_WorkshopLogColor(0, 255, 255, 255);
-BEGIN_DEFINE_LOGGING_CHANNEL(LOG_WORKSHOP, "Workshop", LCF_CONSOLE_ONLY, LS_WARNING, g_WorkshopLogColor);
-ADD_LOGGING_CHANNEL_TAG("UGCOperation");
-ADD_LOGGING_CHANNEL_TAG("WorkshopOperation");
-END_DEFINE_LOGGING_CHANNEL();
-#endif // CSTRIKE15
-
 //setup in GameUI_Interface.cpp
 extern class IMatchSystem *matchsystem;
-#ifdef SWARM_DLL
-//extern IGameConsole *IGameConsole();
-#endif
+extern IGameConsole *IGameConsole();
 
 extern CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent );
-//CBaseModFrame *OpenPortal2EconUI( vgui::Panel *pParent ) {}
 
 #define MAX_QUICK_PLAY_ENTRIES	50	// We want at least this many in the queue to consider ourselves "full"
 
@@ -953,37 +930,48 @@ CBaseModFrame* CBaseModPanel::OpenWindow( const WINDOW_TYPE & wt, CBaseModFrame 
 		case WT_COMMUNITYMAP:
 			m_Frames[ wt ] = new CommunityMapDialog( this, "CommunityMapDialog" );
 			break;
+
 		case WT_RATEMAP:
 			m_Frames[ wt ] = new RateMapDialog( this, "RateMapDialog" );
 			break;
+
 		case WT_PLAYTESTDEMOS:
 			m_Frames[ wt ] = new CPlaytestDemosDialog( this, "PlaytestDemosDialog" );
 			break;
+
 		case WT_PLAYTESTUPLOADWAIT:
 			m_Frames[ wt ] = new CPlaytestUploadWait( this, "PlaytestUploadWait" );
 			break;
+
 		case WT_EDITORMAINMENU:
 			m_Frames[ wt ] = new CPuzzleMakerMenu( this, "PuzzleMakerMenu" );
 			SetForceUseAlternateTileSet( true );
 			break;
+
 		case WT_EDITORCHAMBERLIST:
 			m_Frames[ wt ] = new CPuzzleMakerMyChambers( this, "PuzzleMakerMyChambers" );
 			break;
+
 		case WT_PUZZLEMAKEREXITCONRFIRMATION:
 			m_Frames[ wt ] = new CPuzzleMakerExitConfirmation( this, "PuzzleMakerExitConfirmation" );
 			break;
+
 		case WT_PUZZLEMAKERSAVEDIALOG:
 			m_Frames[ wt ] = new CPuzzleMakerSaveDialog( this, "PuzzleMakerSaveDialog" );
 			break;
+
 		case WT_PUZZLEMAKERCOMPILEDIALOG:
 			m_Frames[ wt ] = new CPuzzleMakerCompileDialog( this, "PuzzleMakerCompileDialog" );
 			break;
+
 		case WT_PUZZLEMAKERPUBLISHPROGRESS:
 			m_Frames[ wt ] = new CPuzzleMakerPublishProgress( this, "PuzzleMakerPublishProgress" );
 			break;
+
 		case WT_QUICKPLAY:
 			m_Frames[ wt ] = new CQuickPlay( this, "QuickPlay" );
 			break;
+
 #endif // PORTAL2_PUZZLEMAKER
 		default:
 			Assert( false );	// unknown window type

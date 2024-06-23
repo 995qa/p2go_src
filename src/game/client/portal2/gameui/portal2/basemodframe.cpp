@@ -928,7 +928,7 @@ void CBaseModFrame::PerformLayout()
 			{
 				if ( m_nTitleWide )
 				{
-					// shift all the children down one tile to account for dialog Frame.heading
+					// shift all the children down one tile to account for dialog frame heading
 					y += m_nTileHeight;
 				}
 			}
