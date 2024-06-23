@@ -10,9 +10,9 @@
 #include "portal_shareddefs.h"
 #include "clientsideeffects.h"
 #include "tier0/vprof.h"
-#include "materialsystem/ITexture.h"
+#include "materialsystem/itexture.h"
 #include "hud_macros.h"
-#include "IGameSystem.h"
+#include "igamesystem.h"
 #include "game_timescale_shared.h"
 #include "view.h"						// For MainViewOrigin()
 #include "clientleafsystem.h"			// For finding the leaves our portals are in
@@ -31,7 +31,7 @@
 #include "c_user_message_register.h"
 #include "c_world.h"
 
-#include "C_Portal_Player.h"
+#include "c_portal_player.h"
 
 #include "c_pixel_visibility.h"
 

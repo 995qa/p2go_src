@@ -9,7 +9,7 @@
 #include "hudelement.h"
 #include "c_playerresource.h"
 #include "iclientmode.h"
-#include <vgui_controls/controls.h>
+#include <vgui_controls/Controls.h>
 #include <vgui_controls/Panel.h>
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
@@ -289,7 +289,7 @@ void CHudDeathNotice::FireGameEvent( KeyValues * event)
 		if ( !strcmp( killedwith+2, "gauss" ) )
 			Q_strncpy( killedwith, "d_tau cannon", sizeof( killedwith ) );
 
-		Msg( killedwith+2 ); // skip over the "d_" part
+		Msg( "%s", killedwith+2 ); // skip over the "d_" part
 	}
 
 	Msg( "\n" );

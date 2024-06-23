@@ -9,20 +9,20 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "CreateMultiplayerGameGameplayPage.h"
+#include "createmultiplayergamegameplaypage.h"
 
 using namespace vgui;
 
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui/ILocalize.h>
 #include <vgui_controls/ComboBox.h>
 #include <vgui_controls/CheckButton.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/TextEntry.h>
 
-#include "FileSystem.h"
-#include "PanelListPanel.h"
-#include "ScriptObject.h"
+#include "filesystem.h"
+#include "panellistpanel.h"
+#include "scriptobject.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -446,7 +446,7 @@ void CServerDescription::WriteScriptHeader( FileHandle_t fp )
 	if( newtime.tm_hour == 0 )        /*Set hour to 12 if midnight. */
 		newtime.tm_hour = 12;
 
-	g_pFullFileSystem->FPrintf( fp, (char *)getHint() );
+	g_pFullFileSystem->FPrintf( fp, "%s", (char *)getHint() );
 
 	char timeString[64];
 	Plat_GetTimeString( &newtime, timeString, sizeof( timeString ) );

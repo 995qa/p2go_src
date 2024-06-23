@@ -197,6 +197,7 @@ void CFuncPortalDetector::NotifyPortalEvent( PortalEvent_t nEventType, CPortal_B
 
 void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 {
+#if !defined( LINUX ) // LINUXTODO:
 	if ( m_bActive )
 	{
 		m_iLinkageGroupID = pPortal->GetLinkageGroup();
@@ -239,6 +240,7 @@ void CFuncPortalDetector::UpdateOnPortalMoved( CProp_Portal *pPortal )
 			PortalPlacedInsideBounds( pPortal );
 		}
 	}
+#endif
 }
 
 void CFuncPortalDetector::PortalPlacedInsideBounds( CProp_Portal *pPortal )

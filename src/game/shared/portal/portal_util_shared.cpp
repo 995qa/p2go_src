@@ -12,14 +12,14 @@
 #include "portal_shareddefs.h"
 #include "portal_collideable_enumerator.h"
 #include "beam_shared.h"
-#include "CollisionUtils.h"
+#include "collisionutils.h"
 #include "util_shared.h"
 #include "portal_mp_gamerules.h"
 #include "coordsize.h"
 
 #ifndef CLIENT_DLL
-	#include "Util.h"
-	#include "NDebugOverlay.h"
+	#include "util.h"
+	#include "ndebugoverlay.h"
 	#include "env_debughistory.h"
 	#include "world.h"
 	#include "paint/paint_savelogic.h"
@@ -29,7 +29,7 @@
 	#include "materialsystem/imaterialvar.h"
 	#include "c_world.h"
 #endif
-#include "PortalSimulation.h"
+#include "portalsimulation.h"
 #include "CegClientWrapper.h"
 
 bool g_bAllowForcePortalTrace = false;

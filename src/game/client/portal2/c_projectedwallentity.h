@@ -9,45 +9,48 @@
 
 #define CProjectedWallEntity C_ProjectedWallEntity
 
-DECLARE_AUTO_LIST( IProjectedWallEntityAutoList )
+DECLARE_AUTO_LIST( IProjectedWallEntityAutoList );
 
-class C_ProjectedWallEntity : public CPaintableEntity<C_BaseProjectedEntity>, IProjectedWallEntityAutoList
+class C_ProjectedWallEntity : public CPaintableEntity<C_BaseProjectedEntity>, public IProjectedWallEntityAutoList
 {
 public:
 	DECLARE_CLASS( C_ProjectedWallEntity, CPaintableEntity<C_BaseProjectedEntity> );
 
 	DECLARE_CLIENTCLASS();
 	DECLARE_PREDICTABLE();
-	C_BaseEntity *GetEntity() { return this; }
+
+	// IProjectedWallEntityAutoList
+	IMPLEMENT_AUTO_LIST_GET();
+
 	C_ProjectedWallEntity();
-	
+
 	virtual void Spawn();
-	virtual void ClientThink();	
+	virtual void ClientThink();
 	virtual void UpdateOnRemove();
-	
+
 	virtual void Touch( C_BaseEntity *pOther );
-	
+
 	virtual CollideType_t GetCollideType();
 	virtual int DrawModel( int flags, const RenderableInstance_t &instance );
 	virtual bool ShouldDraw();
 	virtual void GetRenderBounds( Vector& mins, Vector& maxs );
 	virtual QAngle const& GetRenderAngles( void );
-	
+
 	virtual RenderableTranslucencyType_t ComputeTranslucencyType();
 	virtual void ComputeWorldSpaceSurroundingBox( Vector *mins, Vector *maxs );
-	
+
 	virtual void OnPreDataChanged( DataUpdateType_t datatype );
 	virtual void OnDataChanged( DataUpdateType_t datatype );
 	virtual void PostDataUpdate( DataUpdateType_t datatype );
-	
+
 	virtual bool TestCollision( const Ray_t &ray, unsigned int mask, trace_t& trace );
 	virtual bool TestHitboxes( const Ray_t &ray, unsigned int fContentsMask, trace_t& tr );
-	
+
 	virtual void OnProjected();
 	virtual void GetProjectionExtents( Vector &, Vector & );
 	virtual void GetExtents( Vector &outMins, Vector &outMaxs, float flWidthScale = 1.0 );
 	virtual void ProjectWall();
-	
+
 	virtual PaintPowerType GetPaintPowerAtPoint( const Vector& worldContactPt ) const;
 	virtual void Paint( PaintPowerType type, const Vector& worldContactPt );
 	virtual void CleansePaint();
@@ -64,7 +67,7 @@ private:
 	void SetupWallParticles();
 	void CheckForPlayersOnBridge();
 	void PaintWallSideRails( CMeshBuilder & , Vector & , Vector & , Vector & , Vector & ,float ,float );
-	
+
 	IMaterial *m_pBodyMaterial;
 	IMaterial *m_pPaintMaterialsMid[4];
 	IMaterial *m_pPaintMaterialsEnd1[4];

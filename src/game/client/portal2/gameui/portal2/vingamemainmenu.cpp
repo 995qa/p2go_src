@@ -6,19 +6,19 @@
 
 #include "cbase.h"
 
-#include "VInGameMainMenu.h"
-#include "VGenericConfirmation.h"
+#include "vingamemainmenu.h"
+#include "vgenericconfirmation.h"
 //#include "vportalleaderboard.h"
-#include "VFooterPanel.h"
-#include "VFlyoutMenu.h"
-#include "VHybridButton.h"
-#include "EngineInterface.h"
+#include "vfooterpanel.h"
+#include "vflyoutmenu.h"
+#include "vhybridbutton.h"
+#include "engineinterface.h"
 #include "vpuzzlemakersavedialog.h"
 
 #include "fmtstr.h"
 
 #include "game/client/IGameClientExports.h"
-#include "GameUI_Interface.h"
+#include "gameui_interface.h"
 
 #include "vgui/ILocalize.h"
 #include "vgui_controls/Button.h"
@@ -26,7 +26,7 @@
 #include "vgui/ISurface.h"
 
 #include "vratemapdialog.h"
-#include "VGenericWaitScreen.h"
+#include "vgenericwaitscreen.h"
 
 #include "materialsystem/materialsystem_config.h"
 #include "portal_gamerules.h"
@@ -1265,7 +1265,10 @@ void InGameMainMenu::OnThink()
 
 	IMatchSession *pIMatchSession = g_pMatchFramework->GetMatchSession();
 	KeyValues *pGameSettings = pIMatchSession ? pIMatchSession->GetSessionSettings() : NULL;
-	
+
+	if( !pGameSettings )
+		return;
+
 	char const *szNetwork = pGameSettings->GetString( "system/network", "offline" );
 	char const *szGameMode = pGameSettings->GetString( "game/mode", "coop" );
 	char const *szGameState = pGameSettings->GetString( "game/state", "lobby" );
@@ -1395,6 +1398,9 @@ void InGameMainMenu::PerformLayout( void )
 
 	IMatchSession *pIMatchSession = g_pMatchFramework->GetMatchSession();
 	KeyValues *pGameSettings = pIMatchSession ? pIMatchSession->GetSessionSettings() : NULL;
+
+	if( !pGameSettings )
+		return;
 
 	char const *szNetwork = pGameSettings->GetString( "system/network", "offline" );
 

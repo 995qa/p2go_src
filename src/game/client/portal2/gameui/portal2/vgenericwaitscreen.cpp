@@ -4,9 +4,9 @@
 //
 //=====================================================================================//
 
-#include "VGenericWaitScreen.h"
-#include "EngineInterface.h"
-#include "tier1/KeyValues.h"
+#include "vgenericwaitscreen.h"
+#include "engineinterface.h"
+#include "tier1/keyvalues.h"
 
 #include "vgui_controls/Label.h"
 #include "vgui_controls/Button.h"
@@ -176,6 +176,9 @@ void GenericWaitScreen::RunFrame()
 
 void GenericWaitScreen::SetDataSettings( KeyValues *pSettings )
 {
+	if( !pSettings )
+		return;
+
 	m_pAsyncOperationAbortable = ( IMatchAsyncOperation * ) pSettings->GetPtr( "options/asyncoperation", NULL );
 	m_pWaitscreenCallbackInterface = ( IWaitscreenCallbackInterface * ) pSettings->GetPtr( "options/waitscreencallback", NULL );
 

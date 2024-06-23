@@ -6,8 +6,8 @@
 //===========================================================================//
 
 #include "cbase.h"
-#include "C_PortalGhostRenderable.h"
-#include "PortalRender.h"
+#include "c_portalghostrenderable.h"
+#include "portalrender.h"
 #include "c_portal_player.h"
 #include "model_types.h"
 #include "c_basecombatweapon.h"

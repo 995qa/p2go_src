@@ -43,7 +43,8 @@ $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;fxctmp9;vshtmp9;..\..\dx9sdk\include"	[$WINDOWS]
+		$AdditionalIncludeDirectories	"$BASE;fxctmp9;vshtmp9;"	[$WINDOWS||$POSIX]
+		$AdditionalIncludeDirectories	"$BASE;..\..\dx9sdk\include"	[$WINDOWS]
 		$AdditionalIncludeDirectories	"$BASE;fxctmp9_360;vshtmp9_360"					[$X360]
 		$AdditionalIncludeDirectories	"$BASE;.."
 		$PreprocessorDefinitions		"$BASE;STDSHADER_DBG_DLL_EXPORT;FAST_MATERIALVAR_ACCESS"
@@ -89,8 +90,8 @@ $Project "stdshader_dbg"
 	$Folder	"Link Libraries"
 	{
 		$Lib	"$SRCDIR\dx9sdk\lib\d3dx9"			[$WINDOWS && !$GL]
-		$Lib	"$SRCDIR\lib\public\mathlib"		[$WINDOWS]
-		$Lib	"$SRCDIR\lib\public\shaderlib"		[$WINDOWS]
+		$Lib mathlib
+		$Lib shaderlib
 
 		$Lib	"$SRCDIR\lib\public\mathlib_360"	[$X360]
 		$Lib	"$SRCDIR\lib\public\shaderlib_360"	[$X360]

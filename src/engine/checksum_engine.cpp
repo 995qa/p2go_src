@@ -272,7 +272,7 @@ bool CRC_MapFile(CRC32_t *crcvalue, const char *pszFileName)
 
 		if ( debug_map_crc.GetBool() )
 		{
-			Msg( "Lump %d crc %lu\n", l, lumpCRC );
+			Msg( "Lump %d crc %x\n", l, lumpCRC );
 		}
 	}
 	
@@ -281,7 +281,7 @@ bool CRC_MapFile(CRC32_t *crcvalue, const char *pszFileName)
 
 	if ( debug_map_crc.GetBool() )
 	{
-		Msg( "Map file '%s' CRC = %lu\n", pszFileName, *crcvalue );
+		Msg( "Map file '%s' CRC = %x\n", pszFileName, *crcvalue );
 	}
 
 	return true;

@@ -4,7 +4,7 @@
 //
 //=====================================================================================//
 
-#include "VGenericPanelList.h"
+#include "vgenericpanellist.h"
 
 #include "vgui_controls/Label.h"
 #include "vgui_controls/Panel.h"
@@ -14,8 +14,8 @@
 #include "vgui/IImage.h"
 #include "vgui/ILocalize.h"
 #include "vgui_controls/ImagePanel.h"
-#include "KeyValues.h"
-#include "VFlyoutMenu.h"
+#include "keyvalues.h"
+#include "vflyoutmenu.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

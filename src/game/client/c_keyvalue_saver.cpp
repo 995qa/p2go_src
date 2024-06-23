@@ -184,7 +184,7 @@ bool C_KeyValueSaver::ReadKeyValues( KeyValueSaverData *pKeyValueData )
 #endif
 
 	char szFilename[_MAX_PATH];
-	Q_snprintf( szFilename, sizeof( szFilename ), VarArgs( "save/%s", pKeyValueData->szFileName ) );
+	Q_snprintf( szFilename, sizeof( szFilename ), "save/%s", pKeyValueData->szFileName );
 	if ( pKeyValueData->pKeyValues )
 	{
 		pKeyValueData->pKeyValues->deleteThis();

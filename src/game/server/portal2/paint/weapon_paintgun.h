@@ -10,7 +10,7 @@
 #ifndef WEAPON_PAINTGUN_H
 #define WEAPON_PAINTGUN_H
 
-#include "sprite.h"
+#include "Sprite.h"
 #include "weapon_portalbasecombatweapon.h"
 #include "paint/paint_color_manager.h"
 #include "paint/prop_paint_power_user.h"

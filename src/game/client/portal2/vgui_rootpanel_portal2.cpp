@@ -8,7 +8,7 @@
 #include "vgui_int.h"
 #include "ienginevgui.h"
 #include "vgui_controls/Panel.h"
-#include "vgui/IVgui.h"
+#include "vgui/IVGui.h"
 #include "vgui/ISurface.h"
 #include "view_shared.h"
 

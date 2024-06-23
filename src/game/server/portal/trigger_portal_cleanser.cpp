@@ -19,7 +19,7 @@
 #include "rumble_shared.h"
 #include "trigger_portal_cleanser.h"
 #include "soundenvelope.h"
-#include "UtlSortVector.h"
+#include "utlsortvector.h"
 #include "fizzler_effects.h"
 #include "prop_weightedcube.h"
 #include "portal_gamestats.h"

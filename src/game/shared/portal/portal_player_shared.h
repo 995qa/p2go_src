@@ -11,7 +11,7 @@
 
 #include "studio.h"
 #include "paint/paint_color_manager.h"
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 #define PORTAL_PUSHAWAY_THINK_INTERVAL		(1.0f / 20.0f)
 

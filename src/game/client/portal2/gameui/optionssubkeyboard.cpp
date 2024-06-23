@@ -5,9 +5,9 @@
 //===========================================================================//
 
 #include <cbase.h>
-#include "OptionsSubKeyboard.h"
-#include "EngineInterface.h"
-#include "VControlsListPanel.h"
+#include "optionssubkeyboard.h"
+#include "engineinterface.h"
+#include "vcontrolslistpanel.h"
 
 #include "vgui_controls/Button.h"
 #include "vgui_controls/Label.h"
@@ -17,17 +17,17 @@
 #include "vgui/Cursor.h"
 #include "vgui/IVGui.h"
 #include "vgui/ISurface.h"
-#include "tier1/KeyValues.h"
+#include "tier1/keyvalues.h"
 #include "tier1/convar.h"
 #include "vgui/KeyCode.h"
 #include "vgui/MouseCode.h"
 #include "vgui/ISystem.h"
 #include "vgui/IInput.h"
 
-#include "FileSystem.h"
-#include "tier1/UtlBuffer.h"
-#include "igameuifuncs.h"
-#include "vstdlib/IKeyValuesSystem.h"
+#include "filesystem.h"
+#include "tier1/utlbuffer.h"
+#include "IGameUIFuncs.h"
+#include "vstdlib/ikeyvaluessystem.h"
 #include "tier2/tier2.h"
 #include "inputsystem/iinputsystem.h"
 #include "gameui_util.h"

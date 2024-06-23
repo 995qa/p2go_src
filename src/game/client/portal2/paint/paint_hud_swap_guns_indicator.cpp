@@ -5,10 +5,10 @@
 #include "cbase.h"
 #include "hudelement.h"
 #include "iclientmode.h"
-#include <vgui_controls/editablepanel.h>
-#include <vgui_controls/imagepanel.h>
-#include <vgui/ivgui.h>
-#include <vgui/isurface.h>
+#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/ImagePanel.h>
+#include <vgui/IVGui.h>
+#include <vgui/ISurface.h>
 
 #include "c_portal_player.h"
 #include "view.h"

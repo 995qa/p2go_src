@@ -191,7 +191,7 @@ void CBaseHLCombatWeapon::WeaponIdle( void )
 	//See if we should idle high or low
 	if ( WeaponShouldBeLowered() )
 	{
-#if !defined( CLIENT_DLL )
+#if !defined( CLIENT_DLL ) && !defined( PORTAL2 )
 		CHL2_Player *pPlayer = dynamic_cast<CHL2_Player*>(GetOwner());
 
 		if( pPlayer )

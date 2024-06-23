@@ -779,11 +779,15 @@ void CMatchTitle::FireGameEvent( IGameEvent *pIGameEvent )
 	IMatchSession *pMatchSession = g_pMatchFramework->GetMatchSession();
 	if ( !pMatchSession )
 		return;
+
 	KeyValues *pSessionSettings = pMatchSession->GetSessionSettings();
 	char const *szGameServer = pSessionSettings->GetString( "server/server", "" );
 	char const *szSystemLock = pSessionSettings->GetString( "system/lock", "" );
 	if ( ( !szGameServer || !*szGameServer ) &&
 		( !szSystemLock || !*szSystemLock ) )
+		return;
+
+	if( !pMatchSession->GetSessionSystemData() )
 		return;
 
 	// Also don't run on the client when there's a host

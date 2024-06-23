@@ -4,9 +4,9 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include <vgui/vgui.h>
 #include <vgui_controls/EditablePanel.h>
-#include "vgui_controls/phandle.h"
+#include "vgui_controls/PHandle.h"
 
 // == MANAGED_CLASS_DECLARATIONS_START: Do not edit by hand ==
 class vgui::ImagePanel;

@@ -17,11 +17,12 @@ $Configuration
 		$PreprocessorDefinitions		"$BASE;fopen=dont_use_fopen" [$WINDOWS]
 		$PreprocessorDefinitions		"$BASE;ENABLE_CHROMEHTMLWINDOW"
 //		$TreatWchar_tAsBuiltinType		"No"
+		$AdditionalIncludeDirectories		"$BASE;/usr/include/freetype2/"
 	}
 
 	$Linker
 	{
-		$SystemLibraries                	"iconv" [$OSXALL]
+		$SystemLibraries			"iconv" [$OSXALL]
 		$SystemFrameworks			"Carbon" [$OSXALL]
 		$GCC_ExtraLinkerFlags                   "-L/usr/lib32 -L/usr/lib -L/usr/lib/i386-linux-gnu" [$LINUXALL]
 		$SystemLibraries                        "fontconfig;freetype;SDL2"			[$LINUXALL]

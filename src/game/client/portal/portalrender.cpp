@@ -13,7 +13,7 @@
 #include "c_pixel_visibility.h"
 #include "glow_overlay.h"
 #include "portal_render_targets.h" //depth doubler
-#include "materialsystem/ITexture.h"
+#include "materialsystem/itexture.h"
 #include "toolframework/itoolframework.h"
 #include "tier1/keyvalues.h"
 #include "view_scene.h"

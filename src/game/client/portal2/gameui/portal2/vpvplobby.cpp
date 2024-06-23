@@ -5,15 +5,15 @@
 //=====================================================================================//
 
 #include "vpvplobby.h"
-#include "KeyValues.h"
-#include "VGenericConfirmation.h"
-#include "VGenericPanelList.h"
-#include "VFooterPanel.h"
+#include "keyvalues.h"
+#include "vgenericconfirmation.h"
+#include "vgenericpanellist.h"
+#include "vfooterpanel.h"
 #include "gameui_util.h"
 #include "GameUI/IGameUI.h"
-#include "EngineInterface.h"
-#include "VHybridButton.h"
-#include "VGameSettings.h"
+#include "engineinterface.h"
+#include "vhybridbutton.h"
+#include "vgamesettings.h"
 
 #include "vgui_controls/Button.h"
 #include "vgui_controls/ImagePanel.h"
@@ -22,12 +22,12 @@
 #include "vgui/ILocalize.h"
 #include "vgui/ISurface.h"
 #include "vgui/IVGui.h"
-#include "FileSystem.h"
+#include "filesystem.h"
 
 #include "fmtstr.h"
 #include "smartptr.h"
 
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 #include "globalvars_base.h"
 extern CGlobalVarsBase *gpGlobals;

@@ -6,13 +6,13 @@
 //
 //=============================================================================//
 #include <cbase.h>
-#include "OptionsSubPortal.h"
-#include "CvarToggleCheckButton.h"
+#include "optionssubportal.h"
+#include "cvartogglecheckbutton.h"
 #include "vgui_controls/ComboBox.h"
 
-#include "EngineInterface.h"
+#include "engineinterface.h"
 
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui/IScheme.h>
 #include "tier1/convar.h"
 #include <stdio.h>

@@ -12,7 +12,7 @@
 #endif
 
 #include "baseanimating.h"
-#include "PortalSimulation.h"
+#include "portalsimulation.h"
 #include "pvs_extender.h"
 #include "portal_base2d_shared.h"
 

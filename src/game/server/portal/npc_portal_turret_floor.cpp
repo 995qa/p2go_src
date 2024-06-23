@@ -15,7 +15,7 @@
 #include "rope.h"
 #include "rope_shared.h"
 #include "prop_portal_shared.h"
-#include "sprite.h"
+#include "Sprite.h"
 #include "particle_parse.h"
 
 ConVar sv_portal_turret_fire_cone_z_tolerance("sv_portal_turret_fire_cone_z_tolerance", "45.0", FCVAR_CHEAT, "The max height of the turrets firing view cone (in degrees)", true, 0.0f, true, 180.0f);

@@ -8,9 +8,9 @@
 #include "cbase.h"
 #include "EnvMessage.h"
 #include "engine/IEngineSound.h"
-#include "KeyValues.h"
+#include "keyvalues.h"
 #include "filesystem.h"
-#include "Color.h"
+#include "color.h"
 #include "GameStats.h"
 #include "portal2_usermessages.pb.h"
 

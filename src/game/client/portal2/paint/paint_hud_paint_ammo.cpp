@@ -5,11 +5,11 @@
 #include "cbase.h"
 #include "hudelement.h"
 #include "iclientmode.h"
-#include <vgui_controls/editablepanel.h>
-#include <vgui_controls/progressbar.h>
-#include <vgui_controls/label.h>
-#include <vgui/ivgui.h>
-#include <vgui/isurface.h>
+#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/ProgressBar.h>
+#include <vgui_controls/Label.h>
+#include <vgui/IVGui.h>
+#include <vgui/ISurface.h>
 
 #include "paint/paint_color_manager.h"
 #include "c_weapon_paintgun.h"
@@ -108,7 +108,7 @@ void CHUDPaintAmmo::OnTick( void )
 
 			if( cl_debug_paint_ammo_bar.GetBool() )
 			{
-				DevMsg( "Max: %d, Ammo: %d, Percent: %f\n",  paintgun_max_ammo, pPaintGun->GetPaintAmmo(), flAmmo );
+				DevMsg( "Max: %d, Ammo: %d, Percent: %f\n",  paintgun_max_ammo.GetInt(), pPaintGun->GetPaintAmmo(), flAmmo );
 			}
 
 			//GetHud().DrawProgressBar( 300, 300, 10, 100, flAmmo, Color( 255, 0, 255, 255 ), CHud::HUDPB_VERTICAL );

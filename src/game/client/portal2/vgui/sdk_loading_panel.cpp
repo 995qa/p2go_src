@@ -100,7 +100,7 @@ void CSDK_Loading_Panel::Init( void )
 	};
 
 	int iChosen = RandomInt(0,13);
-	Q_snprintf(m_szLoadingPic, sizeof(m_szLoadingPic), pics[iChosen]);
+	Q_snprintf(m_szLoadingPic, sizeof(m_szLoadingPic), "%s", pics[iChosen]);
 
 	ListenForGameEvent( "server_spawn" );
 

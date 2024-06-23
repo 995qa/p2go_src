@@ -8,7 +8,7 @@
 #include "mm_title_richpresence.h"
 #include "portal2.spa.h"
 #include "matchmaking/portal2/imatchext_portal2.h"
-#include "filesystem/ixboxinstaller.h"
+#include "filesystem/IXboxInstaller.h"
 
 #include "filesystem.h"
 #include "vstdlib/random.h"
@@ -150,7 +150,7 @@ public:
 	}
 
 	// Retrieves the indexed formula from the match system settings file. (MatchSystem.360.res)
-	char const *CMatchTitleGameSettingsMgr::GetFormulaAverage( int index )
+	char const *GetFormulaAverage( int index )
 	{
 		return "newValue";
 	}

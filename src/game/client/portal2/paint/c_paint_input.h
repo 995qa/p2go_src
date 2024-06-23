@@ -16,7 +16,7 @@
 #include "mathlib/vector.h"
 #include "kbutton.h"
 #include "ehandle.h"
-#include "inputsystem/analogcode.h"
+#include "inputsystem/AnalogCode.h"
 #include "shareddefs.h"
 
 

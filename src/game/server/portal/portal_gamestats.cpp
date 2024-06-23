@@ -6,7 +6,7 @@
 
 #include "cbase.h"
 #include "portal_gamestats.h"
-#include "tier1/UtlBuffer.h"
+#include "tier1/utlbuffer.h"
 #include "portal_player.h"
 #include "matchmaking/imatchframework.h"
 #include "portal_gamerules.h"
@@ -834,16 +834,19 @@ void CPortalStatsController::LevelStart( float flDisplayTime )
 	m_flTransitionTime = -1.0;
 }
 
+// TODO: get rid of gotos
 void CPortalStatsController::LevelEnd( float flDisplayTime )
 {
 	CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayerOrListenServerHost();
+
+	IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
 
 	if (pLocalPlayer->GetBonusChallenge() <= 0)
 	{
 		flDisplayTime = 0.0;
 		goto EndSpot;
 	}
-	IMatchSession *pSession = g_pMatchFramework->GetMatchSession();
+
 	if (pSession)
 	{
 		KeyValues *pSettings = pSession->GetSessionSettings();
@@ -986,12 +989,12 @@ void ReadLeaderboard()
 	CFmtStrN<256> challenge_besttime( "challenge_besttime_%s", pszMapName );
 	KeyValues *pBestTimeKV = new KeyValues( challenge_besttime.Access() );
 	pBestTimeKV->SetInt( ":refresh", 1 );
-	pBestTimeKV->SetUint64( "besttime", 0xFFFFFFFFFFFFFFFFui64 );
+	pBestTimeKV->SetUint64( "besttime", 0xFFFFFFFFFFFFFFFFu );
 
 	CFmtStrN<256> challenge_portals;( "challenge_portals_%s", pszMapName );
 	KeyValues *pPortalsKV = new KeyValues( challenge_portals.Access() );
 	pPortalsKV->SetInt( ":refresh", 1 );
-	pPortalsKV->SetUint64( "portals", 0xFFFFFFFFFFFFFFFFui64 );
+	pPortalsKV->SetUint64( "portals", 0xFFFFFFFFFFFFFFFFu );
 	
 	KeyValues *pReadLeaderboardKV = new KeyValues( "read_leaderboard" );
 	pReadLeaderboardKV->AddSubKey( pBestTimeKV );

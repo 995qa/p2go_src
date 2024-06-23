@@ -1,7 +1,7 @@
 #ifndef _DEFINED_SDK_VGUI_MUSIC_IMPORTER_H
 #define _DEFINED_SDK_VGUI_MUSIC_IMPORTER_H
 
-#include <vgui/VGUI.h>
+#include <vgui/vgui.h>
 #include "vgui_controls/FileOpenDialog.h"
 
 class vgui::IScheme;

@@ -20,7 +20,7 @@
 #include "engine/IEngineSound.h"
 #include "ndebugoverlay.h"
 #include "soundscape.h"
-#include "AI_ResponseSystem.h"
+#include "ai_responsesystem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

@@ -1037,6 +1037,7 @@ void SaveSurfAtCrossHair()
 
 void DebugDrawLightmapAtCrossHair()
 {
+#if 0
 	return;
 	IMaterial *pMaterial;
 	int lightmapPageSize[2];
@@ -1071,6 +1072,7 @@ void DebugDrawLightmapAtCrossHair()
 
 	meshBuilder.End();
 	pMesh->Draw();
+#endif
 #endif
 }
 

@@ -10,14 +10,14 @@
 
 #include <time.h>
 #include "vpuzzlemakermychambers.h"
-#include "VFooterPanel.h"
-#include "VHybridButton.h"
-#include "EngineInterface.h"
+#include "vfooterpanel.h"
+#include "vhybridbutton.h"
+#include "engineinterface.h"
 #include "IGameUIFuncs.h"
 #include "gameui_util.h"
 #include "vgui/ISurface.h"
-#include "VGenericConfirmation.h"
-#include "VGenericPanelList.h"
+#include "vgenericconfirmation.h"
+#include "vgenericpanellist.h"
 #include "gameui/portal2/vdialoglistbutton.h"
 #include "vpuzzlemakeruilistitem.h"
 #include "puzzlemaker/puzzlemaker.h"
@@ -25,7 +25,7 @@
 #include "vpuzzlemakersavedialog.h"
 #include "vpuzzlemakerexitconfirmation.h"
 #include "bitmap/tgaloader.h"
-#include "vgui_controls/imagepanel.h"
+#include "vgui_controls/ImagePanel.h"
 #include "imageutils.h"
 #include "keyvalues.h"
 

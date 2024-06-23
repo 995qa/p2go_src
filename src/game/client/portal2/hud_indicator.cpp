@@ -1,7 +1,7 @@
 #include "cbase.h"
 #include "hudelement.h"
 #include "vgui_controls/panel.h"
-#include "vgui_controls/editablepanel.h"
+#include "vgui_controls/EditablePanel.h"
 #include "vgui_controls/MessageMap.h"
 
 

@@ -5,7 +5,7 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui/IScheme.h>

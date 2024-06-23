@@ -4,12 +4,12 @@
 //
 //=====================================================================================//
 
-#include "VFlyoutMenu.h"
-#include "VGenericPanelList.h"
-#include "VFooterPanel.h"
-#include "VHybridButton.h"
+#include "vflyoutmenu.h"
+#include "vgenericpanellist.h"
+#include "vfooterpanel.h"
+#include "vhybridbutton.h"
 
-#include "tier1/KeyValues.h"
+#include "tier1/keyvalues.h"
 #include "vgui/ISurface.h"
 #include "vgui/IScheme.h"
 
@@ -285,7 +285,7 @@ void FlyoutMenu::ApplySettings( KeyValues* inResourceData )
 	const char* resFile = inResourceData->GetString( "ResourceFile", NULL );
 	if ( resFile )
 	{
-		V_snprintf( m_resFile, DEFAULT_STR_LEN, resFile );
+		V_snprintf( m_resFile, DEFAULT_STR_LEN, "%s", resFile );
 		LoadControlSettings( resFile );
 	}
 

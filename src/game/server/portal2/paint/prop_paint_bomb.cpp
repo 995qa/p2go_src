@@ -18,7 +18,7 @@
 #include "paint/paint_cleanser_manager.h"
 #include "trigger_paint_cleanser.h"
 #include "collisionutils.h"
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

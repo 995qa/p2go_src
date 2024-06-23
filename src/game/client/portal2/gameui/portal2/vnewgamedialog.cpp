@@ -5,14 +5,14 @@
 //=====================================================================================//
 
 #include "vnewgamedialog.h"
-#include "VFooterPanel.h"
-#include "VGenericPanelList.h"
+#include "vfooterpanel.h"
+#include "vgenericpanellist.h"
 #include "vgui_controls/ImagePanel.h"
 #include "vgui/ISurface.h"
 #include "vgui/IVGui.h"
-#include "vgui/ilocalize.h"
+#include "vgui/ILocalize.h"
 
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

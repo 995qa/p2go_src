@@ -17,7 +17,7 @@
 #include "portal_mp_gamerules.h"
 #include "weapon_portalgun.h"
 #include "portal/weapon_physcannon.h"
-#include "KeyValues.h"
+#include "keyvalues.h"
 #include "team.h"
 #include "eventqueue.h"
 #include "weapon_portalbase.h"
@@ -1206,7 +1206,7 @@ void CPortal_Player::OnFullyConnected()
 		const char *szVideoCommand = "stopvideos_fadeout";
 		char szClientCmd[256];
 		Q_snprintf( szClientCmd, sizeof(szClientCmd), "%s %f\n", szVideoCommand, 1.5f );
-		engine->ClientCommand( edict(), szClientCmd );
+		engine->ClientCommand( edict(), "%s", szClientCmd );
 
 		ChallengePlayersReady();
 	}
@@ -1559,7 +1559,7 @@ void CPortal_Player::SetPlayerModel( void )
 		}
 
 		Q_snprintf( szReturnString, sizeof (szReturnString ), "cl_playermodel %s\n", pszCurrentModelName );
-		engine->ClientCommand ( edict(), szReturnString );
+		engine->ClientCommand ( edict(), "%s", szReturnString );
 
 		szModelName = pszCurrentModelName;
 	}
@@ -1573,7 +1573,7 @@ void CPortal_Player::SetPlayerModel( void )
 		char szReturnString[512];
 
 		Q_snprintf( szReturnString, sizeof (szReturnString ), "cl_playermodel %s\n", szModelName );
-		engine->ClientCommand ( edict(), szReturnString );
+		engine->ClientCommand ( edict(), "%s", szReturnString );
 	}
 
 	bool allowPrecache = CBaseEntity::IsPrecacheAllowed();
@@ -2284,7 +2284,7 @@ void CPortal_Player::PlayerTransitionCompleteThink( void )
 	const char *szVideoCommand = "stop_transition_videos_fadeout";
 	char szClientCmd[256];
 	Q_snprintf( szClientCmd, sizeof(szClientCmd), "%s %f\n", szVideoCommand, 1.5f );
-	engine->ClientCommand( edict(), szClientCmd );
+	engine->ClientCommand( edict(), "%s", szClientCmd );
 
 	if ( mp_dev_wait_for_other_player.GetBool() && ( PortalMPGameRules() && !PortalMPGameRules()->IsCommunityCoopHub() ) )
 	{

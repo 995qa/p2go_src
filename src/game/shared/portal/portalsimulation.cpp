@@ -11,7 +11,7 @@
 #include "vphysics_interface.h"
 #include "physics.h"
 #include "portal_shareddefs.h"
-#include "StaticCollisionPolyhedronCache.h"
+#include "staticcollisionpolyhedroncache.h"
 #include "model_types.h"
 #include "filesystem.h"
 #include "collisionutils.h"
@@ -55,7 +55,7 @@ extern IPhysicsConstraintEvent* g_pConstraintEvents;
 
 #if defined( DEBUG_PORTAL_COLLISION_ENVIRONMENTS ) || defined( DEBUG_PORTAL_SIMULATION_CREATION_TIMES )
 #	if !defined( PORTAL_SIMULATORS_EMBED_GUID )
-#		pragma message( __FILE__ "(" __LINE__AS_STRING ") : error custom: Portal simulators require a GUID to debug, enable the GUID in PortalSimulation.h ." )
+#		pragma message( __FILE__ "(" __LINE__AS_STRING ") : error custom: Portal simulators require a GUID to debug, enable the GUID in portalsimulation.h ." )
 #	endif
 #endif
 

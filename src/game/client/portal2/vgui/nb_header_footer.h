@@ -4,7 +4,7 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include <vgui/vgui.h>
 #include <vgui_controls/EditablePanel.h>
 
 #define ASW_BINK_MOVIES

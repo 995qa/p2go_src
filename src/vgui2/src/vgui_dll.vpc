@@ -18,6 +18,7 @@ $Configuration
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;DONT_PROTECT_FILEIO_FUNCTIONS"
 //		$TreatWchar_tAsBuiltinType		"No"
+		$AdditionalIncludeDirectories		"$BASE;/usr/include/freetype2/"
 	}
 
 	$Linker [!$PS3]

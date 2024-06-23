@@ -6,10 +6,10 @@
 
 #include "vsingleplayer.h"
 #include "vsaveloadgamedialog.h"
-#include "VFooterPanel.h"
-#include "VHybridButton.h"
+#include "vfooterpanel.h"
+#include "vhybridbutton.h"
 #include "vgui_controls/Button.h"
-#include "KeyValues.h"
+#include "keyvalues.h"
 #include "vgenericconfirmation.h"
 #include "filesystem.h"
 //#include "vportalleaderboard.h"
@@ -18,7 +18,7 @@
 #include "sysutil/sysutil_savedata.h"
 #endif
 
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

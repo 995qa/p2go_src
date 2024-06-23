@@ -10,7 +10,7 @@
 #include "ai_senses.h"
 #include "ai_memory.h"
 #include "prop_portal_shared.h"
-#include "sprite.h"
+#include "Sprite.h"
 #include "paint/player_pickup_paint_power_user.h"
 
 

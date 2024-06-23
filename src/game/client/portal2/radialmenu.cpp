@@ -21,14 +21,14 @@
 #include "keyvalues.h"
 #include <filesystem.h>
 #include "c_team.h"
-#include "vgui/isurface.h"
+#include "vgui/ISurface.h"
 #include "iclientmode.h"
 #include "c_portal_player.h"
 #include "hud_locator_target.h"
 #include "c_user_message_register.h"
 #include "portal_placement.h"
 #include "glow_outline_effect.h"
-#include "soundemittersystem/isoundemittersystembase.h"
+#include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "c_prop_portal.h"
 #include "c_trigger_tractorbeam.h"
 #include "c_projectedwallentity.h"
@@ -36,10 +36,10 @@
 #include "c_projectedwallentity.h"
 #include "portal2_usermessages.pb.h"
 
-#include "vgui/cursor.h"
+#include "vgui/Cursor.h"
 #include "fmtstr.h"
 #include "vgui_int.h"
-#include "vgui/IVgui.h"
+#include "vgui/IVGui.h"
 #include <game/client/iviewport.h>
 
 #include "IGameUIFuncs.h"
@@ -52,7 +52,7 @@
 #endif
 #include "radialbutton.h"
 
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -1844,7 +1844,7 @@ void OpenRadialMenu( const char *lpszTargetClassification, EHANDLE hTargetEntity
 		}
 	}
 
-	V_snprintf( s_radialMenuName[ nSlot ], sizeof( s_radialMenuName[ nSlot ] ), pchTarget );
+	V_snprintf( s_radialMenuName[ nSlot ], sizeof( s_radialMenuName[ nSlot ] ), "%s", pchTarget );
 	pRadialMenu->SetData( menuKey );
 
 	pRadialMenu->SetRadialType( menuType );

@@ -103,7 +103,7 @@ void CPortal2ResearchDataTracker::IncrementDeath( CPortal_Player *pPortalPlayer 
 void CPortal2ResearchDataTracker::SetPlayerName( CPortal_Player *pPortalPlayer ) // Purpose: Completely restored
 { // Line 104
     int nStatIndex = GetStatIndex( pPortalPlayer );
-    Q_snprintf( m_pszName[ nStatIndex ], sizeof( m_pszName[ nStatIndex ] ), pPortalPlayer->GetPlayerName() );
+    Q_snprintf( m_pszName[ nStatIndex ], sizeof( m_pszName[ nStatIndex ] ), "%s", pPortalPlayer->GetPlayerName() );
 }
 
 

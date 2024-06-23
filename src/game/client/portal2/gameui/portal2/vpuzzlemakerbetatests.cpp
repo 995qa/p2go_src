@@ -9,18 +9,18 @@
 #if defined( PORTAL2_PUZZLEMAKER )
 
 #include "vpuzzlemakerbetatests.h"
-#include "VFooterPanel.h"
-#include "VHybridButton.h"
-#include "EngineInterface.h"
+#include "vfooterpanel.h"
+#include "vhybridbutton.h"
+#include "engineinterface.h"
 #include "IGameUIFuncs.h"
 #include "gameui_util.h"
 #include "vgui/ISurface.h"
-#include "VGenericConfirmation.h"
-#include "VGenericPanelList.h"
+#include "vgenericconfirmation.h"
+#include "vgenericpanellist.h"
 #include "gameui/portal2/vdialoglistbutton.h"
 #include "vpuzzlemakeruilistitem.h"
 
-#include "FileSystem.h"
+#include "filesystem.h"
 
 #if !defined( _X360 ) && !defined( _PS3 )
 #include "gc_clientsystem.h"

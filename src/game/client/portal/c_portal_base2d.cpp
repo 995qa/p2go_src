@@ -10,9 +10,9 @@
 #include "portal_shareddefs.h"
 #include "clientsideeffects.h"
 #include "tier0/vprof.h"
-#include "materialsystem/ITexture.h"
+#include "materialsystem/itexture.h"
 #include "hud_macros.h"
-#include "IGameSystem.h"
+#include "igamesystem.h"
 #include "view.h"						// For MainViewOrigin()
 #include "clientleafsystem.h"			// For finding the leaves our portals are in
 #include "portal_render_targets.h"		// Access to static references to Portal-specific render textures
@@ -26,7 +26,7 @@
 #include "c_baseprojectedentity.h"
 #include "c_basetempentity.h"
 #include "c_combatweaponworldclone.h"
-#include "C_Portal_Player.h"
+#include "c_portal_player.h"
 #include "prediction.h"
 #include "tier1/callqueue.h"
 

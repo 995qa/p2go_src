@@ -168,6 +168,9 @@ $Project "Client (Portal 2)"
 			
 		//$File	"c_team_objectiveresource.cpp"
 		//$File	"c_team_objectiveresource.h"
+
+		$File	"c_combatweaponworldclone.cpp"
+		$File	"c_combatweaponworldclone.h"
 		
 		$File	"$SRCDIR\common\language.cpp"
 		{
@@ -321,7 +324,7 @@ $Project "Client (Portal 2)"
 						"portal2\gameui\labeledcommandcombobox.cpp" \
 						"portal2\gameui\loadingdialog.cpp" \
 						"portal2\gameui\loadingtippanel.cpp" \
-						"portal2\gameui\logofile.cpp" \
+						//"portal2\gameui\logofile.cpp" \
 						"portal2\gameui\modinfo.cpp" \
 						"portal2\gameui\mousemessageforwardingpanel.cpp" \
 						"portal2\gameui\multiplayeradvanceddialog.cpp" \
@@ -456,8 +459,8 @@ $Project "Client (Portal 2)"
 			$File	"portal\c_npc_rocket_turret.cpp"
 			$File	"portal\c_portal_player.cpp"
 			$File	"portal\c_portal_player.h"
-			$File	"portal\C_PortalGhostRenderable.cpp"
-			$File	"portal\C_PortalGhostRenderable.h"
+			$File	"portal\c_portalghostrenderable.cpp"
+			$File	"portal\c_portalghostrenderable.h"
 			$File	"portal\c_prop_energy_ball.cpp"
 			$File	"portal\c_prop_mirror.cpp"
 			$File	"portal\c_prop_portal.cpp"
@@ -474,15 +477,15 @@ $Project "Client (Portal 2)"
 			$File	"$SRCDIR\game\shared\portal\env_portal_path_track_shared.h"
 			$File	"portal\fx_portal.cpp"
 			$File	"portal\hud_quickinfo.cpp"
-			$File	"portal\MaterialProxy_Portal_PickAlphaMask.cpp"
+			$File	"portal\materialproxy_portal_pickalphamask.cpp"
 			$File	"portal\materialproxy_portalstatic.cpp"
 			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.cpp"
 			$File	"$SRCDIR\game\shared\Multiplayer\multiplayer_animstate.h"
 			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_collideable_enumerator.h"
 			$File	"portal\portal_credits.cpp"
-			$File	"portal\Portal_DynamicMeshRenderingUtils.cpp"
-			$File	"portal\Portal_DynamicMeshRenderingUtils.h"
+			$File	"portal\portal_dynamicmeshrenderingutils.cpp"
+			$File	"portal\portal_dynamicmeshrenderingutils.h"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_gamemovement.h"
 			$File	"$SRCDIR\game\shared\portal\portal_gamestats_shared.cpp"
@@ -511,12 +514,12 @@ $Project "Client (Portal 2)"
 			$File	"$SRCDIR\game\shared\portal\prop_portal_shared.h"
 			$File	"$SRCDIR\game\shared\portal\portal_base2d_shared.cpp"
 			$File	"$SRCDIR\game\shared\portal\portal_base2d_shared.h"
-			$File	"$SRCDIR\game\shared\portal\PortalSimulation.cpp"
-			$File	"$SRCDIR\game\shared\portal\PortalSimulation.h"
-			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.cpp"
-			$File	"$SRCDIR\game\shared\portal\StaticCollisionPolyhedronCache.h"
-			$File	"portal\PortalRender.cpp"
-			$File	"portal\PortalRender.h"
+			$File	"$SRCDIR\game\shared\portal\portalsimulation.cpp"
+			$File	"$SRCDIR\game\shared\portal\portalsimulation.h"
+			$File	"$SRCDIR\game\shared\portal\staticcollisionpolyhedroncache.cpp"
+			$File	"$SRCDIR\game\shared\portal\staticcollisionpolyhedroncache.h"
+			$File	"portal\portalrender.cpp"
+			$File	"portal\portalrender.h"
 			$File	"portal\portalrenderable_flatbasic.cpp"
 			$File	"portal\portalrenderable_flatbasic.h"
 			$File	"portal\vgui_portal_stats_display_screen.cpp"
@@ -644,7 +647,7 @@ $Project "Client (Portal 2)"
 
 		$Folder	"Link Libraries" [$POSIX]
 		{
-			$ImplibExternal"$SRCDIR/lib/$PLATFORM/release/libpng" [$LINUX]
+			$LibExternal	"$SRCDIR/lib/$PLATFORM/release/libpng" [$LINUX]
 		}
 
 		$Folder	"Link Libraries"

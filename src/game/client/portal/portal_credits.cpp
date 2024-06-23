@@ -17,7 +17,7 @@
 #include <vgui_controls/AnimationController.h>
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
-#include "KeyValues.h"
+#include "keyvalues.h"
 #include "filesystem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

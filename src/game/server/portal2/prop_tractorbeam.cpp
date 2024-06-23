@@ -144,6 +144,7 @@ void CPropTractorBeamProjector::Project( void )
 {
 	BaseClass::Project();
 
+#if !defined( LINUX ) // LINUXTODO:
 	m_vEndPos = m_hFirstChild->GetEndPoint();
 
 	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
@@ -209,6 +210,7 @@ void CPropTractorBeamProjector::Project( void )
 
 		controller.Play( m_sndAmbientSound, 1.0, 100.0, 0 );
 	}
+#endif
 }
 
 void CPropTractorBeamProjector::Shutdown( void )

@@ -7,22 +7,22 @@
 #include <cbase.h>
 #include <time.h>
 
-#include "MultiplayerAdvancedDialog.h"
+#include "multiplayeradvanceddialog.h"
 
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/ListPanel.h>
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/MessageBox.h>
 #include <vgui_controls/CheckButton.h>
 #include <vgui_controls/ComboBox.h>
 #include <vgui_controls/TextEntry.h>
-#include "PanelListPanel.h"
+#include "panellistpanel.h"
 #include <vgui/IInput.h>
 
-#include "FileSystem.h"
+#include "filesystem.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -412,7 +412,7 @@ void CInfoDescription::WriteScriptHeader( FileHandle_t fp )
 	tm newtime;
 	Plat_GetLocalTime( &newtime );
 
-	g_pFullFileSystem->FPrintf( fp, (char *)getHint() );
+	g_pFullFileSystem->FPrintf( fp, "%s", (char *)getHint() );
 
 	char timeString[64];
 	Plat_GetTimeString( &newtime, timeString, sizeof( timeString ) );

@@ -4,14 +4,14 @@
 //
 //=====================================================================================//
 
-#include "VQuickJoin.h"
-#include "VGenericPanelList.h"
-#include "VHybridButton.h"
-#include "VMainMenu.h"
-#include "EngineInterface.h"
+#include "vquickjoin.h"
+#include "vgenericpanellist.h"
+#include "vhybridbutton.h"
+#include "vmainmenu.h"
+#include "engineinterface.h"
 #include "gameui_util.h"
 
-#include "tier1/KeyValues.h"
+#include "tier1/keyvalues.h"
 #include "vgui/ILocalize.h"
 #include "vgui_controls/Tooltip.h"
 #include "vgui_controls/ImagePanel.h"

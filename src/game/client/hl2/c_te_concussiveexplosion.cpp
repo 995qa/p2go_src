@@ -8,7 +8,7 @@
 #include "c_te_particlesystem.h"
 #include "fx.h"
 #include "ragdollexplosionenumerator.h"
-#include "tier1/KeyValues.h"
+#include "tier1/keyvalues.h"
 #include "toolframework_client.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

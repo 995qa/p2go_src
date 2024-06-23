@@ -12,7 +12,7 @@
 #include "../hud_crosshair.h"
 
 #include "VGuiMatSurface/IMatSystemSurface.h"
-#include <KeyValues.h>
+#include <keyvalues.h>
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>

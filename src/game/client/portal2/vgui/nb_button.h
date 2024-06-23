@@ -4,7 +4,7 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include <vgui/vgui.h>
 #include <vgui_controls/Button.h>
 
 // == MANAGED_CLASS_DECLARATIONS_START: Do not edit by hand ==

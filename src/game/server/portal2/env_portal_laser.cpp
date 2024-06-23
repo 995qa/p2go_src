@@ -4,7 +4,7 @@
 #include "portal_util_shared.h"
 #include "player.h" 
 #include "particle_parse.h"
-#include "ieffects.h"
+#include "IEffects.h"
 #include "util_shared.h"
 #include "prop_weightedcube.h"
 #include "point_laser_target.h"
@@ -247,6 +247,7 @@ void CPortalLaser::CreateSoundProxies( void )
 
 void CPortalLaser::UpdateSoundPosition( Vector &vecStart, Vector &vecEnd )
 {
+#if !defined( LINUX ) // LINUXTODO:
 	Vector vEyePosition;
 	Vector vecNearestPoint;
 	int i;
@@ -289,6 +290,7 @@ void CPortalLaser::UpdateSoundPosition( Vector &vecStart, Vector &vecEnd )
 	}
 	if (i != (MAX_PLAYERS-1))
 		goto LOOP_END;
+#endif
 }
 
 int CPortalLaser::UpdateTransmitState( void )
@@ -385,6 +387,7 @@ void CPortalLaser::TurnOffLaserSound( void )
 void CPortalLaser::StrikeThink(void)
 {
 	VPROF("CPortalLaser::StrikeThink");
+#if !defined( LINUX ) // LINUXTODO:
 	Vector vecDir;
 	Vector vecOrigin;
 
@@ -482,6 +485,7 @@ LABEL_11:
 
 	if (sv_debug_laser.GetBool())
 		engine->Con_NPrintf( 0, "num lasers = %d", AutoList().Count());
+#endif
 }
 
 Vector CPortalLaser::ClosestPointOnLineSegment( const Vector &vPos )
@@ -533,6 +537,7 @@ void CPortalLaser::TurnOnGlow(void)
 
 void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeightedCube *pReflector )
 {
+#if !defined( LINUX ) // LINUXTODO:
 	trace_t tr;
 	Vector vecNewTermPoint;
 	Vector vDir;
@@ -716,10 +721,12 @@ void CPortalLaser::FireLaser( Vector &vecStart, Vector &vecDirection, CPropWeigh
 			UTIL_SetOrigin( m_pPlacementHelper, tr.endpos );
 		BeamDamage( tr );
 	}
+#endif
 }
 
 CBaseEntity *CPortalLaser::TraceLaser( bool bIsFirstTrace, Vector &vecStart, Vector &vecDirection, float &flTotalBeamLength, trace_t &tr, PortalLaserInfoList_t &infoList, Vector *pVecAutoAimOffset )
 {
+#if !defined( LINUX ) // LINUXTODO:
 	CBaseEntity *pHitEntity;
 
 	flTotalBeamLength = 0.0;
@@ -860,6 +867,9 @@ LABEL_25:
 		} while (v23 != -1);
 	}
 	return pHitEntity;
+#else
+	return NULL;
+#endif
 }
 
 void CPortalLaser::UpdateNextLaser( Vector &vecStart, Vector &vecDirection, CPropWeightedCube *pReflector )
@@ -897,6 +907,7 @@ void CPortalLaser::UpdateNextLaser( Vector &vecStart, Vector &vecDirection, CPro
 
 void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoList, bool bAutoAim )
 {
+#if !defined( LINUX ) // LINUXTODO:
 	float x; // xmm4_4
 	float y; // xmm3_4
 	Vector vecEnd; // [esp+4Ch] [ebp-7Ch]
@@ -1059,6 +1070,7 @@ void CPortalLaser::DamageEntitiesAlongLaser( const PortalLaserInfoList_t &infoLi
 		if ( fabs(vecDirection.z) < 0.2 )
 			goto LABEL_25;
 	}
+#endif
 }
 
 CBaseEntity *CPortalLaser::GetEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector &vecOut, PortalLaserInfoList_t &infoList, bool bIsFirstTrace )
@@ -1390,6 +1402,7 @@ void CPortalLaser::DamageEntity( CBaseEntity *pVictim, float flAmount )
 
 bool CPortalLaser::StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, Vector *pVecOut)
 {
+#if !defined( LINUX ) // LINUXTODO:
 	Vector vecDirection = vecEnd - vecStart;
 	float v33 = (sqrt(((vecDirection.x * vecDirection.x) + (vecDirection.y * vecDirection.y)) + (vecDirection.z * vecDirection.z))
 		* 0.00390625)
@@ -1581,4 +1594,7 @@ bool CPortalLaser::StrikeEntitiesAlongLaser( Vector &vecStart, Vector &vecEnd, V
 	//	(*(void(__cdecl **)(_DWORD, LaserVictimInfo_t *))(*g_pMemAlloc + 8))(g_pMemAlloc, vsrtVictims.m_Memory.m_pMemory);
 
 	return false;
+#else
+	return false;
+#endif
 }

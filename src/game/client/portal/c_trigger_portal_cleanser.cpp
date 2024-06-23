@@ -292,7 +292,7 @@ void C_TriggerPortalCleanser::UpdateParticles( void )
 			{
 
 				CNewParticleEffect *pCleanserFX = ParticleProp()->Create( "cleanser_scanline", PATTACH_CUSTOMORIGIN, -1, vec3_origin, 0 );
-			
+
 				if ( m_hCleanserFX != pCleanserFX )
 				{
 					m_hCleanserFX = pCleanserFX;
@@ -319,7 +319,7 @@ void C_TriggerPortalCleanser::UpdateParticles( void )
 				LB_UPDATEPOS:
 					CollisionProp()->CollisionToWorldSpace( CollisionProp()->OBBMins(), &vecMins );
 					vecMins.z = vecMins.z - 512.0;
-					
+
 					if ( m_bObject1InRange && m_hObject1 )
 					{
 						m_hCleanserFX->SetControlPoint( 4, m_hObject1->WorldSpaceCenter() );
@@ -328,7 +328,7 @@ void C_TriggerPortalCleanser::UpdateParticles( void )
 					{
 						m_hCleanserFX->SetControlPoint( 4, vecMins );
 					}
-					
+
 					if ( m_bObject2InRange && m_hObject2 )
 					{
 						m_hCleanserFX->SetControlPoint( 5,  m_hObject2->WorldSpaceCenter() );

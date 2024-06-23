@@ -8,12 +8,9 @@
 #define __VADDONS_H__
 
 #include "basemodui.h"
-#include "VGenericPanelList.h"
+#include "vgenericpanellist.h"
 #include "vgui_controls/CvarToggleCheckButton.h"
 #include "gameui_util.h"
-
-class CNB_Button;
-class CNB_Header_Footer;
 
 namespace BaseModUI {
 
@@ -85,7 +82,6 @@ private:
 	vgui::Label *m_LblAuthor;
 	vgui::Label *m_LblDescription;
 	vgui::ImagePanel *m_ImgAddonIcon;
-	CNB_Header_Footer *m_pHeaderFooter;
 	vgui::CvarToggleCheckButton<CGameUIConVarRef> *m_pDoNotAskForAssociation;
 
 	vgui::EditablePanel *m_pSupportRequiredPanel;

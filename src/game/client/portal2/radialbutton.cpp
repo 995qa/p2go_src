@@ -15,7 +15,7 @@
 #include "keyvalues.h"
 #include <filesystem.h>
 #include "c_team.h"
-#include "vgui/isurface.h"
+#include "vgui/ISurface.h"
 #include "iclientmode.h"
 #include "portal_gamerules.h"
 //#include "asw_vgui_ingame_panel.h"
@@ -26,7 +26,7 @@
 
 #include "radialmenu.h"
 #include "radialbutton.h"
-#include "vgui/cursor.h"
+#include "vgui/Cursor.h"
 #include "fmtstr.h"
 #include "vgui_int.h"
 

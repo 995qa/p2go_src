@@ -13,8 +13,8 @@
 #endif
 
 #include "c_baseentity.h"
-#include "PortalRender.h"
-#include "Portal_DynamicMeshRenderingUtils.h"
+#include "portalrender.h"
+#include "portal_dynamicmeshrenderingutils.h"
 #include "ScreenSpaceEffects.h"
 
 class CPortalRenderable_Func_LiquidPortal : public CPortalRenderable

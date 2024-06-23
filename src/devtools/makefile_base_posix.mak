@@ -139,7 +139,7 @@ else
 endif
 
 WARN_FLAGS += -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-value -Wno-missing-field-initializers -Wno-sign-compare -Wno-reorder -Wno-invalid-offsetof -Wno-float-equal -Wno-switch -fdiagnostics-show-option -Wformat -Werror=format-security -Wstrict-aliasing=2
-
+WARN_FLAGS += -Wformat -Wformat-security -fdiagnostics-color -Wno-template-id-cdtor -Wno-class-memaccess -Wno-ignored-attributes
 
 ifeq ($(OS),Linux)
 	# We should always specify -Wl,--build-id, as documented at:
@@ -148,9 +148,24 @@ ifeq ($(OS),Linux)
 
 	UUID_LIB =
 
+	ifeq ($(USE_LOCAL_BINDIR),1)
+		# linux desktop client flags
+		VALVE_BINDIR =
+		DEFINES +=
+		GCC_VER =
+
+		MARCH_TARGET = core2
+
+		# On dedicated servers, some plugins depend on global variable symbols in addition to functions.
+		# So symbols like _Z16ClearMultiDamagev should show up when you do "nm server_srv.so" in TF2.
+		STRIP_FLAGS = -x
+
+		LIBCPP_EXT = so
+
+		UUID_LIB = -luuid
 	# Set USE_STEAM_RUNTIME to build with the Steam Runtime. Otherwise uses
 	# The toolchain in /valve
-	ifneq ($(USE_STEAM_RUNTIME),1)
+	else ifeq ($(USE_STEAM_RUNTIME),0)
 		# dedicated server flags
 		ifeq ($(TARGET_PLATFORM),linux64)
 			VALVE_BINDIR = /valve/bin64/
@@ -161,7 +176,6 @@ ifeq ($(OS),Linux)
 		endif
 		STRIP_FLAGS = -x
 		LIBCPP_EXT = a
-
 	else
 		# linux desktop client flags
 		VALVE_BINDIR =

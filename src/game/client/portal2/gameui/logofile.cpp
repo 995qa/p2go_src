@@ -10,10 +10,10 @@
 #include <windows.h>
 #endif
 #include <stdio.h>
-#include "UtlBuffer.h"
-#include <vgui/VGUI.h>
+#include "utlbuffer.h"
+#include <vgui/vgui.h>
 #include <vgui_controls/Controls.h>
-#include "FileSystem.h"
+#include "filesystem.h"
 
 // dgoodenough - select the correct stubs header based on current console
 // PS3_BUILDFIX

@@ -73,7 +73,7 @@
 #include "tier0/stackstats.h"
 
 #if defined ( PORTAL2 )
-#include "PortalSimulation.h"
+#include "portalsimulation.h"
 #include "portal2_usermessages.pb.h"
 #endif
 

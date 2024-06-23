@@ -20,7 +20,7 @@
 #include "c_trigger_catapult.h"
 #endif
 
-#include "cegclientwrapper.h"       	// Re-added for CEG stuff
+#include "CegClientWrapper.h"       	// Re-added for CEG stuff
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

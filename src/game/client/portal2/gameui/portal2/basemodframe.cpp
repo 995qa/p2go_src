@@ -22,11 +22,11 @@
 #include "basemodpanel.h"
 #include "transitionpanel.h"
 #include "vhybridbutton.h"
-#include "EngineInterface.h"
+#include "engineinterface.h"
 
-#include "VFooterPanel.h"
-#include "VGenericConfirmation.h"
-#include "VFlyoutMenu.h"
+#include "vfooterpanel.h"
+#include "vgenericconfirmation.h"
+#include "vflyoutmenu.h"
 #include "IGameUIFuncs.h"
 
 // vgui controls
@@ -35,7 +35,7 @@
 #include "vgui/IInput.h"
 #include "vgui_controls/Tooltip.h"
 #include "vgui_controls/ImagePanel.h"
-#include "vgui/ilocalize.h"
+#include "vgui/ILocalize.h"
 
 #include "filesystem.h"
 #include "fmtstr.h"
@@ -419,6 +419,9 @@ void CBaseModFrame::ExecuteCommandForEntity( char const *szEntityName )
 	if ( !szEntityName || !*szEntityName )
 		return;
 
+	if( !m_pVuiSettings )
+		return;
+
 	// Check if the virtual UI defines such command
 	for ( KeyValues *kvCmd = m_pVuiSettings->FindKey( "commands" )->GetFirstValue(); kvCmd; kvCmd = kvCmd->GetNextValue() )
 	{
@@ -444,6 +447,10 @@ void CBaseModFrame::ExecuteCommandForEntity( char const *szEntityName )
 void CBaseModFrame::GetEntityNameForControl( char const *szControlId, char chEntityName[256] )
 {
 	chEntityName[0] = 0;
+
+	if( !m_pVuiSettings )
+		return;
+
 	if ( KeyValues *kvCtrl = m_pVuiSettings->FindKey( "controls" )->FindKey( szControlId ) )
 	{
 		char const *szEntityName = kvCtrl->GetString( "entity" );
@@ -453,6 +460,9 @@ void CBaseModFrame::GetEntityNameForControl( char const *szControlId, char chEnt
 
 void CBaseModFrame::ResolveEntityName( char const *szEntityName, char chEntityName[256] )
 {
+	if( !m_pVuiSettings )
+		return;
+
 	switch ( szEntityName[0] )
 	{
 	case '^':
@@ -484,23 +494,26 @@ void CBaseModFrame::Activate()
 {
 	BaseClass::Activate();
 
-	// Navigate to default entity
-	if ( char const *szDefaultEntity = m_pVuiSettings->GetString( "default/entity", NULL ) )
+	if( m_pVuiSettings )
 	{
-		char chEntityName[256];
-		ResolveEntityName( szDefaultEntity, chEntityName );
-		g_BackgroundMapActiveControlManager.NavigateToEntity( chEntityName );
-	}
-
-	if ( char const *szDefaultControl = m_pVuiSettings->GetString( "default/control", NULL ) )
-	{
-		char const *szControlName = m_pVuiSettings->GetString( CFmtStr( "controls/%s/name", szDefaultControl ), szDefaultControl );
-		if ( vgui::Panel *pDefault = FindChildByName( szControlName ) )
+		// Navigate to default entity
+		if ( char const *szDefaultEntity = m_pVuiSettings->GetString( "default/entity", NULL ) )
 		{
-			if ( m_ActiveControl )
-				m_ActiveControl->NavigateTo();
-			else
-				pDefault->NavigateTo();
+			char chEntityName[256];
+			ResolveEntityName( szDefaultEntity, chEntityName );
+			g_BackgroundMapActiveControlManager.NavigateToEntity( chEntityName );
+		}
+
+		if ( char const *szDefaultControl = m_pVuiSettings->GetString( "default/control", NULL ) )
+		{
+			char const *szControlName = m_pVuiSettings->GetString( CFmtStr( "controls/%s/name", szDefaultControl ), szDefaultControl );
+			if ( vgui::Panel *pDefault = FindChildByName( szControlName ) )
+			{
+				if ( m_ActiveControl )
+					m_ActiveControl->NavigateTo();
+				else
+					pDefault->NavigateTo();
+			}
 		}
 	}
 
@@ -766,11 +779,14 @@ void CBaseModFrame::OnNavigateTo( const char* panelName )
 	{
 		Panel* child = GetChild(i);
 		if(child != NULL && (!Q_strcmp(panelName, child->GetName())))
-		{						
+		{
 			m_ActiveControl = child;
 
 			if ( BaseModHybridButton *pButton = dynamic_cast< BaseModHybridButton * >( m_ActiveControl ) )
 			{
+				if( !pButton || !pButton->GetCommand() )
+					break;
+
 				char const *szCommand = pButton->GetCommand()->GetString( "command" );
 				if ( char const *szControlId = StringAfterPrefix( szCommand, VIRTUAL_UI_COMMAND_PREFIX ) )
 				{
@@ -912,7 +928,7 @@ void CBaseModFrame::PerformLayout()
 			{
 				if ( m_nTitleWide )
 				{
-					// shift all the children down one tile to account for dialog frame heading
+					// shift all the children down one tile to account for dialog Frame.heading
 					y += m_nTileHeight;
 				}
 			}
@@ -1679,6 +1695,9 @@ class NavLinkUpDown : public IControlNavLinker
 void CBaseModFrame::CreateVirtualUiControls()
 {
 	if ( !IsGameConsole() )
+		return;
+
+	if( !m_pVuiSettings )
 		return;
 
 	// Null active control before deleting

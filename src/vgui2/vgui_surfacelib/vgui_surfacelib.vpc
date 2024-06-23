@@ -14,6 +14,7 @@ $Configuration
 	$Compiler
 	{
 		$PreprocessorDefinitions		"$BASE;ALLOW_TEXT_MODE=1" [$CSTRIKE_TRUNK_BUILD||$CSTRIKE_STAGING_BUILD]
+		$AdditionalIncludeDirectories		"$BASE;/usr/include/freetype2/"
 	}
 }
 

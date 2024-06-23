@@ -325,7 +325,7 @@ void CInputSystem::JoystickHotplugRemoved( int joystickId )
 	if ( info.m_pDevice == NULL )
 	{
 		info.m_nDeviceId = -1;
-		DevMsg("Got hotplug remove event for removed joystick %i, ignoring.\n");
+		DevMsg("Got hotplug remove event for removed joystick %i, ignoring.\n", joystickId);
 		return;
 	}
 

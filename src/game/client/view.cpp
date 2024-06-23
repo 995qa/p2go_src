@@ -64,7 +64,7 @@
 #endif
 
 #ifdef PORTAL
-#include "C_Prop_Portal.h" //portal surface rendering functions
+#include "c_prop_portal.h" //portal surface rendering functions
 #endif
 
 	

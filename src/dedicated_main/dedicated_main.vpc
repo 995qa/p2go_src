@@ -44,6 +44,6 @@ $Project "Dedicated_main"
 		-$Lib		"$LIBPUBLIC\tier1"
 		-$Lib		"$LIBPUBLIC\interfaces"
 		-$Implib	"$LIBPUBLIC\vstdlib"
-        $Lib     "$SRCDIR/thirdparty/telemetry/lib/libtelemetryx86.link" [$LINUX]
+		//$Lib		"$SRCDIR/thirdparty/telemetry/lib/libtelemetryx86.link" [$LINUX]
 	}
 }

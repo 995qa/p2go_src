@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include "gamestats.h"
+#include "GameStats.h"
 
 #define PORTAL_GAMESTATS_VERSION 001
 

@@ -171,7 +171,7 @@
 #endif
 
 #ifdef PORTAL
-#include "PortalRender.h"
+#include "portalrender.h"
 #endif
 
 #ifdef PORTAL2

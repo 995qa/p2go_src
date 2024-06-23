@@ -3,9 +3,9 @@
 #include "vgui_controls/Label.h"
 #include "vgui_controls/ImagePanel.h"
 #include "vgui_bitmapbutton.h"
-#include "KeyValues.h"
-#include "missionchooser/iasw_mission_chooser.h"
-#include "missionchooser/iasw_mission_chooser_source.h"
+#include "keyvalues.h"
+//#include "missionchooser/iasw_mission_chooser.h"
+//#include "missionchooser/iasw_mission_chooser_source.h"
 #include "filesystem.h"
 #include "nb_select_chapter_panel.h"
 

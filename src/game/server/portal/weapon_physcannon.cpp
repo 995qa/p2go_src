@@ -23,7 +23,7 @@
 #include "hl2_player.h"
 #endif
 #include "beam_shared.h"
-#include "sprite.h"
+#include "Sprite.h"
 #include "util.h"
 #include "portal/weapon_physcannon.h"
 #include "physics_saverestore.h"
@@ -44,7 +44,7 @@
 #include "model_types.h"
 #include "ai_interactions.h"
 #include "rumble_shared.h"
-#include "gamestats.h"
+#include "GameStats.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

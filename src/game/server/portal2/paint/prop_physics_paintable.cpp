@@ -4,7 +4,7 @@
 
 #include "cbase.h"
 #include "props.h"
-#include "cegclientwrapper.h"
+#include "CegClientWrapper.h"
 #include "paint/player_pickup_paint_power_user.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
