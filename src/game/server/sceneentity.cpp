@@ -3580,7 +3580,9 @@ CChoreoScene *CSceneEntity::LoadScene( const char *filename, IChoreoEventCallbac
 	Q_strncpy( loadfile, filename, sizeof( loadfile ) );
 	// Many vcd's in CSGO have a '.' in the filename, which breaks this call
 	// We're going to assume that all filenames have the correct extension
-//	Q_SetExtension( loadfile, ".vcd", sizeof( loadfile ) );
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
+	Q_SetExtension( loadfile, ".vcd", sizeof( loadfile ) );
+#endif
 	Q_FixSlashes( loadfile );
 
 	// binary compiled vcd
