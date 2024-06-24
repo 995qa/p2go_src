@@ -1119,14 +1119,26 @@ $Project
 		$Lib	vgui_controls
 		$Lib    responserules_runtime
 
-		$LibExternal	libprotobuf [!$VS2013 && !$VS2015]
+		$LibExternal	libprotobuf [!$VS2013 && !$VS2015 && !$VS2019]
+
 		$LibExternal	$LIBPUBLIC\2013\libprotobuf [$VS2013]
+
 		$LibExternal	$LIBPUBLIC\2015\libprotobuf [$VS2015]
 		{
 			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
 		}
 
 		$LibExternal	$LIBPUBLIC\2015\debug\libprotobuf [$VS2015]
+		{
+			$Configuration "Release" { $ExcludedFromBuild "Yes" }
+		}
+
+		$LibExternal	$LIBPUBLIC\2019\libprotobuf [$VS2019]
+		{
+			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
+		}
+
+		$LibExternal	$LIBPUBLIC\2019\debug\libprotobuf [$VS2019]
 		{
 			$Configuration "Release" { $ExcludedFromBuild "Yes" }
 		}

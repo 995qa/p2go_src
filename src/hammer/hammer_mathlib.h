@@ -17,6 +17,9 @@ typedef unsigned char byte;
 #include "mathlib/vmatrix.h"
 #include <math.h>
 
+#if !defined( _NOEXCEPT )
+#define _NOEXCEPT noexcept
+#endif
 
 typedef vec_t vec5_t[5];
 

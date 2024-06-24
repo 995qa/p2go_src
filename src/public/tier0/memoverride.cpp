@@ -479,7 +479,7 @@ void* __cdecl _malloc_base( size_t nSize )
 	return AllocUnattributed( nSize );
 }
 #else
-void *_malloc_base( size_t nSize )
+ALLOC_CALL void *_malloc_base( size_t nSize )
 {
 	return AllocUnattributed( nSize );
 }
@@ -501,20 +501,27 @@ void *_calloc_base( size_t nSize )
 }
 #endif
 
-void *_realloc_base( void *pMem, size_t nSize )
+ALLOC_CALL void *_realloc_base( void *pMem, size_t nSize )
 {
 	return ReallocUnattributed( pMem, nSize );
 }
 
-void *_recalloc_base( void *pMem, size_t nSize )
+#if ( defined ( _MSC_VER ) && _MSC_VER >= 1900 )
+ALLOC_CALL void *_recalloc_base( void *pMem, size_t nCount, size_t nSize )
+{
+	return _recalloc( pMem, nCount, nSize );
+}
+#else
+ALLOC_CALL void *_recalloc_base( void *pMem, size_t nSize )
 {
 	void *pMemOut = ReallocUnattributed( pMem, nSize );
-	if (!pMem)
+	if( !pMem )
 	{
-		memset(pMemOut, 0, nSize);
+		memset( pMemOut, 0, nSize );
 	}
 	return pMemOut;
 }
+#endif
 
 void _free_base( void *pMem )
 {
@@ -539,7 +546,7 @@ void * __cdecl _malloc_crt(size_t size)
 
 void * __cdecl _calloc_crt(size_t count, size_t size)
 {
-#if (defined( _MSC_VER ) && _MSC_VER >= 1900)
+#if ( defined ( _MSC_VER ) && _MSC_VER >= 1900 )
 	return _calloc_base(count, size);
 #else
 	return _calloc_base( count * size );
@@ -553,7 +560,11 @@ void * __cdecl _realloc_crt(void *ptr, size_t size)
 
 void * __cdecl _recalloc_crt(void *ptr, size_t count, size_t size)
 {
+#if ( defined ( _MSC_VER ) && _MSC_VER >= 1900 )
+	return _recalloc_base( ptr, count, size );
+#else
 	return _recalloc_base( ptr, size * count );
+#endif
 }
 
 ALLOC_CALL void * __cdecl _recalloc ( void * memblock, size_t count, size_t size )

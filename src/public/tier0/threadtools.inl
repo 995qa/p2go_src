@@ -528,11 +528,12 @@ unsigned long STDCALL CThread::ThreadProc(LPVOID pv)
 INLINE_ON_PS3 void* CThread::ThreadProc(LPVOID pv)
 #endif
 {
-#if defined( POSIX ) || defined( _PS3 )
+	// SanyaSho: code with std::auto_ptr is dead for newer Visual Studio versions.
+//#if defined( POSIX ) || defined( _PS3 )
 	ThreadInit_t *pInit = reinterpret_cast<ThreadInit_t*>(pv);
-#else
-	std::auto_ptr<ThreadInit_t> pInit((ThreadInit_t *)pv);
-#endif
+//#else
+//	std::auto_ptr<ThreadInit_t> pInit((ThreadInit_t *)pv);
+//#endif
 
 #ifdef _X360
 	// Make sure all threads are consistent w.r.t floating-point math

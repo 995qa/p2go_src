@@ -188,8 +188,10 @@ CVPC::CVPC()
 	m_bUse2012 = false;
 	m_bPreferVS2013 = false;
 	m_bUse2013 = false;
-	m_bPreferVS2015 = true;
+	m_bPreferVS2015 = false;
 	m_bUse2015 = false;
+	m_bPreferVS2019 = true;
+	m_bUse2019 = false;
 	m_bShallowDepencies = false;
 	m_nFilesMissing = 0;
 	m_nTotalFilesMissing = 0;
@@ -1035,7 +1037,8 @@ void CVPC::SpewUsage( void )
 			Log_Msg( LOG_VPC, "[/testmode]:    Override output .vcproj file to be named 'test.vcproj'\n" );
 			Log_Msg( LOG_VPC, "[/projsuffix]:  <suffix> - Override output .vcproj file to be named '?????_suffix.vcproj'\n" );
 			Log_Msg( LOG_VPC, "[/mirror]:      <path> - Mirror output files to specified path. Used for A:B testing.\n" );
-			Log_Msg( LOG_VPC, "[/2015]:        Generate projects and solutions for Visual Studio 2015\n");
+			Log_Msg( LOG_VPC, "[/2019]:        Generate projects and solutions for Visual Studio 2019\n" );
+			Log_Msg( LOG_VPC, "[/2015]:        Generate projects and solutions for Visual Studio 2015\n" );
 			Log_Msg( LOG_VPC, "[/2013]:        Generate projects and solutions for Visual Studio 2013\n" );
 			Log_Msg( LOG_VPC, "[/2012]:        Generate projects and solutions for Visual Studio 2012\n" );
 			Log_Msg( LOG_VPC, "[/2010]:        Generate projects and solutions for Visual Studio 2010\n" );
@@ -1568,13 +1571,14 @@ void CVPC::HandleSingleCommandLineArg( const char *pArg )
 		{
 			SetConditional( "P4_AUTO_ADD", false, CONDITIONAL_SYSTEM );
 		}
-		else if ( !V_stricmp_fast( pArgName, "2005" ) || !V_stricmp_fast( pArgName, "2010" ) || !V_stricmp_fast( pArgName, "2012" ) || !V_stricmp_fast( pArgName, "2013" ) || !V_stricmp_fast( pArgName, "2015" ) )
+		else if ( !V_stricmp_fast( pArgName, "2005" ) || !V_stricmp_fast( pArgName, "2010" ) || !V_stricmp_fast( pArgName, "2012" ) || !V_stricmp_fast( pArgName, "2013" ) || !V_stricmp_fast( pArgName, "2015" ) || !V_stricmp_fast( pArgName, "2019" ) )
 		{
 			// User provided CL trumps any pre-set defaults.
 			SetConditional( "PREFER_VS2010", !V_stricmp_fast( pArgName, "2010" ), CONDITIONAL_SYSTEM );
 			SetConditional( "PREFER_VS2012", !V_stricmp_fast( pArgName, "2012" ), CONDITIONAL_SYSTEM );
 			SetConditional( "PREFER_VS2013", !V_stricmp_fast( pArgName, "2013" ), CONDITIONAL_SYSTEM );
 			SetConditional( "PREFER_VS2015", !V_stricmp_fast( pArgName, "2015" ), CONDITIONAL_SYSTEM );
+			SetConditional( "PREFER_VS2019", !V_stricmp_fast( pArgName, "2019" ), CONDITIONAL_SYSTEM );
 		}
 		else if ( !V_stricmp_fast( pArgName, "restart" ) || !V_stricmp_fast( pArgName, "noautoargs" ) )
 		{
@@ -2502,7 +2506,11 @@ void CVPC::SetMacrosAndConditionals()
 		 !V_stricmp_fast( platformName.String(), "X360" ) ||
 		 bCrossCompileUsingVisualStudio )
 	{
-		if ( PrefersVS2015() )
+		if ( PrefersVS2019() )
+		{
+			m_bUse2019 = true;
+		}
+		else if ( PrefersVS2015() )
 		{
 			m_bUse2015 = true;
 		}
@@ -2520,7 +2528,12 @@ void CVPC::SetMacrosAndConditionals()
 		}
 
 		// For backwards compatibility with /define:vs2012 don't set this to false if m_bUse2012 isn't set.
-		if ( m_bUse2015 )
+		if ( m_bUse2019 )
+		{
+			SetConditional( "VS2019", true, CONDITIONAL_SYSTEM );
+			m_bUse2010 = true; // Request the 2010 file-format.
+		}
+		else if ( m_bUse2015 )
 		{
 			SetConditional( "VS2015", true, CONDITIONAL_SYSTEM );
 			m_bUse2010 = true; // Request the 2010 file-format.
@@ -3068,7 +3081,9 @@ void CVPC::DetermineSolutionGenerator()
 		if ( IsConditionalDefined( "GENERATE_MAKEFILE_VCXPROJ" ) )
         {
 			const char *pVSName = "2010";
-			if ( m_bUse2015 )
+			if ( m_bUse2019 )
+				pVSName = "2019";
+			else if ( m_bUse2015 )
 				pVSName = "2015";
 			else if ( m_bUse2013 )
 				pVSName = "2013";
@@ -3108,7 +3123,11 @@ void CVPC::DetermineSolutionGenerator()
 		}
 		else
 		{
-			if ( m_bUse2015 )
+			if ( m_bUse2019 )
+			{
+				VPCStatusWithColor( true, Color( 0, 255, 255, 255 ), "Generating for Visual Studio 2019." );
+			}
+			else if ( m_bUse2015 )
 			{
 				VPCStatusWithColor( true, Color( 0, 255, 255, 255 ), "Generating for Visual Studio 2015." );
 			}
@@ -3218,7 +3237,11 @@ void CVPC::DetermineProjectGenerator()
 		}
 		else
 		{
-			if ( m_bUse2015 )
+			if ( m_bUse2019 )
+			{
+				m_pProjectGenerator = GetWin32ProjectGenerator_2010();
+			}
+			else if ( m_bUse2015 )
 			{
 				m_pProjectGenerator = GetWin32ProjectGenerator_2010();
 			}

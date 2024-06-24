@@ -1260,14 +1260,26 @@ $Project
 		$File "$SRCDIR\lib\common\$PLATFORM\libv8.so"	[$LINUXALL && $PANORAMA_ENABLE]
 		$File "$SRCDIR\lib\common\$PLATFORM\libv8.dylib"	[$OSXALL && $PANORAMA_ENABLE]
 
-		$LibExternal	libprotobuf [!$VS2013 && !$VS2015]
+		$LibExternal	libprotobuf [!$VS2013 && !$VS2015 && !$VS2019]
+
 		$Libexternal	$LIBPUBLIC\2013\libprotobuf [$VS2013]
+
 		$Libexternal	$LIBPUBLIC\2015\libprotobuf [$VS2015]
 		{
 			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
 		}
 
 		$Libexternal	$LIBPUBLIC\2015\debug\libprotobuf [$VS2015]
+		{
+			$Configuration "Release" { $ExcludedFromBuild "Yes" }
+		}
+
+		$Libexternal	$LIBPUBLIC\2019\libprotobuf [$VS2019]
+		{
+			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
+		}
+
+		$Libexternal	$LIBPUBLIC\2019\debug\libprotobuf [$VS2019]
 		{
 			$Configuration "Release" { $ExcludedFromBuild "Yes" }
 		}

@@ -213,9 +213,9 @@ void BuildPortalMatrixListInAABB( const Vector& vCenter, const Vector& vExtents,
 {
 	//Tony; no portal? no portalMatrixList . empty list is okay in blobulator.
 #ifdef PORTAL2
-	for ( int i=0; i<CProp_Portal_Shared::AllPortals.Count(); ++i )
+	for ( int i=0; i<CPortal_Base2D_Shared::AllPortals.Count(); ++i )
 	{
-		C_Prop_Portal *pPortal = CProp_Portal_Shared::AllPortals[i];
+		C_Portal_Base2D *pPortal = CPortal_Base2D_Shared::AllPortals[i];
 		// only add portal to portal clip list if portal is active and linked and inside the box
 		if ( pPortal && pPortal->IsActivedAndLinked() && UTIL_IsBoxIntersectingPortal( vCenter, vExtents, pPortal ) )
 		{
@@ -344,7 +344,6 @@ void C_PaintStream::DrawBlobs( IMaterial* pMaterial )
 
 int C_PaintStream::DrawModel( int flags, const RenderableInstance_t &instance )
 {
-#if 1
 	static ConVarRef gpu_level( "gpu_level" );
 
 	// See if we should draw
@@ -387,11 +386,6 @@ int C_PaintStream::DrawModel( int flags, const RenderableInstance_t &instance )
 	DrawBlobs( pMaterial );
 
 	return 1;
-#else
-
-	return BaseClass::DrawModel( flags, instance );
-
-#endif
 }
 
 
