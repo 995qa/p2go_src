@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include "bitmapimagepanel.h"
 #include <vgui/ISurface.h>
 

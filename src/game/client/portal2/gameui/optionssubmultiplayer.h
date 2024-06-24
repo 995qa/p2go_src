@@ -61,7 +61,7 @@ class COptionsSubMultiplayer : public vgui::PropertyPage
 	DECLARE_CLASS_SIMPLE( COptionsSubMultiplayer, vgui::PropertyPage );
 
 public:
-	COptionsSubMultiplayer(vgui::Panel *parent);
+	explicit COptionsSubMultiplayer(vgui::Panel *parent);
 	~COptionsSubMultiplayer();
 
 	virtual vgui::Panel *CreateControlByName(const char *controlName);

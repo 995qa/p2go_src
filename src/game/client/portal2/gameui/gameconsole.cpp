@@ -5,12 +5,11 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <cbase.h>
+
 #include <stdio.h>
 
 #include "gameconsole.h"
 #include "gameconsoledialog.h"
-#include "loadingdialog.h"
 #include "vgui/ISurface.h"
 
 #include "keyvalues.h"
@@ -66,6 +65,8 @@ void CGameConsole::Initialize()
 		(swide / 2) + (offset * 3),
 		stall - (offset * 8));
 
+	m_pConsole->InvalidateLayout( false, true );
+
 	m_bInitialized = true;
 }
 
@@ -91,6 +92,18 @@ void CGameConsole::Hide()
 
 	m_pConsole->Hide();
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: skips animation and forces the immediate hiding of the panel
+//-----------------------------------------------------------------------------
+void CGameConsole::HideImmediately ( void )
+{
+	if ( !m_bInitialized )
+		return;
+
+	m_pConsole->SetVisible( false );
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: clears the console
@@ -134,14 +147,15 @@ void CGameConsole::SetParent( int parent )
 	m_pConsole->SetParent( static_cast<vgui::VPANEL>( parent ));
 }
 
-void CGameConsole::Shutdown(void)
+void CGameConsole::Shutdown( void )
 {
-	if (m_pConsole && m_bInitialized)
+	if ( m_pConsole && m_bInitialized)
 	{
-//		HideImmediately();
+		HideImmediately();
 		m_pConsole->MarkForDeletion();
 	}
 }
+
 //-----------------------------------------------------------------------------
 // Purpose: static command handler
 //-----------------------------------------------------------------------------

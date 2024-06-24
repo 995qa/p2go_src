@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <cbase.h>
+
 #include <stdio.h>
 #include <time.h>
 
@@ -27,14 +27,6 @@ using namespace vgui;
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
-#ifdef _PS3
-//!!BUG!! "PS3 doesn't support wcsicmp!"
-#ifdef _wcsicmp
-#undef _wcsicmp
-#endif
-#define _wcsicmp wcscmp
-#endif
-
 #define OPTIONS_DIR "cfg"
 #define DEFAULT_OPTIONS_FILE OPTIONS_DIR "/settings_default.scr"
 #define OPTIONS_FILE OPTIONS_DIR "/settings.scr"
@@ -45,7 +37,7 @@ using namespace vgui;
 class CServerDescription : public CDescription
 {
 public:
-	CServerDescription( CPanelListPanel *panel );
+	explicit CServerDescription( CPanelListPanel *panel );
 
 	void WriteScriptHeader( FileHandle_t fp );
 	void WriteFileHeader( FileHandle_t fp ); 
@@ -350,7 +342,7 @@ void CCreateMultiplayerGameGameplayPage::GatherCurrentValues()
 				if ( wLocalizedString )
 				{
 					// Copy the string we found into our temp array
-					wcsncpy( w_szStrTemp, wLocalizedString, sizeof( w_szStrTemp ) / sizeof( wchar_t ) );
+					V_wcscpy_safe( w_szStrTemp, wLocalizedString );
 				}
 				else
 				{

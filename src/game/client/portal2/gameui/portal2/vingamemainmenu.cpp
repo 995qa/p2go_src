@@ -696,7 +696,8 @@ void InGameMainMenu::OnCommand( const char *command )
 			CUIGameData::Get()->ExecuteOverlayCommand( "LobbyInvite" );
 		}
 	}
-	/*else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
+#if defined( PORTAL2_PUZZLEMAKER )
+	else if ( char const *szLeaderboards = StringAfterPrefix( command, "Leaderboards_" ) )
 	{
 #ifdef PORTAL2
 		if ( CheckAndDisplayErrorIfNotLoggedIn() ||
@@ -768,7 +769,8 @@ void InGameMainMenu::OnCommand( const char *command )
 		GameUI().PreventEngineHideGameUI();
 		BASEMODPANEL_SINGLETON.OpenWindow( WT_LEADERBOARD, this, true, pSettings );
 #endif
-	}*/
+	}
+#endif
 	else if ( !V_stricmp( command, "AudioVideo" ) )
 	{
 		GameUI().PreventEngineHideGameUI();
@@ -1603,15 +1605,9 @@ void InGameMainMenu::UpdateSaveState()
 		bNoSavesAllowed = true;
 	}
 #endif
-#if 0
 	static ConVarRef map_wants_save_disable( "map_wants_save_disable" );
 	SetControlEnabled( "BtnSaveGame", !bNoSavesAllowed && !map_wants_save_disable.GetBool() );
 	SetControlEnabled( "BtnLoadLastSave", !bNoSavesAllowed );
-#else
-	// FIXME: CGameUIConVarRef is broken?
-	SetControlEnabled( "BtnSaveGame", !bNoSavesAllowed );
-	SetControlEnabled( "BtnLoadLastSave", !bNoSavesAllowed );
-#endif
 }
 
 void InGameMainMenu::ApplySchemeSettings( IScheme *pScheme )

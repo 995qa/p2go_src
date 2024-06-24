@@ -87,6 +87,14 @@ void GameUI_MakeSafeName( const char *oldName, char *newName, int newNameBufSize
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Performs a var args printf into a static return buffer
+// Input  : *format - 
+//			... - 
+// Output : char
+//-----------------------------------------------------------------------------
+// Unused :: char *VarArgs( PRINTF_FORMAT_STRING const char *format, ... );
+
+//-----------------------------------------------------------------------------
 // This version is simply used to make reading convars simpler.
 // Writing convars isn't allowed in this mode
 //-----------------------------------------------------------------------------

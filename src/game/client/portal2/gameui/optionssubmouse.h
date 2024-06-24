@@ -32,7 +32,7 @@ class COptionsSubMouse : public vgui::PropertyPage
 	DECLARE_CLASS_SIMPLE( COptionsSubMouse, vgui::PropertyPage );
 
 public:
-	COptionsSubMouse(vgui::Panel *parent);
+	explicit COptionsSubMouse(vgui::Panel *parent);
 	~COptionsSubMouse();
 
 	virtual void OnResetData();

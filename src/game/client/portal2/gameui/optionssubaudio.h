@@ -27,7 +27,7 @@ class COptionsSubAudio : public vgui::PropertyPage
 	DECLARE_CLASS_SIMPLE( COptionsSubAudio, vgui::PropertyPage );
 
 public:
-	COptionsSubAudio(vgui::Panel *parent);
+	explicit COptionsSubAudio(vgui::Panel *parent);
 	~COptionsSubAudio();
 
 	virtual void OnResetData();
@@ -67,7 +67,7 @@ class COptionsSubAudioThirdPartyCreditsDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubAudioThirdPartyCreditsDlg, vgui::Frame );
 public:
-	COptionsSubAudioThirdPartyCreditsDlg( vgui::VPANEL hParent );
+	explicit COptionsSubAudioThirdPartyCreditsDlg( vgui::VPANEL hParent );
 
 	virtual void Activate();
 	void OnKeyCodeTyped(vgui::KeyCode code);

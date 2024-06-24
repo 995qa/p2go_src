@@ -5,7 +5,6 @@
 // $NoKeywords: $
 //
 //=============================================================================//
-#include <cbase.h>
 #include "optionssubportal.h"
 #include "cvartogglecheckbutton.h"
 #include "vgui_controls/ComboBox.h"

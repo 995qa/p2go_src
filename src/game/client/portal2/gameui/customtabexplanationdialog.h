@@ -23,7 +23,7 @@ class CCustomTabExplanationDialog : public vgui::Frame
 	DECLARE_CLASS_SIMPLE( CCustomTabExplanationDialog, vgui::Frame );
 
 public:
-	CCustomTabExplanationDialog(vgui::Panel *parent);
+	explicit CCustomTabExplanationDialog(vgui::Panel *parent);
 	~CCustomTabExplanationDialog();
 
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );

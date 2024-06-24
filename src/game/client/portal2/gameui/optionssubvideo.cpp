@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=======================================================================================//
-#include <cbase.h>
+
 #include "optionssubvideo.h"
 #include "cvarslider.h"
 #include "engineinterface.h"
@@ -123,7 +123,7 @@ class CGammaDialog : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( CGammaDialog, vgui::Frame );
 public:
-	CGammaDialog( vgui::VPANEL hParent ) : BaseClass( NULL, "OptionsSubVideoGammaDlg" )
+	explicit CGammaDialog( vgui::VPANEL hParent ) : BaseClass( NULL, "OptionsSubVideoGammaDlg" )
 	{
 		// parent is ignored, since we want look like we're steal focus from the parent (we'll become modal below)
 		SetTitle("#GameUI_AdjustGamma_Title", true);
@@ -237,7 +237,7 @@ class COptionsSubVideoAdvancedDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubVideoAdvancedDlg, vgui::Frame );
 public:
-	COptionsSubVideoAdvancedDlg( vgui::Panel *parent ) : BaseClass( parent , "OptionsSubVideoAdvancedDlg" )
+	explicit COptionsSubVideoAdvancedDlg( vgui::Panel *parent ) : BaseClass( parent , "OptionsSubVideoAdvancedDlg" )
 	{
 		SetTitle("#GameUI_VideoAdvanced_Title", true);
 		SetSize( 260, 400 );
@@ -1084,7 +1084,7 @@ void COptionsSubVideo::PrepareResolutionList()
 	else
 	{
 		char sz[256];
-		Q_snprintf( sz, ARRAYSIZE( sz ), "%d x %d", config.m_VideoMode.m_Width, config.m_VideoMode.m_Height );
+		Q_snprintf( sz, 256, "%d x %d", config.m_VideoMode.m_Width, config.m_VideoMode.m_Height );
 		m_pMode->SetText( sz );
 	}
 }
@@ -1163,7 +1163,7 @@ void COptionsSubVideo::OnApplyChanges()
 			const char *pAddr = nci->GetAddress();
 			if ( pAddr )
 			{
-				if ( Q_strncmp(pAddr,"127.0.0.1",9) && Q_strncmp(pAddr,"localhost",9) )
+				if ( !StringHasPrefixCaseSensitive( pAddr, "127.0.0.1" ) && !StringHasPrefixCaseSensitive( pAddr,"localhost" ) )
 				{
 					engine->ClientCmd_Unrestricted( "retry\n" );
 				}

@@ -2059,10 +2059,9 @@ bool PvpLobby::AddFriendFromDetails( const void *pfi )
 	// Make a copy
 	FriendsListItem::Info fiCopy = fi;
 
-	// Broken debugging stuff, not important
-	//static CGameUIConVarRef cl_names_debug( "cl_names_debug" );
-	//if ( cl_names_debug.GetInt() )
-	//	Q_strncpy( fiCopy.Name, "WWWWWWWWWWWWWWW", sizeof( fiCopy.Name ) );
+	static CGameUIConVarRef cl_names_debug( "cl_names_debug" );
+	if ( cl_names_debug.GetInt() )
+		Q_strncpy( fiCopy.Name, "WWWWWWWWWWWWWWW", sizeof( fiCopy.Name ) );
 
 	game->SetGameIndex( fiCopy );
 

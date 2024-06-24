@@ -1,14 +1,18 @@
-//========= Copyright (c) 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright  1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================//
 
-#include <cbase.h>
+
 #include <stdio.h>
-#ifdef IS_WINDOWS_PC
+// dgoodenough - memory.h doesn't exist on PS3
+// PS3_BUILDFIX
+#if !defined( _PS3 )
 #include <memory.h>
+#endif
+#if !defined( _GAMECONSOLE ) && !defined( _OSX ) && !defined (LINUX)
 #include <windows.h>
 #endif
 
@@ -28,13 +32,13 @@
 #include <vgui_controls/RadioButton.h>
 #include <vgui_controls/TextEntry.h>
 
+// dgoodenough - select correct stub header based on console
+// PS3_BUILDFIX
+#if defined( _PS3 )
+#include "ps3/ps3_win32stubs.h"
+#endif
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
-#endif
-
-#if defined( _PS3 )
-#include "ps3/ps3_core.h"
-#include "ps3/ps3_win32stubs.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -102,8 +106,8 @@ void CContentControlDialog::Activate()
 //-----------------------------------------------------------------------------
 void CContentControlDialog::ResetPassword()
 {
+#if !defined( _OSX ) && !defined (LINUX)
 	// Set initial value
-#if defined(_WIN32)
 	HKEY key;
 	if ( ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Half-Life\\Settings", 0, KEY_READ, &key))
 	{
@@ -114,10 +118,10 @@ void CContentControlDialog::ResetPassword()
 		RegCloseKey( key );
 	}
     else
-#endif
     {
         m_szGorePW[ 0 ] = 0;
     }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -131,7 +135,7 @@ void CContentControlDialog::ApplyPassword()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CContentControlDialog::Explain( char const *fmt, ... )
+void CContentControlDialog::Explain( PRINTF_FORMAT_STRING char const *fmt, ... )
 {
 	if ( !m_pExplain )
 		return;
@@ -211,8 +215,8 @@ void CContentControlDialog::OnClose()
 //-----------------------------------------------------------------------------
 void CContentControlDialog::WriteToken( const char *str )
 {
+#if !defined( _OSX ) && !defined (LINUX)
 	// Set initial value
-#ifdef IS_WINDOWS_PC
 	HKEY key;
 	if ( ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Valve\\Half-Life\\Settings", 0, KEY_WRITE, &key))
 	{
@@ -223,10 +227,11 @@ void CContentControlDialog::WriteToken( const char *str )
 
 		RegCloseKey( key );
 	}
-#endif
+
 	Q_strncpy( m_szGorePW, str, sizeof( m_szGorePW ) );
 
 	UpdateContentControlStatus();
+#endif
 }
 
 //-----------------------------------------------------------------------------

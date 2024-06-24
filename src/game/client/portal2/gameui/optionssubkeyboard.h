@@ -25,7 +25,7 @@ class COptionsSubKeyboard : public vgui::PropertyPage
 	DECLARE_CLASS_SIMPLE( COptionsSubKeyboard, vgui::PropertyPage );
 
 public:
-	COptionsSubKeyboard(vgui::Panel *parent);
+	explicit COptionsSubKeyboard(vgui::Panel *parent);
 	~COptionsSubKeyboard();
 
 	virtual void	OnResetData();

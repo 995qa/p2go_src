@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include <stdio.h>
 #include <utlsymbol.h>
 
@@ -375,7 +375,7 @@ void URLButton::FireActionSignal()
 	{
 		// see if it's a url
 		if (!stricmp(_actionMessage->GetName(), "command")
-			&& !strnicmp(_actionMessage->GetString("command", ""), "url ", strlen("url "))
+			&& StringHasPrefix(_actionMessage->GetString("command", ""), "url " )
 			&& strstr(_actionMessage->GetString("command", ""), "://"))
 		{
 			// it's a command to launch a url, run it

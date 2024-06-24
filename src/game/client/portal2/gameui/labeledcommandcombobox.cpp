@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include "labeledcommandcombobox.h"
 #include "engineinterface.h"
 #include <keyvalues.h>

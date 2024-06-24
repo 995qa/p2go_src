@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include "optionssubdifficulty.h"
 #include "tier1/convar.h"
 #include "engineinterface.h"

@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //===========================================================================//
-#include <cbase.h>
+
 #include "createmultiplayergameserverpage.h"
 
 using namespace vgui;
@@ -142,8 +142,6 @@ void CCreateMultiplayerGameServerPage::LoadMaps( const char *pszPathID )
 	const char *pszFilename = g_pFullFileSystem->FindFirst( "maps/*.bsp", &findHandle );
 	while ( pszFilename )
 	{
-		const char *str = NULL;
-		char *ext = NULL;
 		char mapname[256];
 
 		// FindFirst ignores the pszPathID, so check it here
@@ -156,19 +154,21 @@ void CCreateMultiplayerGameServerPage::LoadMaps( const char *pszPathID )
 
 		// remove the text 'maps/' and '.bsp' from the file name to get the map name
 		
-		str = Q_strstr( pszFilename, "maps" );
-		if ( str )
-		{
-			Q_strncpy( mapname, str + 5, sizeof(mapname) - 1 );	// maps + \\ = 5
-		}
-		else
-		{
-			Q_strncpy( mapname, pszFilename, sizeof(mapname) - 1 );
-		}
-		ext = Q_strstr( mapname, ".bsp" );
-		if ( ext )
-		{
-			*ext = 0;
+		{ 
+			const char *str = Q_strstr( pszFilename, "maps" );
+			if ( str )
+			{
+				Q_strncpy( mapname, str + 5, sizeof(mapname) - 1 );	// maps + \\ = 5
+			}
+			else
+			{
+				Q_strncpy( mapname, pszFilename, sizeof(mapname) - 1 );
+			}
+			char *ext = Q_strstr( mapname, ".bsp" );
+			if ( ext )
+			{
+				*ext = 0;
+			}
 		}
 
 		//!! hack: strip out single player HL maps

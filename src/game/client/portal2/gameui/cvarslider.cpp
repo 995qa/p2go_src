@@ -5,7 +5,6 @@
 // $NoKeywords: $
 //
 //=============================================================================//
-#include <cbase.h>
 #include "cvarslider.h"
 #include <stdio.h>
 #include "engineinterface.h"

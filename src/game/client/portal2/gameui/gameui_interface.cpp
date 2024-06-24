@@ -4,11 +4,11 @@
 //
 // $NoKeywords: $
 //===========================================================================//
-#include <cbase.h>
 
 #if defined( _WIN32 ) && !defined( _X360 )
 #include <windows.h>
 #endif
+#include "cbase.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -548,6 +548,7 @@ void CGameUI::ActivateGameUI()
 void CGameUI::HideGameUI()
 {
 	engine->ExecuteClientCmd("gameui_hide");
+	GameConsole().HideImmediately();
 }
 
 //-----------------------------------------------------------------------------

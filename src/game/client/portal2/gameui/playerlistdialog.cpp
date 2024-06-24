@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include <cbase.h>
+
 #include "playerlistdialog.h"
 
 #include <vgui/ILocalize.h>

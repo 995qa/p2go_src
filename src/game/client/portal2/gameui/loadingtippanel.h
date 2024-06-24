@@ -37,7 +37,7 @@ class CLoadingTipPanel : public vgui::EditablePanel
 	DECLARE_CLASS_SIMPLE( CLoadingTipPanel, vgui::EditablePanel )
 
 public:
-	CLoadingTipPanel( Panel *pParent );
+	explicit CLoadingTipPanel( Panel *pParent );
 	~CLoadingTipPanel();
 
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );

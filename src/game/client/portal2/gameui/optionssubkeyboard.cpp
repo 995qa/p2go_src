@@ -4,7 +4,7 @@
 //
 //===========================================================================//
 
-#include <cbase.h>
+
 #include "optionssubkeyboard.h"
 #include "engineinterface.h"
 #include "vcontrolslistpanel.h"
@@ -185,7 +185,7 @@ static char *UTIL_CopyString( const char *in )
 	return out;
 }
 
-char *UTIL_va(char *format, ...)
+const char *UTIL_va(PRINTF_FORMAT_STRING const char *format, ...)
 {
 	va_list		argptr;
 	static char	string[4][1024];
@@ -593,17 +593,12 @@ void COptionsSubKeyboard::ApplyAllBindings( void )
 //-----------------------------------------------------------------------------
 void COptionsSubKeyboard::FillInDefaultBindings( void )
 {
-	FileHandle_t fh = g_pFullFileSystem->Open( "cfg/config_default.cfg", "rb" );
-	if (fh == FILESYSTEM_INVALID_HANDLE)
+	CUtlBuffer buf( 0, 0, CUtlBuffer::TEXT_BUFFER );
+	if ( !g_pFullFileSystem->ReadFile( "cfg/config_default.cfg", NULL, buf ) )
 		return;
 
 	// L4D: also unbind other keys
 	engine->ClientCmd_Unrestricted( "unbindall\n" );
-
-	int size = g_pFullFileSystem->Size(fh);
-	CUtlBuffer buf( 0, size, CUtlBuffer::TEXT_BUFFER );
-	g_pFullFileSystem->Read( buf.Base(), size, fh );
-	g_pFullFileSystem->Close(fh);
 
 	// Clear out all current bindings
 	ClearBindItems();
@@ -815,7 +810,7 @@ class COptionsSubKeyboardAdvancedDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubKeyboardAdvancedDlg, vgui::Frame );
 public:
-	COptionsSubKeyboardAdvancedDlg( vgui::VPANEL hParent ) : BaseClass( NULL, NULL )
+	explicit COptionsSubKeyboardAdvancedDlg( vgui::VPANEL hParent ) : BaseClass( NULL, NULL )
 	{
 		// parent is ignored, since we want look like we're steal focus from the parent (we'll become modal below)
 

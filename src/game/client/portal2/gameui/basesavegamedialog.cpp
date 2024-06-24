@@ -4,7 +4,7 @@
 //
 //=============================================================================//
 
-#include <cbase.h>
+
 #include "basesavegamedialog.h"
 #include "filesystem.h"
 #include "savegame_version.h"
@@ -224,7 +224,7 @@ void CBaseSaveGameDialog::ScanSavedGames()
 	const char *pFileName = g_pFullFileSystem->FindFirst( szDirectory, &handle );
 	while (pFileName)
 	{
-		if ( !Q_strnicmp(pFileName, "HLSave", strlen( "HLSave" ) ) )
+		if ( StringHasPrefix( pFileName, "HLSave" ) )
 		{
 			pFileName = g_pFullFileSystem->FindNext( handle );
 			continue;
