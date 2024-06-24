@@ -50,7 +50,7 @@
 	#include "voice_gamemgr.h"
 	#include "globalstate.h"
 	//#include "portal_mp_stats.h"
-	//#include "portal_ui_controller.h"
+	#include "portal_ui_controller.h"
 
 #endif	// CLIENT_DLL
 
@@ -1556,8 +1556,6 @@ void CPortalMPGameRules::SetMapCompleteData( int nPlayer )
 
 void CPortalMPGameRules::StartPlayerTransitionThinks( void )
 {
-	// FIXME: - Wonderland_War
-	/*
 	// Turn off video for all players once they've all connected
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
@@ -1586,7 +1584,6 @@ void CPortalMPGameRules::StartPlayerTransitionThinks( void )
 
 	ResetAllPlayersStats();
 	g_portal_ui_controller.OnLevelStart();
-	*/
 }
 
 

@@ -212,6 +212,9 @@ $Project "Server (Portal 2)"
 				$File "portal2\prop_tractorbeam.cpp"
 				$File "portal2\func_portalled.cpp"
 				$File "portal2\func_portalled.h"
+				$File "portal2\portal_ui_controller.h"
+				$File "portal2\portal_ui_controller.cpp"
+
 				
 				$File "$SRCDIR\game\shared\portal2\trigger_catapult_shared.cpp"
 				
