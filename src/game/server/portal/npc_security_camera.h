@@ -80,7 +80,7 @@ void PlayDismountSounds( void );
 // Security Camera
 //
 
-class CNPC_SecurityCamera : public CNPCBaseInteractive<CAI_BaseNPC>, public CDefaultPlayerPickupVPhysics
+class CNPC_SecurityCamera : public CNPCBaseInteractive<CAI_BaseNPC>, public CDefaultPlayerPickupVPhysics, public CGameEventListener
 {
 	DECLARE_CLASS( CNPC_SecurityCamera, CNPCBaseInteractive<CAI_BaseNPC> );
 public:
@@ -95,9 +95,11 @@ public:
 	virtual void	Activate( void );
 	bool			CreateVPhysics( void );
 	virtual void	UpdateOnRemove( void );
-	virtual void	NotifySystemEvent( CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params );
+	virtual void	NotifyPortalEvent( PortalEvent_t nEventType, CPortal_Base2D *pNotifier );
 	virtual int		ObjectCaps( void );
 	void			Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	virtual void FireGameEvent( IGameEvent *pEvent );
 
 	// TODO: Use m_bEnabled or m_bActive?
 	bool IsActive( void ) { return m_bEnabled; }
@@ -106,14 +108,22 @@ public:
 	void	Retire( void );
 	void	Deploy( void );
 	void	ActiveThink( void );
+	void	DormantThink( void );
 	void	SearchThink( void );
 	void	DeathThink( void );
+	
+	// COOP TAUNTS
+	void	TauntedByPlayer( CPortal_Player *pPlayer );
+	void	TauntedByPlayerFinished( CPortal_Player *pPlayer );
 
 	// Inputs
 	void	InputToggle( inputdata_t &inputdata );
 	void	InputEnable( inputdata_t &inputdata );
 	void	InputDisable( inputdata_t &inputdata );
 	void	InputRagdoll( inputdata_t &inputdata );
+	void	InputLookAtBlue( inputdata_t &inputdata );
+	void	InputLookAtOrange( inputdata_t &inputdata );
+	void	InputLookAllTeams( inputdata_t &inputdata );
 
 	void	SetLastSightTime();
 
@@ -124,8 +134,6 @@ public:
 	bool	ShouldSavePhysics() { return true; }
 
 	virtual bool CanBeAnEnemyOf( CBaseEntity *pEnemy );
-
-	bool TauntedByPlayerFinished( CPortal_Player *pPlayer ) { return false; } // FIXME!
 
 	Class_T	Classify( void ) 
 	{
@@ -155,10 +163,12 @@ public:
 protected:
 	
 	bool	PreThink( cameraState_e state );
+	bool	CheckRestingSurfaceForPortals();
 	void	Ping( void );	
 	void	Toggle( void );
 	void	Enable( void );
 	void	Disable( void );
+	void	Ragdoll( void );
 
 	void	EyeOn( void );
 	void	EyeOff( void );
@@ -173,7 +183,12 @@ private:
 	bool	m_bActive;		//Denotes the turret is deployed and looking for targets
 	bool	m_bBlinkState;
 	bool	m_bEnabled;		//Denotes whether the turret is able to deploy or not
-	
+
+	bool	m_bDetectedNewPing;
+	bool	m_bLookAtPlayerPings;
+	int		m_nTeamToLookAt;
+	int		m_nTeamPlayerToLookAt;
+
 	float	m_flLastSight;
 	float	m_flPingTime;
 
@@ -181,11 +196,19 @@ private:
 	QAngle	m_vecCurrentAngles;
 	Vector	m_vNoisePos;
 	int		m_iTicksTillNextNoise;
+	Vector	m_vecPingLocation;
 
-	CSoundPatch		*m_pMovementSound;
+	CSoundPatch	*m_pMovementSound;
 
 	COutputEvent m_OnDeploy;
 	COutputEvent m_OnRetire;
+
+	COutputEvent m_OnTaunted;
+	COutputEvent m_OnTauntedBlue;
+	COutputEvent m_OnTauntedOrange;
+	COutputEvent m_OnTauntedFinished;
+	COutputEvent m_OnTauntedBlueFinished;
+	COutputEvent m_OnTauntedOrangeFinished;
 
 	DECLARE_DATADESC();
 };

@@ -29,6 +29,9 @@
 #include "world.h"
 #include "ai_baseactor.h"		// for Glados ent playing VCDs
 #include "sceneentity.h"		// precacheing vcds
+#include "GameEventListener.h"
+#include "portal_gamestats.h"
+#include "portal_mp_gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -50,12 +53,18 @@ BEGIN_DATADESC( CNPC_SecurityCamera )
 	DEFINE_FIELD( m_vecCurrentAngles,	FIELD_VECTOR ),
 	DEFINE_FIELD( m_vNoisePos,			FIELD_VECTOR ),
 	DEFINE_FIELD( m_iTicksTillNextNoise, FIELD_INTEGER ),
+	DEFINE_FIELD( m_vecPingLocation,	FIELD_VECTOR ),
+
+	DEFINE_KEYFIELD( m_bLookAtPlayerPings, FIELD_BOOLEAN, "LookAtPlayerPings" ),
+	DEFINE_KEYFIELD( m_nTeamToLookAt, FIELD_INTEGER, "TeamToLookAt" ),
+	DEFINE_KEYFIELD( m_nTeamPlayerToLookAt, FIELD_INTEGER, "TeamPlayerToLookAt" ),
 
 	DEFINE_SOUNDPATCH( m_pMovementSound ),
 
 	DEFINE_THINKFUNC( Retire ),
 	DEFINE_THINKFUNC( Deploy ),
 	DEFINE_THINKFUNC( ActiveThink ),
+	DEFINE_THINKFUNC( DormantThink ),
 	DEFINE_THINKFUNC( SearchThink ),
 	DEFINE_THINKFUNC( DeathThink ),
 
@@ -64,9 +73,18 @@ BEGIN_DATADESC( CNPC_SecurityCamera )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Ragdoll", InputRagdoll ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "LookAtBlue", InputLookAtBlue ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "LookAtOrange", InputLookAtOrange ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "LookAllTeams", InputLookAllTeams ),
 
 	DEFINE_OUTPUT( m_OnDeploy, "OnDeploy" ),
 	DEFINE_OUTPUT( m_OnRetire, "OnRetire" ),
+	DEFINE_OUTPUT( m_OnTaunted, "OnTaunted" ),
+	DEFINE_OUTPUT( m_OnTauntedBlue , "OnTauntedBlue" ),
+	DEFINE_OUTPUT( m_OnTauntedOrange, "OnTauntedOrange" ),
+	DEFINE_OUTPUT( m_OnTauntedFinished, "OnTauntedFinished" ),
+	DEFINE_OUTPUT( m_OnTauntedBlueFinished, "OnTauntedBlueFinished" ),
+	DEFINE_OUTPUT( m_OnTauntedOrangeFinished, "OnTauntedOrangeFinished" ),
 
 END_DATADESC()
 
@@ -75,7 +93,7 @@ LINK_ENTITY_TO_CLASS( npc_security_camera, CNPC_SecurityCamera );
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
-CNPC_SecurityCamera::CNPC_SecurityCamera( void )
+CNPC_SecurityCamera::CNPC_SecurityCamera( void ) // Line 124 (125) (identical)
 {
 	m_bActive			= false;
 	m_bAutoStart		= false;
@@ -84,6 +102,7 @@ CNPC_SecurityCamera::CNPC_SecurityCamera( void )
 	m_bBlinkState		= false;
 	m_bEnabled			= false;
 	m_vecCurrentAngles	= QAngle( 0.0f, 0.0f, 0.0f );
+	m_vecPingLocation.Init();
 
 	m_vecGoalAngles.Init();
 	m_vNoisePos = Vector( 0.0f, 0.0f, 0.0f );
@@ -91,32 +110,26 @@ CNPC_SecurityCamera::CNPC_SecurityCamera( void )
 
 	m_pMovementSound = NULL;
 	m_hEyeGlow = NULL;
+	m_bDetectedNewPing = false;
 }
 
-CNPC_SecurityCamera::~CNPC_SecurityCamera( void )
+CNPC_SecurityCamera::~CNPC_SecurityCamera( void ) // Line 145 (146)
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Precache
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Precache( void )
+void CNPC_SecurityCamera::Precache( void ) // Line 153 (154) (identical)
 {
 	PrecacheModel( SECURITY_CAMERA_MODEL );	
 
 	PrecacheScriptSound( "Portalgun.pedestal_rotate_loop" );
-
-	// Scenes for when the player dismounts a security camera. Spoken only if Aperture_AI actor is in the 
-	PrecacheInstancedScene( CAMERA_DESTROYED_SCENE_1 );
-	PrecacheInstancedScene( CAMERA_DESTROYED_SCENE_2 );
-	PrecacheInstancedScene( CAMERA_DESTROYED_SCENE_3 );
-	PrecacheInstancedScene( CAMERA_DESTROYED_SCENE_4 );
-	PrecacheInstancedScene( CAMERA_DESTROYED_SCENE_5 );
 	
 	BaseClass::Precache();
 }
 
-void CNPC_SecurityCamera::CreateSounds()
+void CNPC_SecurityCamera::CreateSounds() // Line 172 (173) (identical)
 {
 	if (!m_pMovementSound)
 	{
@@ -129,7 +142,7 @@ void CNPC_SecurityCamera::CreateSounds()
 	}
 }
 
-void CNPC_SecurityCamera::StopLoopingSounds()
+void CNPC_SecurityCamera::StopLoopingSounds() // Line 185 (186) (identical)
 {
 	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
 
@@ -142,7 +155,7 @@ void CNPC_SecurityCamera::StopLoopingSounds()
 //-----------------------------------------------------------------------------
 // Purpose: Spawn the entity
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Spawn( void )
+void CNPC_SecurityCamera::Spawn( void ) // Line 198 (199) (identical)
 { 
 	Precache();
 
@@ -177,14 +190,26 @@ void CNPC_SecurityCamera::Spawn( void )
 	{
 		SetThink( &CNPC_SecurityCamera::SearchThink );
 	}
+	else
+	{
+		SetThink( &CNPC_SecurityCamera::DormantThink );
+	}
 
 	//Stagger our starting times
 	SetNextThink( gpGlobals->curtime + random->RandomFloat( 0.1f, 0.3f ) );
 
+	if( m_bLookAtPlayerPings )
+	{
+		ListenForGameEvent( "portal_player_ping" );
+	}
+
 	CreateVPhysics();
+
+	SetFadeDistance( -1.0, 0.0 );
+	SetGlobalFadeScale( 0.0 );
 }
 
-void CNPC_SecurityCamera::Activate( void )
+void CNPC_SecurityCamera::Activate( void ) // Line 251 (252) (identical)
 {
 	BaseClass::Activate();
 
@@ -193,7 +218,7 @@ void CNPC_SecurityCamera::Activate( void )
 	EyeOn();
 }
 
-bool CNPC_SecurityCamera::CreateVPhysics( void )
+bool CNPC_SecurityCamera::CreateVPhysics( void ) // Line 260 (261) (identical)
 {
 	IPhysicsObject *pPhysics = VPhysicsInitNormal( SOLID_VPHYSICS, FSOLID_NOT_STANDABLE, false );
 	if ( !pPhysics )
@@ -204,19 +229,43 @@ bool CNPC_SecurityCamera::CreateVPhysics( void )
 	return true;
 }
 
-void CNPC_SecurityCamera::UpdateOnRemove( void )
+void CNPC_SecurityCamera::UpdateOnRemove( void ) // Line 271 (272) (identical)
 {
 	EyeOff();
 
 	BaseClass::UpdateOnRemove();
 }
 
-void CNPC_SecurityCamera::NotifySystemEvent(CBaseEntity *pNotify, notify_system_event_t eventType, const notify_system_event_params_t &params )
+void CNPC_SecurityCamera::FireGameEvent( IGameEvent *pEvent )
 {
-	BaseClass::NotifySystemEvent( pNotify, eventType, params );
+	if( FStrEq( pEvent->GetName(), "portal_player_ping" ) )
+	{
+		int nUserID = pEvent->GetInt( "userid" );
+		int nX = pEvent->GetInt( "ping_x" );
+		int nY = pEvent->GetInt( "ping_y" );
+		int nZ = pEvent->GetInt( "ping_z" );
+
+		for( int i = 1; i <= gpGlobals->maxClients; ++i )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+			if( !pPlayer )
+				continue;
+
+			if( engine->GetPlayerUserId( pPlayer->edict() ) == nUserID )
+			{
+				if( ( m_nTeamToLookAt == TEAM_SPECTATOR ) || ( m_nTeamToLookAt == pPlayer->GetTeamNumber() ) )
+				{
+					m_vecPingLocation.x = nX;
+					m_vecPingLocation.y = nY;
+					m_vecPingLocation.z = nZ;
+					m_bDetectedNewPing = true;
+				}
+			}
+		}
+	}
 }
 
-int CNPC_SecurityCamera::ObjectCaps( void )
+int CNPC_SecurityCamera::ObjectCaps( void ) // Line 321 (322) (identical)
 {
 	IPhysicsObject *pPhysics = VPhysicsGetObject();
 	if ( !pPhysics || !pPhysics->IsMotionEnabled() )
@@ -225,7 +274,7 @@ int CNPC_SecurityCamera::ObjectCaps( void )
 	return ( BaseClass::ObjectCaps() | FCAP_USE_IN_RADIUS | FCAP_USE_ONGROUND | FCAP_IMPULSE_USE );
 }
 
-void CNPC_SecurityCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CNPC_SecurityCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) // Line 330 (331)
 {
 	CBasePlayer *pPlayer = ToBasePlayer( pActivator );
 	if ( pPlayer )
@@ -235,7 +284,7 @@ void CNPC_SecurityCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int CNPC_SecurityCamera::OnTakeDamage( const CTakeDamageInfo &inputInfo )
+int CNPC_SecurityCamera::OnTakeDamage( const CTakeDamageInfo &inputInfo ) // Line 340 (341) (identical)
 {
 	if ( !m_takedamage )
 		return 0;
@@ -276,12 +325,12 @@ int CNPC_SecurityCamera::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 //			book keeping.  This means we can become invisible and then never
 //			reappear.
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::PlayerPenetratingVPhysics( void )
+void CNPC_SecurityCamera::PlayerPenetratingVPhysics( void ) // Line 382 (383) (identical)
 {
 	// We don't care!
 }
 
-bool CNPC_SecurityCamera::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason )
+bool CNPC_SecurityCamera::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason ) // Line 387 (388) (identical)
 {
 	return !m_bActive;
 }
@@ -289,7 +338,7 @@ bool CNPC_SecurityCamera::OnAttemptPhysGunPickup( CBasePlayer *pPhysGunUser, Phy
 //-----------------------------------------------------------------------------
 // Purpose: Shut down
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Retire( void )
+void CNPC_SecurityCamera::Retire( void ) // Line 395 (396) (identical)
 {
 	if ( PreThink( CAMERA_RETIRING ) )
 		return;
@@ -314,7 +363,7 @@ void CNPC_SecurityCamera::Retire( void )
 //-----------------------------------------------------------------------------
 // Purpose: Start up
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Deploy( void )
+void CNPC_SecurityCamera::Deploy( void ) // Line 420 (421) (identical)
 {
 	if ( PreThink( CAMERA_DEPLOYING ) )
 		return;
@@ -339,9 +388,45 @@ void CNPC_SecurityCamera::Deploy( void )
 	SetLastSightTime();
 }
 
+void CNPC_SecurityCamera::TauntedByPlayer( CPortal_Player *pPlayer ) // Line: 448 (448)
+{
+	if( !pPlayer )
+		return;
+
+	m_OnTaunted.FireOutput( pPlayer, pPlayer );
+
+	switch( pPlayer->GetTeamNumber() )
+	{
+		case TEAM_BLUE:
+			m_OnTauntedBlue.FireOutput( pPlayer, pPlayer );
+			break;
+		case TEAM_RED:
+			m_OnTauntedOrange.FireOutput( pPlayer, pPlayer );
+			break;
+	}
+}
+
+void CNPC_SecurityCamera::TauntedByPlayerFinished( CPortal_Player *pPlayer ) // Line: 470 (471)
+{
+	if( !pPlayer )
+		return;
+
+	m_OnTauntedFinished.FireOutput( pPlayer, pPlayer );
+
+	switch( pPlayer->GetTeamNumber() )
+	{
+		case TEAM_BLUE:
+			m_OnTauntedBlueFinished.FireOutput( pPlayer, pPlayer );
+			break;
+		case TEAM_RED:
+			m_OnTauntedOrangeFinished.FireOutput( pPlayer, pPlayer );
+			break;
+	}
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::SetLastSightTime()
+void CNPC_SecurityCamera::SetLastSightTime() // Line 492 (493) (identical)
 {
 	if( HasSpawnFlags( SF_SECURITY_CAMERA_NEVERRETIRE ) )
 	{
@@ -356,7 +441,7 @@ void CNPC_SecurityCamera::SetLastSightTime()
 //-----------------------------------------------------------------------------
 // Purpose: Causes the turret to face its desired angles
 //-----------------------------------------------------------------------------
-bool CNPC_SecurityCamera::UpdateFacing( void )
+bool CNPC_SecurityCamera::UpdateFacing( void ) // Line 507 (508) (identical)
 {
 	bool  bMoved = false;
 
@@ -437,7 +522,7 @@ bool CNPC_SecurityCamera::UpdateFacing( void )
 // Input  : *pEntity - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_SecurityCamera::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker )
+bool CNPC_SecurityCamera::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker ) // Line 594 (595) (identical)
 {
 	CBaseEntity	*pHitEntity = NULL;
 	if ( BaseClass::FVisible( pEntity, traceMask, &pHitEntity ) )
@@ -461,7 +546,7 @@ bool CNPC_SecurityCamera::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEn
 //-----------------------------------------------------------------------------
 // Purpose: Allows the turret to fire on targets if they're visible
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::ActiveThink( void )
+void CNPC_SecurityCamera::ActiveThink( void ) // Line 621 (622)
 {
 	//Allow descended classes a chance to do something before the think function
 	if ( PreThink( CAMERA_ACTIVE ) )
@@ -486,11 +571,14 @@ void CNPC_SecurityCamera::ActiveThink( void )
 	Vector vecMid = EyePosition();
 	Vector vecMidEnemy = pEnemy->GetAbsOrigin();
 
+	if( m_bLookAtPlayerPings )
+		vecMidEnemy = m_vecPingLocation;
+
 	//Store off our last seen location
 	UpdateEnemyMemory( pEnemy, vecMidEnemy );
 
 	//Look for our current enemy
-	bool bEnemyVisible = pEnemy->IsAlive() && FInViewCone( pEnemy ) && FVisible( pEnemy );
+	bool bEnemyVisible = m_bLookAtPlayerPings || pEnemy->IsAlive() && FInViewCone(pEnemy) && FVisible(pEnemy);
 
 	//Calculate dir and dist to enemy
 	Vector	vecDirToEnemy = vecMidEnemy - vecMid;	
@@ -498,7 +586,7 @@ void CNPC_SecurityCamera::ActiveThink( void )
 
 	CPortal_Base2D *pPortal = NULL;
 
-	if ( pEnemy->IsAlive() )
+	if ( pEnemy->IsAlive() && !m_bLookAtPlayerPings )
 	{
 		pPortal = FInViewConeThroughPortal( pEnemy );
 
@@ -545,6 +633,11 @@ void CNPC_SecurityCamera::ActiveThink( void )
 
 	//We want to look at the enemy's eyes so we don't jitter
 	Vector vEnemyEyes = pEnemy->EyePosition();
+
+	if( m_bLookAtPlayerPings )
+	{
+		vEnemyEyes = m_vecPingLocation + Vector( 0, 0, 128 );
+	}
 
 	if ( pPortal )
 	{
@@ -606,12 +699,27 @@ void CNPC_SecurityCamera::ActiveThink( void )
 
 	//Turn to face
 	UpdateFacing();
+
+	if( m_bDetectedNewPing && fabs( AngleDiff( m_vecGoalAngles.x, m_vecCurrentAngles.x ) ) <= 1.0 && fabs( AngleDiff( m_vecGoalAngles.y, m_vecCurrentAngles.y ) ) <= 1.0 )
+	{
+		m_bDetectedNewPing = 0;
+	}
+}
+
+void CNPC_SecurityCamera::DormantThink( void ) // Line 789 (790) (identical)
+{
+	//Allow descended classes a chance to do something before the think function
+	if( PreThink( CAMERA_ACTIVE ) )
+		return;
+
+	//Update our think time
+	SetNextThink( gpGlobals->curtime + 0.1f );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Target doesn't exist or has eluded us, so search for one
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::SearchThink( void )
+void CNPC_SecurityCamera::SearchThink( void ) // Line 800 (801)
 {
 	//Allow descended classes a chance to do something before the think function
 	if ( PreThink( CAMERA_SEARCHING ) )
@@ -634,7 +742,7 @@ void CNPC_SecurityCamera::SearchThink( void )
 		for( int i = 1; i <= gpGlobals->maxClients; ++i )
 		{
 			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
-			if ( pPlayer && pPlayer->IsAlive() )
+			if ( pPlayer && pPlayer->IsAlive() && ( !(m_bLookAtPlayerPings > 0) || m_nTeamPlayerToLookAt == pPlayer->GetTeamNumber() ) )
 			{
 				if ( FInViewCone( pPlayer ) && FVisible( pPlayer ) )
 				{
@@ -690,21 +798,56 @@ void CNPC_SecurityCamera::SearchThink( void )
 // Purpose: Allows a generic think function before the others are called
 // Input  : state - which state the turret is currently in
 //-----------------------------------------------------------------------------
-bool CNPC_SecurityCamera::PreThink( cameraState_e state )
+bool CNPC_SecurityCamera::PreThink( cameraState_e state ) // Line 883 (884)
 {
 	CheckPVSCondition();
 
 	//Animate
 	StudioFrameAdvance();
 
+	Toggle();
+
 	//Do not interrupt current think function
-	return false;
+	return CheckRestingSurfaceForPortals();
+}
+
+bool CNPC_SecurityCamera::CheckRestingSurfaceForPortals() // Line 906 (907)
+{
+	if( !m_bEnabled )
+		return false;
+
+	float m_flRadius = CollisionProp()->BoundingRadius();
+	Vector vecForward, vecUp, vecRight;
+	GetVectors( &vecForward, &vecRight, &vecUp );
+
+	Vector vecAbsOrigin = GetAbsOrigin();
+	Vector vecStart = vecAbsOrigin + vecForward * m_flRadius;
+	Vector vecEnd = vecAbsOrigin - vecForward * m_flRadius;
+
+	Ray_t ray;
+	ray.Init( vecStart, vecEnd );
+	ray.m_IsRay = true;
+
+	float fMustBeCloserThan = 1.0f;
+	CPortal_Base2D *pPortal = UTIL_Portal_FirstAlongRay( ray, fMustBeCloserThan );
+
+	if( !pPortal )
+		return false;
+
+	if( !pPortal->IsActivedAndLinked() )
+	{
+		pPortal->AddPortalEventListener( this );
+		return false;
+	}
+
+	Ragdoll();
+	return true;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Make a pinging noise so the player knows where we are
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Ping( void )
+void CNPC_SecurityCamera::Ping( void ) // Line 936 (937) (identical)
 {
 	//See if it's time to ping again
 	if ( m_flPingTime > gpGlobals->curtime )
@@ -719,7 +862,7 @@ void CNPC_SecurityCamera::Ping( void )
 //-----------------------------------------------------------------------------
 // Purpose: Toggle the turret's state
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Toggle( void )
+void CNPC_SecurityCamera::Toggle( void ) // Line 951 (952) (identical)
 {
 	//Toggle the state
 	if ( m_bEnabled )
@@ -735,7 +878,7 @@ void CNPC_SecurityCamera::Toggle( void )
 //-----------------------------------------------------------------------------
 // Purpose: Enable the turret and deploy
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Enable( void )
+void CNPC_SecurityCamera::Enable( void ) // Line 967 (968) (identical)
 {
 	m_bEnabled = true;
 
@@ -752,7 +895,7 @@ void CNPC_SecurityCamera::Enable( void )
 //-----------------------------------------------------------------------------
 // Purpose: Retire the turret until enabled again
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::Disable( void )
+void CNPC_SecurityCamera::Disable( void ) // Line 984 (985) (identical)
 {
 	m_bEnabled = false;
 	m_bAutoStart = false;
@@ -762,7 +905,7 @@ void CNPC_SecurityCamera::Disable( void )
 	SetNextThink( gpGlobals->curtime + 0.1f );
 }
 
-void CNPC_SecurityCamera::EyeOn( void )
+void CNPC_SecurityCamera::EyeOn( void ) // Line 995 (996) (identical)
 {
 	if ( !m_hEyeGlow )
 	{
@@ -777,7 +920,7 @@ void CNPC_SecurityCamera::EyeOn( void )
 	}
 }
 
-void CNPC_SecurityCamera::EyeOff( void )
+void CNPC_SecurityCamera::EyeOff( void ) // Line 1011 (1012) (identical)
 {
 	if ( m_hEyeGlow != NULL )
 	{
@@ -789,7 +932,7 @@ void CNPC_SecurityCamera::EyeOff( void )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::InputToggle( inputdata_t &inputdata )
+void CNPC_SecurityCamera::InputToggle( inputdata_t &inputdata ) // Line 1023 (1024) (identical)
 {
 	Toggle();
 }
@@ -797,7 +940,7 @@ void CNPC_SecurityCamera::InputToggle( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::InputEnable( inputdata_t &inputdata )
+void CNPC_SecurityCamera::InputEnable( inputdata_t &inputdata ) // Line 1031 (1032) (identical)
 {
 	Enable();
 }
@@ -805,23 +948,23 @@ void CNPC_SecurityCamera::InputEnable( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::InputDisable( inputdata_t &inputdata )
+void CNPC_SecurityCamera::InputDisable( inputdata_t &inputdata ) // Line 1039 (1040) (identical)
 {
 	Disable();
 }
 
-void CNPC_SecurityCamera::InputRagdoll( inputdata_t &inputdata )
+void CNPC_SecurityCamera::Ragdoll() // Line 1044 (1045)
 {
-	if ( !m_bEnabled )
+	if( !m_bEnabled )
 		return;
-	
+
 	// Leave decal on wall (may want to disable this once decal for where cam touches wall is made)
 	Vector vForward;
 	GetVectors( &vForward, NULL, NULL );
 
 	trace_t tr;
-	UTIL_TraceLine ( GetAbsOrigin() + 10.0f * vForward, GetAbsOrigin() -60.0f * vForward, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
-	if ( tr.m_pEnt )
+	UTIL_TraceLine( GetAbsOrigin() + 10.0f * vForward, GetAbsOrigin() - 60.0f * vForward, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+	if( tr.m_pEnt )
 		UTIL_DecalTrace( &tr, "SecurityCamera.Detachment" );
 
 	// Disable it's AI
@@ -829,21 +972,53 @@ void CNPC_SecurityCamera::InputRagdoll( inputdata_t &inputdata )
 	SetThink( &CNPC_SecurityCamera::DeathThink );
 	EyeOff();
 
+	//g_PortalGameStats.Event_CameraDetach(); // TODO!
+
 	// Make it move
 	IPhysicsObject *pPhysics = VPhysicsGetObject();
-	if ( !pPhysics || pPhysics->IsMotionEnabled() )
+	if( !pPhysics || pPhysics->IsMotionEnabled() )
 		return;
 
 	pPhysics->EnableMotion( true );
 	pPhysics->Wake();
+}
 
-	PlayDismountSounds();
+void CNPC_SecurityCamera::InputRagdoll( inputdata_t &inputdata ) // Line 1085 (1086) (was moved into CNPC_SecurityCamera::Ragdoll to use with new portal placement check)
+{
+	Ragdoll();
+}
+
+void CNPC_SecurityCamera::InputLookAtBlue( inputdata_t &inputdata ) // Line 1090 (1091)
+{
+	ClearEnemyMemory();
+	SetEnemy( NULL );
+	SetLastSightTime();
+	SetThink( &CNPC_SecurityCamera::SearchThink );
+	m_nTeamPlayerToLookAt = 0;
+}
+
+void CNPC_SecurityCamera::InputLookAtOrange( inputdata_t &inputdata ) // Line 1100 (1101)
+{
+	ClearEnemyMemory();
+	SetEnemy( NULL );
+	SetLastSightTime();
+	SetThink( &CNPC_SecurityCamera::SearchThink );
+	m_nTeamPlayerToLookAt = TEAM_RED;
+}
+
+void CNPC_SecurityCamera::InputLookAllTeams( inputdata_t &inputdata ) // Line 1110 (1111)
+{
+	ClearEnemyMemory();
+	SetEnemy( NULL );
+	SetLastSightTime();
+	SetThink( &CNPC_SecurityCamera::SearchThink );
+	m_nTeamPlayerToLookAt = TEAM_BLUE;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_SecurityCamera::DeathThink( void )
+void CNPC_SecurityCamera::DeathThink( void ) // Line 1123 (1124) (identical)
 {
 	if ( PreThink( CAMERA_DEAD ) )
 		return;
@@ -882,7 +1057,7 @@ void CNPC_SecurityCamera::DeathThink( void )
 // Input  : *pEnemy - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_SecurityCamera::CanBeAnEnemyOf( CBaseEntity *pEnemy )
+bool CNPC_SecurityCamera::CanBeAnEnemyOf( CBaseEntity *pEnemy ) // Line 1162 (1163) (identical)
 {
 	// If we're out of ammo, make friendly companions ignore us
 	if ( m_spawnflags & SF_SECURITY_CAMERA_OUT_OF_AMMO )
@@ -894,60 +1069,10 @@ bool CNPC_SecurityCamera::CanBeAnEnemyOf( CBaseEntity *pEnemy )
 	return BaseClass::CanBeAnEnemyOf( pEnemy );
 }
 
-
-void PlayDismountSounds()
+void CNPC_SecurityCamera::NotifyPortalEvent( PortalEvent_t nEventType, CPortal_Base2D *pNotifier ) // Line 1174 (1175)
 {
-	// Play GLaDOS's audio reaction
-	CPortal_Player* pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( 1 ) );
-	CAI_BaseActor* pGlaDOS  = (CAI_BaseActor*)gEntList.FindEntityByName( NULL, "Aperture_AI" );
-	
-	if ( !pPlayer || !pGlaDOS )
+	if( nEventType == PORTALEVENT_LINKED )
 	{
-		DevMsg( 2, "Could not play CNPC_SecurityCamera dismount scene, make sure actor named 'Aperture_AI' is present in map.\n" );
-		return;
-	}
-
-	IGameEvent *event = gameeventmanager->CreateEvent( "security_camera_detached" );
-	if ( event )
-	{
-		gameeventmanager->FireEvent( event );
-	}
-	
-	// If glados is currently talking, don't let her talk over herself or interrupt a potentially important speech.
-	// Should we play the dismount sound after she's done? or is that too disjointed from the camera dismounting act to make sense...
-	if ( IsRunningScriptedScene( pGlaDOS, false ) )
-	{
-		return;
-	}
-
-	pPlayer->IncNumCamerasDetatched();
-	int iNumCamerasDetatched = pPlayer->GetNumCamerasDetatched();
-
-	// If they've knocked down every one possible, play special '1' sound.
-	if ( iNumCamerasDetatched == SECURITY_CAMERA_TOTAL_TO_KNOCK_DOWN )
-	{
-		InstancedScriptedScene( pGlaDOS, CAMERA_DESTROYED_SCENE_1 );
-	}
-	else // iNumCamerasDetatched < SECURITY_CAMERA_TOTAL_TO_KNOCK_DOWN
-	{
-		// Play different sounds based on progress towards security camera knockdown total.
-		switch ( iNumCamerasDetatched )
-		{
-			case 1:
-				InstancedScriptedScene( pGlaDOS, CAMERA_DESTROYED_SCENE_2 );
-				break;
-
-			case 2:
-				InstancedScriptedScene( pGlaDOS, CAMERA_DESTROYED_SCENE_3 );
-				break;
-
-			case 3:
-				InstancedScriptedScene( pGlaDOS, CAMERA_DESTROYED_SCENE_4 );
-				break;
-
-			default:
-				InstancedScriptedScene( pGlaDOS, CAMERA_DESTROYED_SCENE_5 );
-				break;
-		}
+		CheckRestingSurfaceForPortals();
 	}
 }
