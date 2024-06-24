@@ -11,6 +11,7 @@
 #include <windows.h>
 #include "cputopology.h"
 #elif defined( PLATFORM_OSX )
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
 
@@ -31,10 +32,10 @@ const tchar* GetProcessorBrand();
 
 struct CpuIdResult_t
 {
-	unsigned long eax;
-	unsigned long ebx;
-	unsigned long ecx;
-	unsigned long edx;
+	unsigned int eax;
+	unsigned int ebx;
+	unsigned int ecx;
+	unsigned int edx;
 
 	void Reset()
 	{
@@ -43,18 +44,16 @@ struct CpuIdResult_t
 };
 
 
-static bool cpuid( unsigned long function, CpuIdResult_t &out )
+static bool cpuid( unsigned int function, CpuIdResult_t &out )
 {
 #if defined( _X360 ) || defined( _PS3 )
 	return false;
 #elif defined(GNUC)
-	unsigned long out_eax,out_ebx,out_ecx,out_edx;
+	unsigned int out_eax,out_ebx,out_ecx,out_edx;
 #ifdef PLATFORM_64BITS
-	asm("mov %%rbx, %%rsi\n\t"
-		"cpuid\n\t"
-		"xchg %%rsi, %%rbx"
+	asm("cpuid\n\t"
 		: "=a" (out_eax),
-		  "=S" (out_ebx),
+		  "=b" (out_ebx),
 		  "=c" (out_ecx),
 		  "=d" (out_edx)
 		: "a" (function) 
@@ -86,7 +85,7 @@ static bool cpuid( unsigned long function, CpuIdResult_t &out )
 	return true;
 #else
 	bool retval = true;
-	unsigned long out_eax = 0, out_ebx = 0, out_ecx = 0, out_edx = 0;
+	unsigned int out_eax = 0, out_ebx = 0, out_ecx = 0, out_edx = 0;
 	_asm pushad;
 
 	__try
@@ -122,18 +121,16 @@ static bool cpuid( unsigned long function, CpuIdResult_t &out )
 }
 
 
-static bool cpuidex( unsigned long function, unsigned long subfunction, CpuIdResult_t &out )
+static bool cpuidex( unsigned int function, unsigned int subfunction, CpuIdResult_t &out )
 {
 #if defined( _X360 ) || defined( _PS3 )
 	return false;
 #elif defined(GNUC)
-	unsigned long out_eax, out_ebx, out_ecx, out_edx;
+	unsigned int out_eax, out_ebx, out_ecx, out_edx;
 
-	asm( "mov %%ebx, %%esi\n\t"
-		"cpuid\n\t"
-		"xchg %%esi, %%ebx"
+	asm( "cpuid\n\t"
 		: "=a" ( out_eax ),
-		"=S" ( out_ebx ),
+		"=b" ( out_ebx ),
 		"=c" ( out_ecx ),
 		"=d" ( out_edx )
 		: "a" ( function ),
@@ -156,7 +153,7 @@ static bool cpuidex( unsigned long function, unsigned long subfunction, CpuIdRes
 	return false;
 #else
 	bool retval = true;
-	unsigned long out_eax = 0, out_ebx = 0, out_ecx = 0, out_edx = 0;
+	unsigned int out_eax = 0, out_ebx = 0, out_ecx = 0, out_edx = 0;
 	_asm pushad;
 
 	__try
@@ -192,7 +189,7 @@ static bool cpuidex( unsigned long function, unsigned long subfunction, CpuIdRes
 }
 
 
-static CpuIdResult_t cpuid( unsigned long function )
+static CpuIdResult_t cpuid( unsigned int function )
 {
 	CpuIdResult_t out;
 	if ( !cpuid( function, out ) )
@@ -202,7 +199,7 @@ static CpuIdResult_t cpuid( unsigned long function )
 	return out;
 }
 
-static CpuIdResult_t cpuidex( unsigned long function, unsigned long subfunction )
+static CpuIdResult_t cpuidex( unsigned int function, unsigned int subfunction )
 {
 	CpuIdResult_t out;
 	if ( !cpuidex( function, subfunction, out ) )
@@ -266,12 +263,7 @@ static bool CheckSSETechnology(void)
 #if defined( _X360 ) || defined( _PS3 )
 	return true;
 #else
-	if ( IsWin98OrOlder() )
-	{
-		return false;
-	}
-
-    return ( cpuid( 1 ).edx & 0x2000000L ) != 0;
+	return ( cpuid( 1 ).edx & 0x2000000L ) != 0;
 #endif
 }
 
@@ -280,7 +272,7 @@ static bool CheckSSE2Technology(void)
 #if defined( _X360 ) || defined( _PS3 )
 	return false;
 #else
-    return ( cpuid( 1 ).edx & 0x04000000 ) != 0;
+	return ( cpuid( 1 ).edx & 0x04000000 ) != 0;
 #endif
 }
 
@@ -321,12 +313,7 @@ bool CheckSSE42Technology(void)
 #if defined( _X360 ) || defined( _PS3 )
 	return false;
 #else
-	// SSE4.2 is an Intel-only feature
-
-	const char *pchVendor = GetProcessorVendorId();
-	if ( 0 != V_tier0_stricmp( pchVendor, "GenuineIntel" ) )
-		return false;
-
+	// SSE4.2 implemented by AMD and Intel
 	return ( cpuid( 1 ).ecx & ( 1 << 20 ) ) != 0;	// bit 20 of ECX
 #endif
 }
@@ -343,7 +330,7 @@ bool CheckSSE4aTechnology( void )
 	if ( 0 != V_tier0_stricmp( pchVendor, "AuthenticAMD" ) )
 		return false;
 
-	return ( cpuid( 1 ).ecx & ( 1 << 6 ) ) != 0;	// bit 6 of ECX
+	return ( cpuid( 0x80000001 ).ecx & ( 1 << 6 ) ) != 0;	// bit 6 of ECX
 #endif
 }
 
@@ -389,18 +376,19 @@ static bool CheckRDTSCTechnology(void)
 }
 
 
-static tchar s_CpuVendorID[ 13 ] = "unknown";
+static union { tchar string[ 13 ]; uint32 regs[3]; } s_CpuVendorID = { "unknown" };
 
-bool s_bCpuVendorIdInitialized = false;
+static bool s_bCpuVendorIdInitialized = false;
 
 union CpuBrand_t
 {
 	CpuIdResult_t cpuid[ 3 ];
 	char name[ 49 ];
 };
-CpuBrand_t s_CpuBrand;
 
-bool s_bCpuBrandInitialized = false;
+static CpuBrand_t s_CpuBrand;
+
+static bool s_bCpuBrandInitialized = false;
 
 // Return the Processor's vendor identification string, or "Generic_x86" if it doesn't exist on this CPU
 const tchar* GetProcessorVendorId()
@@ -410,35 +398,35 @@ const tchar* GetProcessorVendorId()
 #else
 	if ( s_bCpuVendorIdInitialized )
 	{
-		return s_CpuVendorID;
+		return s_CpuVendorID.string;
 	}
 
 	s_bCpuVendorIdInitialized = true;
 
 	CpuIdResult_t cpuid0 = cpuid( 0 );
 	
-	memset( s_CpuVendorID, 0, sizeof(s_CpuVendorID) );
+	memset( s_CpuVendorID.string, 0, sizeof(s_CpuVendorID.string) );
 
 	if ( !cpuid0.eax )
 	{
 		// weird...
 		if ( IsPC() )
 		{
-			_tcscpy( s_CpuVendorID, _T( "Generic_x86" ) ); 
+			_tcscpy( s_CpuVendorID.string, _T( "Generic_x86" ) ); 
 		}
 		else if ( IsX360() )
 		{
-			_tcscpy( s_CpuVendorID, _T( "PowerPC" ) ); 
+			_tcscpy( s_CpuVendorID.string, _T( "PowerPC" ) ); 
 		}
 	}
 	else
 	{
-		memcpy( s_CpuVendorID + 0, &( cpuid0.ebx ), sizeof( cpuid0.ebx ) );
-		memcpy( s_CpuVendorID + 4, &( cpuid0.edx ), sizeof( cpuid0.edx ) );
-		memcpy( s_CpuVendorID + 8, &( cpuid0.ecx ), sizeof( cpuid0.ecx ) );
+		s_CpuVendorID.regs[0] = cpuid0.ebx;
+		s_CpuVendorID.regs[1] = cpuid0.edx;
+		s_CpuVendorID.regs[2] = cpuid0.ecx;
 	}
 
-	return s_CpuVendorID;
+	return s_CpuVendorID.string;
 #endif
 }
 
@@ -457,16 +445,12 @@ const tchar* GetProcessorBrand()
 
 	memset( &s_CpuBrand, 0, sizeof( s_CpuBrand ) );
 
-	const char *pchVendor = GetProcessorVendorId();
-	if ( 0 == V_tier0_stricmp( pchVendor, "GenuineIntel" ) )
+	// CPU brand string
+	if ( cpuid( 0x80000000 ).eax >= 0x80000004 )
 	{
-		// Intel brand string
-		if ( cpuid( 0x80000000 ).eax >= 0x80000004 )
-		{
-			s_CpuBrand.cpuid[ 0 ] = cpuid( 0x80000002 );
-			s_CpuBrand.cpuid[ 1 ] = cpuid( 0x80000003 );
-			s_CpuBrand.cpuid[ 2 ] = cpuid( 0x80000004 );
-		}
+		s_CpuBrand.cpuid[ 0 ] = cpuid( 0x80000002 );
+		s_CpuBrand.cpuid[ 1 ] = cpuid( 0x80000003 );
+		s_CpuBrand.cpuid[ 2 ] = cpuid( 0x80000004 );
 	}
 	return s_CpuBrand.name;
 
@@ -804,7 +788,7 @@ const CPUInformation& GetCPUInformation()
 	if ( cpuid0.eax >= 1 )
 	{
 		CpuIdResult_t cpuid1 = cpuid( 1 );
-		uint bFPU = cpuid1.edx & 1; // this should always be on on anything we support
+		bool bFPU = cpuid1.edx & 1; // this should always be on on anything we support
 		// Determine Processor Features:
 		pi.m_bRDTSC = ( cpuid1.edx >> 4 ) & 1;
 		pi.m_bCMOV = ( cpuid1.edx >> 15 ) & 1;
@@ -818,7 +802,18 @@ const CPUInformation& GetCPUInformation()
 		pi.m_bSSE41 = ( cpuid1.ecx >> 19 ) & 1;
 		pi.m_bSSE42 = ( cpuid1.ecx >> 20 ) & 1;
 		pi.m_b3DNow = Check3DNowTechnology();
-		pi.m_bAVX	= ( cpuid1.ecx >> 28 ) & 1;
+
+		// NOTE (Mr0maks): AVX && AVX2/AVX512 can be disabled at least on Linux, first check XSAVE feature
+		//Source: linux-src/Documentation/admin-guide/hw-vuln/gather_data_sampling.rst
+		if( cpuid0.eax >= 13 )
+		{
+			CpuIdResult_t cpuid13 = cpuidex( 13, 0 );
+			if( cpuid13.eax >> 2 & 1 )
+			{
+				pi.m_bAVX	= ( cpuid1.ecx >> 28 ) & 1;
+			}
+		}
+
 		pi.m_szProcessorID = ( tchar* )GetProcessorVendorId();
 		pi.m_szProcessorBrand = ( tchar* )GetProcessorBrand();
 		pi.m_bHT = ( pi.m_nPhysicalProcessors < pi.m_nLogicalProcessors ); //HTSupported();
@@ -839,7 +834,7 @@ const CPUInformation& GetCPUInformation()
 				{
 					nCacheSizeKiB[ i ] = 0;
 				}
-				for ( unsigned long nSub = 0; nSub < 1024 ; ++nSub )
+				for ( unsigned int nSub = 0; nSub < 1024 ; ++nSub )
 				{
 					CpuIdResult_t cpuid4 = cpuidex( 4, nSub );
 					uint nCacheType = cpuid4.eax & 0x1F;
