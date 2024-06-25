@@ -89,7 +89,12 @@ static TitleDataFieldsDescription_t const * PrepareTitleDataStorageDescription()
 		{
 			char *pszComponentName = new char[ numAchNameChars + 10 ];
 			Q_snprintf( pszComponentName, numAchNameChars + 10, "%s[%d]", szAch, iComponent+1 );
+			// NOTE (Mr0maks): Fix this right for POSIX.
+#if 0
+			TD_ENTRY( pszComponentName,	DB_TD2,	DT_uint64,	offsetof( TitleData2, ach_SpreadTheLove_FriendsHugged) + sizeof(uint64) * iComponent );
+#else
 			TD_ENTRY( pszComponentName,	DB_TD2,	DT_uint64,	offsetof( TitleData2, ach_SpreadTheLove_FriendsHugged[iComponent] ) );
+#endif
 		}
 	}
 	{
@@ -99,7 +104,11 @@ static TitleDataFieldsDescription_t const * PrepareTitleDataStorageDescription()
 		{
 			char *pszComponentName = new char[ numAchNameChars + 10 ];
 			Q_snprintf( pszComponentName, numAchNameChars + 10, "%s[%d]", szAch, iComponent+1 );
+#if 0
+			TD_ENTRY( pszComponentName,	DB_TD2,	DT_uint16,	offsetof( TitleData2, ach_SpeedRunCoop_MapsQualified) + sizeof(uint64) * iComponent );
+#else
 			TD_ENTRY( pszComponentName,	DB_TD2,	DT_uint16,	offsetof( TitleData2, ach_SpeedRunCoop_MapsQualified[iComponent] ) );
+#endif
 		}
 	}
 
@@ -191,9 +200,11 @@ TitleAvatarAwardsDescription_t const * CMatchTitle::DescribeTitleAvatarAwards()
 
 TitleDlcDescription_t const * CMatchTitle::DescribeTitleDlcs()
 {
+	// NOTE: Mr0maks: m_iSupportedPlatforms was removed from structure. (DLC2 is a puzzlemaker and has 0x01)
 	static TitleDlcDescription_t tdlcs[] =
 	{
-		{ PORTAL2_DLCID_RETAIL_DLC1,		0x80000001,							0x80000001,							"DLC.0x01" },
+		{ PORTAL2_DLCID_RETAIL_DLC1,		-2147483647,				-2147483647,				"DLC.0x01" },
+		{ PORTAL2_DLCID_RETAIL_DLC2,		-2147483646, 				-2147483646, 				"DLC.0x02" },
 		{ PORTAL2_DLCID_COOP_BOT_SKINS,		PORTAL2_DLC_APPID_COOP_BOT_SKINS,	PORTAL2_DLC_PKGID_COOP_BOT_SKINS,	"DLC.0x12" },
 		{ PORTAL2_DLCID_COOP_BOT_HELMETS,	PORTAL2_DLC_APPID_COOP_BOT_HELMETS,	PORTAL2_DLC_PKGID_COOP_BOT_HELMETS,	"DLC.0x13" },
 		{ PORTAL2_DLCID_COOP_BOT_ANTENNA,	PORTAL2_DLC_APPID_COOP_BOT_ANTENNA,	PORTAL2_DLC_PKGID_COOP_BOT_ANTENNA,	"DLC.0x14" },
