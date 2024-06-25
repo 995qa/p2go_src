@@ -182,8 +182,8 @@ void CNPC_SecurityCamera::Spawn( void ) // Line 198 (199) (identical)
 	SetPoseParameter( SECURITY_CAMERA_BC_PITCH, 0 );
 
 	//Set our autostart state
-	m_bAutoStart = !!( m_spawnflags & SF_SECURITY_CAMERA_AUTOACTIVATE );
-	m_bEnabled	 = ( ( m_spawnflags & SF_SECURITY_CAMERA_STARTINACTIVE ) == false );
+	m_bAutoStart = ( m_spawnflags & SF_SECURITY_CAMERA_AUTOACTIVATE ) != false;
+	m_bEnabled	 = ( m_spawnflags & SF_SECURITY_CAMERA_STARTINACTIVE ) == false;
 
 	//Do we start active?
 	if ( m_bAutoStart && m_bEnabled )
@@ -702,7 +702,7 @@ void CNPC_SecurityCamera::ActiveThink( void ) // Line 621 (622)
 
 	if( m_bDetectedNewPing && fabs( AngleDiff( m_vecGoalAngles.x, m_vecCurrentAngles.x ) ) <= 1.0 && fabs( AngleDiff( m_vecGoalAngles.y, m_vecCurrentAngles.y ) ) <= 1.0 )
 	{
-		m_bDetectedNewPing = 0;
+		m_bDetectedNewPing = false;
 	}
 }
 
@@ -742,7 +742,7 @@ void CNPC_SecurityCamera::SearchThink( void ) // Line 800 (801)
 		for( int i = 1; i <= gpGlobals->maxClients; ++i )
 		{
 			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
-			if ( pPlayer && pPlayer->IsAlive() && ( !(m_bLookAtPlayerPings > 0) || m_nTeamPlayerToLookAt == pPlayer->GetTeamNumber() ) )
+			if ( pPlayer && pPlayer->IsAlive() && ( !m_bLookAtPlayerPings || ( m_nTeamPlayerToLookAt == pPlayer->GetTeamNumber() ) ) )
 			{
 				if ( FInViewCone( pPlayer ) && FVisible( pPlayer ) )
 				{
@@ -805,7 +805,14 @@ bool CNPC_SecurityCamera::PreThink( cameraState_e state ) // Line 883 (884)
 	//Animate
 	StudioFrameAdvance();
 
-	Toggle();
+	if( GetRenderAlpha() > 0 ) // NOTE(SanyaSho): original Portal2 bug when camera glow is always active.
+	{
+		EyeOn();
+	}
+	else
+	{
+		EyeOff();
+	}
 
 	//Do not interrupt current think function
 	return CheckRestingSurfaceForPortals();
@@ -994,7 +1001,7 @@ void CNPC_SecurityCamera::InputLookAtBlue( inputdata_t &inputdata ) // Line 1090
 	SetEnemy( NULL );
 	SetLastSightTime();
 	SetThink( &CNPC_SecurityCamera::SearchThink );
-	m_nTeamPlayerToLookAt = 0;
+	m_nTeamPlayerToLookAt = TEAM_BLUE;
 }
 
 void CNPC_SecurityCamera::InputLookAtOrange( inputdata_t &inputdata ) // Line 1100 (1101)
@@ -1012,7 +1019,7 @@ void CNPC_SecurityCamera::InputLookAllTeams( inputdata_t &inputdata ) // Line 11
 	SetEnemy( NULL );
 	SetLastSightTime();
 	SetThink( &CNPC_SecurityCamera::SearchThink );
-	m_nTeamPlayerToLookAt = TEAM_BLUE;
+	m_nTeamPlayerToLookAt = 0;
 }
 
 //-----------------------------------------------------------------------------
