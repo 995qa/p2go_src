@@ -29,55 +29,14 @@
 
 char* CTriggerPortalCleanser::s_szPlayerPassesTriggerFiltersThinkContext = "PlayerPassesTriggerFiltersThinkContext";
 
-
 ConVar sv_portal_cleanser_think_rate( "sv_portal_cleanser_think_rate", "0.25", FCVAR_DEVELOPMENTONLY, "How often, in seconds should the portal cleanser think." );
 ConVar sv_portal_cleanser_vortex_distance( "sv_portal_cleanser_vortex_distance", "96", FCVAR_DEVELOPMENTONLY, "The distance from the fizzler at which an object is within range to create a vortex." );
 ConVar debug_portal_cleanser_search_box( "debug_portal_cleanser_search_box", "0", FCVAR_DEVELOPMENTONLY );
-
-BEGIN_DATADESC( FizzlerMultiOriginSoundPlayer )
-
-	DEFINE_SOUNDPATCH( m_pSound ),
-	DEFINE_THINKFUNC( RemoveThink ),
-
-END_DATADESC()
-
-IMPLEMENT_SERVERCLASS_ST( FizzlerMultiOriginSoundPlayer, DT_FizzlerMultiOriginSoundPlayer )
-END_SEND_TABLE()
-
-LINK_ENTITY_TO_CLASS( fizzler_multiorigin_sound_player, FizzlerMultiOriginSoundPlayer );
-
-FizzlerMultiOriginSoundPlayer::FizzlerMultiOriginSoundPlayer()
-{
-	m_pSound = NULL;
-}
-
-FizzlerMultiOriginSoundPlayer::~FizzlerMultiOriginSoundPlayer()
-{
-	CSoundEnvelopeController &Controller = CSoundEnvelopeController::GetController();
-	if ( m_pSound )
-	{
-		Controller.Shutdown( m_pSound );
-		Controller.SoundDestroy( m_pSound );
-	}
-}
-
-void FizzlerMultiOriginSoundPlayer::Spawn()
-{
-	BaseClass::Spawn();
-	SetThink( &FizzlerMultiOriginSoundPlayer::RemoveThink );
-	SetNextThink( gpGlobals->curtime );
-}
 
 void CTriggerPortalCleanser::UpdateOnRemove( void )
 {
 	StopAmbientSounds();
 	BaseClass::UpdateOnRemove();
-}
-
-int FizzlerMultiOriginSoundPlayer::UpdateTransmitState( void )
-{
-	// 8 was the value Ghidra gave us, fix me if this is inaccurate.
-	return SetTransmitState( FL_EDICT_ALWAYS );
 }
 
 void CTriggerPortalCleanser::StartAmbientSounds( void )
@@ -116,35 +75,6 @@ void CTriggerPortalCleanser::ClearVortexObjects( void )
 	m_VortexObjects[1].m_flDistanceSq = FLT_MAX;
 	m_VortexObjects[1].m_hEnt = NULL;
 }
-
-void FizzlerMultiOriginSoundPlayer::RemoveThink( void )
-{
-	if ( ITriggerPortalCleanserAutoList::AutoList().Count() )
-		SetNextThink( gpGlobals->curtime );
-	else
-		UTIL_Remove(this);
-}
-
-FizzlerMultiOriginSoundPlayer *FizzlerMultiOriginSoundPlayer::Create( IRecipientFilter &filter, const char *soundName )
-{
-	FizzlerMultiOriginSoundPlayer *pProxy = (FizzlerMultiOriginSoundPlayer *)CreateEntityByName("fizzler_multiorigin_sound_player", -1, 1);
-	if (pProxy)
-	{
-
-#if 0 // TODO: Which one is accurate?
-		pProxy->Spawn();
-#else
-		DispatchSpawn( pProxy );
-#endif
-		CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
-		
-		pProxy->m_pSound = controller.SoundCreate( filter, pProxy->entindex(), soundName );
-		controller.Play( pProxy->m_pSound, 1.0, 100.0, 0 );
-
-	}
-	return pProxy;
-}
-
 
 // Creates a base entity with model/physics matching the parameter ent.
 // Used to avoid higher level functions on a disolving entity, which should be inert

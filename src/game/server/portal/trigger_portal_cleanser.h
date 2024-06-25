@@ -3,6 +3,7 @@
 
 #include "cbase.h"
 #include "triggers.h"
+#include "fizzler_multiorigin_sound_player.h"
 
 static char *g_pszPortalNonCleansable[] = 
 { 
@@ -37,26 +38,6 @@ struct FizzlerVortexObjectInfo_t
 	
 	float m_flDistanceSq;
     EHANDLE m_hEnt;
-};
-
-class FizzlerMultiOriginSoundPlayer : public CBaseEntity
-{
-	DECLARE_CLASS( FizzlerMultiOriginSoundPlayer, CBaseEntity );
-	DECLARE_DATADESC();
-public:
-	DECLARE_SERVERCLASS();
-    
-    FizzlerMultiOriginSoundPlayer();
-	~FizzlerMultiOriginSoundPlayer();
-
-	void Spawn();
-    
-	static FizzlerMultiOriginSoundPlayer *Create( IRecipientFilter &filter, const char *soundName );
-    int UpdateTransmitState();
-
-private:
-    CSoundPatch *m_pSound;
-    void RemoveThink();	
 };
 
 class CleanserVortexTraceEnum : public ICountedPartitionEnumerator
