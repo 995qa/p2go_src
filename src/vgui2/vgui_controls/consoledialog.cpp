@@ -1035,6 +1035,7 @@ void CConsolePanel::ApplySchemeSettings(IScheme *pScheme)
 	m_pCompletionList->SetFont( pScheme->GetFont( "DefaultSmall", IsProportional() ) );
 	m_pSubmit->SetFont( pScheme->GetFont( "DefaultSmall", IsProportional() ) );
 
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 ) // SanyaSho: disable this for PORTAL2
 	if ( true ) // make the console opaque
 	{
 		Color bgColor( 64,64,64, 255 );
@@ -1043,6 +1044,7 @@ void CConsolePanel::ApplySchemeSettings(IScheme *pScheme)
 		m_pEntry->SetBgColor( bgColor );
 		m_pCompletionList->SetBgColor( bgColor );
 	}
+#endif
 
 	InvalidateLayout();
 }
