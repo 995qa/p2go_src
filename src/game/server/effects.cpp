@@ -2856,7 +2856,9 @@ PRECACHE_REGISTER_BEGIN( GLOBAL, EffectsPrecache )
 #ifndef DOTA_DLL
 	PRECACHE( GAMESOUND, "Underwater.BulletImpact" )
 	PRECACHE( GAMESOUND, "FX_RicochetSound.Ricochet" )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	PRECACHE(GAMESOUND, "FX_RicochetSound.Ricochet_Legacy")
+#endif
 	PRECACHE( GAMESOUND, "Physics.WaterSplash" )
 	PRECACHE( GAMESOUND, "BaseExplosionEffect.Sound" )
 	PRECACHE( GAMESOUND, "Splash.SplashSound" )
