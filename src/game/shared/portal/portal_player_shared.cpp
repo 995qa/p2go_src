@@ -311,9 +311,13 @@ void CPortal_Player::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, 
 		return;
 
 #if defined( CLIENT_DLL )
-	// during prediction play footstep sounds only once
-	if ( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
-		return;
+	//Tony; ONLY check for prediction if WE are the LOCAL PLAYER.
+	if( IsLocalPlayer( this ) )
+	{
+		// during prediction play footstep sounds only once
+		if ( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
+			return;
+	}
 #endif
 
 	// Play the paint step sound if applicable

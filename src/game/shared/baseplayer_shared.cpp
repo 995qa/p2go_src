@@ -770,8 +770,6 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	PlayStepSound( feet, psurface, fvol, false );
 }
 
-ConVar sv_max_distance_transmit_footsteps( "sv_max_distance_transmit_footsteps", "1250.0", FCVAR_REPLICATED, "Maximum distance to transmit footstep sound effects." );
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : step - 
@@ -784,9 +782,13 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 		return;
 
 #if defined( CLIENT_DLL )
-	// during prediction play footstep sounds only once
-	if ( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
-		return;
+	//Tony; ONLY check for prediction if WE are the LOCAL PLAYER.
+	if( IsLocalPlayer( this ) )
+	{
+		// during prediction play footstep sounds only once
+		if( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
+			return;
+	}
 #endif
 
 	if ( !psurface )
@@ -809,32 +811,7 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 	}
 	else
 	{
-		IPhysicsSurfaceProps *physprops = MoveHelper()->GetSurfaceProps();
-		
-// footstep sounds
-#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
-		const char *pRawSoundName = physprops->GetString( stepSoundName );
-		const char *pSoundName = NULL;
-		int const nStepCopyLen = V_strlen(pRawSoundName) + 4;
-		char *szStep = ( char * ) stackalloc( nStepCopyLen );
-		if ( GetTeamNumber() == TEAM_CT )
-		{
-			Q_snprintf(szStep, nStepCopyLen, "ct_%s", pRawSoundName);
-		}
-		else
-		{
-			Q_snprintf(szStep, nStepCopyLen, "t_%s", pRawSoundName);
-		}
-
-		pSoundName = szStep;
-		if ( !CBaseEntity::GetParametersForSound( pSoundName, params, NULL ) )
-		{
-			DevMsg( "Can't find specific footstep sound! (%s) - Using the default instead. (%s)\n", pSoundName, pRawSoundName );
-			pSoundName = pRawSoundName;
-		}
-#else
 		const char *pSoundName = physprops->GetString( stepSoundName );
-#endif
 		if ( !CBaseEntity::GetParametersForSound( pSoundName, params, NULL ) )
 			return;
 
@@ -847,75 +824,38 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 	}
 
 	CRecipientFilter filter;
-	
+
 #if defined( CLIENT_DLL )
-	// make sure we hear our own jump
-	filter.AddRecipient( this );
-	if ( prediction->InPrediction() && !bForce )
+	//Tony; ONLY check for prediction if WE are the LOCAL PLAYER.
+	if ( IsLocalPlayer( this ) && prediction->InPrediction() )
 	{
 		// Only use these rules when in prediction.
 		filter.UsePredictionRules();
 	}
 #endif
 
-	if( !bForce )
-	{
-		filter.AddRecipientsByPAS( vecOrigin );
-	}
+	filter.AddRecipientsByPAS( vecOrigin );
 
 #ifndef CLIENT_DLL
 	// in MP, server removes all players in the vecOrigin's PVS, these players generate the footsteps client side
-	if ( gpGlobals->maxClients > 1 && !bForce )
+	if ( gpGlobals->maxClients > 1 )
 	{
 		filter.RemoveRecipientsByPVS( vecOrigin );
 	}
-	
-	if( bForce )
-	{
-		filter.AddAllPlayers();
-	}
-	// the client plays it's own sound
-	filter.RemoveRecipient( this );
-
-	// Don't transmit footsteps if they are outside maximum footstep transmission range.
-	for ( int i = 0; i < filter.GetRecipientCount(); ++i )
-	{
-		int entIndex = filter.GetRecipientIndex( i );
-		IHandleEntity* entity = gEntList.LookupEntityByNetworkIndex( entIndex );
-		if ( entity )
-		{
-			CBasePlayer* player = dynamic_cast<CBasePlayer*>( gEntList.GetBaseEntity( entity->GetRefEHandle() ) );
-			if ( player != NULL )
-			{
-				float dist = vecOrigin.DistTo( player->EyePosition() );
-				if ( dist > sv_max_distance_transmit_footsteps.GetFloat() )
-				{
-					filter.RemoveRecipient( player );
-				}
-			}
-		}
-	}
 #endif
-
-// #if defined( CLIENT_DLL )
-// 	Msg( "CLIENT_DLL: (PlayStepSound) filter recipients = %d\n", filter.GetRecipientCount() );
-// #else
-// 	Msg( "GAME_DLL: (PlayStepSound) filter recipients = %d\n", filter.GetRecipientCount() );
-// #endif
 
 	EmitSound_t ep;
 	ep.m_nChannel = CHAN_BODY;
 	ep.m_pSoundName = params.soundname;
 	ep.m_flVolume = fvol;
 	ep.m_SoundLevel = params.soundlevel;
-	ep.m_nFlags = 0;
+	ep.m_nFlags = SND_CHANGE_VOL | SND_CHANGE_PITCH;	//add this or the fucking sound wont 
 	ep.m_nPitch = params.pitch;
 	ep.m_pOrigin = &vecOrigin;
 	ep.m_hSoundScriptHash = params.m_hSoundScriptHash;
 	ep.m_nSoundEntryVersion = params.m_nSoundEntryVersion;
 
 	EmitSound( filter, entindex(), ep );
-
 }
 
 void CBasePlayer::UpdateButtonState( int nUserCmdButtonMask )
@@ -1155,12 +1095,6 @@ void CBasePlayer::SimulatePlayerSimulatedEntities( void )
 			continue;
 		}
 
-#if defined( CLIENT_DLL )
-		if ( e->IsClientCreated() && prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
-		{
-			continue;
-		}
-#endif
 		Assert( e->IsPlayerSimulated() );
 		Assert( e->GetSimulatingPlayer() == this );
 
