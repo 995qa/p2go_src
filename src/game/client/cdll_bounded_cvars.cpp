@@ -25,11 +25,7 @@ class CBoundedCvar_Predict : public ConVar_ServerBounded
 public:
 	CBoundedCvar_Predict() :
 	  ConVar_ServerBounded( "cl_predict", 
-#if defined( PORTAL2 ) // SanyaSho: FIXME
-		  "0.0",
-#else
 		  "1.0", 
-#endif
 		  FCVAR_USERINFO | FCVAR_NOT_CONNECTED, 
 		  "Perform client side prediction." )
 	  {
