@@ -273,14 +273,9 @@ static void SetMasterServerKeyValue( ISteamGameServer *pGameServer, IConVar *pCo
 	}
 }
 
-static KeyValues *g_pKVrulesConvars = NULL;
-
 static void ServerNotifyVarChangeCallback( IConVar *pConVar, const char *pOldValue, float flOldValue )
 {
 	if ( !pConVar->IsFlagSet( FCVAR_NOTIFY ) )
-		return;
-
-	if ( !g_pKVrulesConvars->GetBool( pConVar->GetName() ) )
 		return;
 	
 	ISteamGameServer *pGameServer = Steam3Server().SteamGameServer();
@@ -2995,15 +2990,6 @@ void CBaseServer::Init( bool bIsDedicated )
 	m_Socket = NS_SERVER;	
 	
 	m_Signon.SetDebugName( "m_Signon" );
-
-	if ( !g_pKVrulesConvars )
-	{
-		g_pKVrulesConvars = new KeyValues( "NotifyRulesCvars" );
-		if ( !g_pKVrulesConvars->LoadFromFile( g_pFullFileSystem, "gamerulescvars.txt", "MOD" ) )
-		{
-			Warning( "Failed to load gamerulescvars.txt, game rules cvars might not be reported to management tools.\n" );
-		}
-	}
 	
 	g_pCVar->InstallGlobalChangeCallback( ServerNotifyVarChangeCallback );
 	SetMasterServerRulesDirty();
@@ -3200,9 +3186,6 @@ void CBaseServer::UpdateMasterServerRules()
 
 		ConVar *pConVar = dynamic_cast< ConVar* >( var );
 		if ( !pConVar )
-			continue;
-
-		if ( !g_pKVrulesConvars->GetBool( pConVar->GetName() ) )
 			continue;
 
 		SetMasterServerKeyValue( pGameServer, pConVar );
