@@ -53,10 +53,11 @@ void CHud::ResetHUD()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 bool CHud::MsgFunc_SendAudio(const CUsrMsg_SendAudio& msg)
 {
 	CLocalPlayerFilter filter;
 	C_BaseEntity::EmitSound(filter, SOUND_FROM_LOCAL_PLAYER, msg.radio_sound().c_str());
 	return true;
 }
+#endif

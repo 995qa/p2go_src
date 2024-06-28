@@ -179,7 +179,9 @@ public:
 
 	// User messages
 	bool						MsgFunc_ResetHUD( const CUsrMsg_ResetHud& msg );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	bool 						MsgFunc_SendAudio( const CUsrMsg_SendAudio& msg );
+#endif
 
 	// Hud Render group
 	int							LookupRenderGroupIndexByName( const char *pszGroupName );

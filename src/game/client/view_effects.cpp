@@ -157,6 +157,7 @@ public:
 	virtual void	Restore( IRestore *pRestore, bool fCreatePlayers );
 
 	CUserMessageBinder m_UMCMsgShake;
+	CUserMessageBinder m_UMCMsgTilt;
 	CUserMessageBinder m_UMCMsgFade;
 
 private:
@@ -226,7 +227,6 @@ bool __MsgFunc_Shake( const CUsrMsg_Shake &msg )
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pszName - 
@@ -247,7 +247,6 @@ void __MsgFunc_ShakeDir( bf_read &msg )
 	GetCViewEffects().Shake( shake );
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pszName - 
@@ -255,21 +254,21 @@ void __MsgFunc_ShakeDir( bf_read &msg )
 //			*pbuf - 
 // Output : static int
 //-----------------------------------------------------------------------------
-void __MsgFunc_Tilt( bf_read &msg )
+bool __MsgFunc_Tilt( const CUsrMsg_Tilt &msg )
 {
 	ScreenTilt_t tilt;
 
-	Vector vecAngle;
-
-	tilt.command = msg.ReadByte();
-	tilt.easeInOut = msg.ReadByte() ? true : false;
-	tilt.angle.x = msg.ReadFloat();
-	tilt.angle.y = msg.ReadFloat();
-	tilt.angle.z = msg.ReadFloat();
-	tilt.duration = msg.ReadFloat();
-	tilt.time = msg.ReadFloat();
+	tilt.command = msg.command();
+	tilt.easeInOut = msg.ease_in_out() ? true : false;
+	tilt.angle.x = msg.angle().x();
+	tilt.angle.y = msg.angle().y();
+	tilt.angle.z = msg.angle().z();
+	tilt.duration = msg.duration();
+	tilt.time = msg.time();
 
 	GetCViewEffects().Tilt( tilt );
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -296,6 +295,7 @@ bool __MsgFunc_Fade( const CUsrMsg_Fade &msg )
 	return true;
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -305,10 +305,7 @@ void CViewEffects::Init( void )
 #ifdef INFESTED_DLL // the user message ShakeDir isn't registered for other games, but if you add it to your RegisterUserMessages, then you can un-#ifdef this
 	HOOK_MESSAGE( ShakeDir ); // directional screen shake
 #endif
-#ifdef HL2_CLIENT
-	// @TODO: Jeep, this causes assert in other games w/o this guard ifdef [6/3/2008 tom]
 	HOOK_MESSAGE( Tilt );
-#endif
 	HOOK_MESSAGE( Fade );
 }
 

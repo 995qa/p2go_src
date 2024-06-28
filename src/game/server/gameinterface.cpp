@@ -3845,9 +3845,11 @@ EncryptedMessageKeyType_t CServerGameDLL::GetMessageEncryptionKey(INetMessage *p
 		return kEncryptedMessageKeyType_Private;
 
 		case UM_TextMsg:
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		case UM_RadioText:
 		case UM_RawAudio:
 		case UM_SendAudio:
+#endif
 			return kEncryptedMessageKeyType_Private;
 
 		default:

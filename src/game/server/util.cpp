@@ -936,18 +936,18 @@ void UTIL_ScreenShakeObject( CBaseEntity *pEnt, const Vector &center, float ampl
 //-----------------------------------------------------------------------------
 inline void TransmitTiltEvent( CBasePlayer *pPlayer, QAngle tiltAngle, float duration, float tiltTime, ShakeCommand_t eCommand, bool bEaseInOut )
 {
-	// Gurjeets - Not used in csgo
-	//CSingleUserRecipientFilter user( pPlayer );
-	//user.MakeReliable();
-	//UserMessageBegin( user, "Tilt" );
-	//WRITE_BYTE( eCommand );				// tilt command (SHAKE_START, STOP, FREQUENCY, AMPLITUDE)
-	//WRITE_BYTE( bEaseInOut );			// tilt ease in/out
-	//WRITE_FLOAT( tiltAngle.x );			// tilt angle
-	//WRITE_FLOAT( tiltAngle.y );
-	//WRITE_FLOAT( tiltAngle.z );
-	//WRITE_FLOAT( duration );			// tilt lasts this long
-	//WRITE_FLOAT( tiltTime );			// tilt time
-	//MessageEnd();
+	CSingleUserRecipientFilter user( pPlayer );
+	user.MakeReliable();
+
+	CUsrMsg_Tilt msg;
+	msg.set_command( eCommand );				// tilt command (SHAKE_START, STOP, FREQUENCY, AMPLITUDE)
+	msg.set_ease_in_out( bEaseInOut );			// tilt ease in/out
+	msg.mutable_angle()->set_x( tiltAngle.x );	// tilt angle
+	msg.mutable_angle()->set_y( tiltAngle.y );
+	msg.mutable_angle()->set_z( tiltAngle.z );
+	msg.set_duration( duration );				// tilt lasts this long
+	msg.set_time( tiltTime );					// tilt time
+	SendUserMessage( user, UM_Tilt, msg );
 }
 
 //-----------------------------------------------------------------------------
