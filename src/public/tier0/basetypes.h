@@ -20,11 +20,12 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef schema
-#define schema namespace ValveSchemaMarker {}
+// SanyaSho: renamed "schema" to "vschema" to avoid Protobuf build conflict
+#ifndef vschema
+#define vschema namespace ValveSchemaMarker {}
 #endif
-#define noschema
-#define schema_pragma( ... )
+#define novschema
+#define vschema_pragma( ... )
 #define META( ... )
 #define TYPEMETA( ... )
 
