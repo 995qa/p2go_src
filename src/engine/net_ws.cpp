@@ -4501,8 +4501,6 @@ void NET_SteamDatagramServerListen()
 		// Clear the convar so we don't advertise that we are listening!
 		sv_steamdatagramtransport_port.SetValue( 0 );
 	}
-#else
-	return;
 #endif
 }
 
@@ -4657,7 +4655,7 @@ bool NET_CryptVerifyServerCertificateAndAllocateSessionKey( bool bOfficial, cons
 				chBuffer, bCertificateValidated ? "succeeded" : "failed" );
 #endif
 		}
-		catch ( Exception e )
+		catch ( Exception &e )
 		{
 #ifdef _DEBUG
 			Warning( "NET_CryptVerifyServerCertificateAndAllocateSessionKey: VerifyMessage threw exception %s (%d)\n",
@@ -4733,7 +4731,7 @@ bool NET_CryptVerifyServerCertificateAndAllocateSessionKey( bool bOfficial, cons
 #endif
 		return true;
 	}
-	catch ( Exception e )
+	catch ( Exception &e )
 	{
 #ifdef _DEBUG
 		Warning( "NET_CryptVerifyServerCertificateAndAllocateSessionKey: Encrypt threw exception %s (%d)\n",
@@ -4825,7 +4823,7 @@ bool NET_CryptVerifyClientSessionKey( bool bOfficial,
 
 		return true;
 	}
-	catch ( Exception e )
+	catch ( Exception &e )
 	{
 #ifdef _DEBUG
 		Warning( "NET_CryptVerifyClientSessionKey: Decrypt threw exception %s (%d)\n",
@@ -4930,7 +4928,7 @@ CON_COMMAND( net_encrypt_key_generate, "Generate a public/private keypair" )
 		pub.DEREncode( stringSinkPublicKey );
 		bSuccess = true;
 	}
-	catch ( Exception e )
+	catch ( Exception &e )
 	{
 		Warning( "net_encrypt_key_generate: crypto++ threw exception %s (%d)\n",
 			e.what(), e.GetErrorType() );
@@ -5011,7 +5009,7 @@ CON_COMMAND( net_encrypt_key_signature, "Compute key signature for the payloads"
 			Msg( "net_encrypt_key_signature: generated %u bytes signature for payload data +%u=%u bytes\n", bufSignature.TellPut(), nStringPayloadLength, bufDataFile.TellPut() );
 		}
 	}
-	catch ( Exception e )
+	catch ( Exception &e )
 	{
 		Warning( "net_encrypt_key_signature: SignMessage threw exception %s (%d)\n",
 			e.what(), e.GetErrorType() );

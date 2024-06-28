@@ -15,8 +15,8 @@ $include "$SRCDIR\vpc_scripts\protobuf_builder.vpc"
 $include "$SRCDIR\vpc_scripts\netmessages_include.vpc"
 $include "$SRCDIR\vpc_scripts\networkbasetypes_include.vpc"
 
-$include "$SRCDIR\external\external.vpc"
-$include "$SRCDIR\external\$EXTERNALCRYPTOPP\external_cryptopp.vpc"
+// Include CryptoPP
+$Include "$SRCDIR\thirdparty\cryptopp\use_cryptopp.vpc"
 
 $Configuration
 {
