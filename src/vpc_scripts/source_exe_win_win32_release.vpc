@@ -84,11 +84,12 @@ $Configuration "Release"
 		$StructMemberAlignment
 		$BufferSecurityCheck					"No" [$WINDOWS]
 		$EnableFunctionLevelLinking				"Yes (/Gy)"
-		$EnableEnhancedInstructionSet
+		$EnableEnhancedInstructionSet	"Streaming SIMD Extensions 2 (/arch:SSE2)"
 		$FloatingPointModel						"Fast (/fp:fast)"
 		$EnableFloatingPointExceptions
 
 		// Language
+		$LanguageStandard					"ISO C++14 Standard (/std:c++14)"
 		$DisableLanguageExtensions
 		$DefaultCharUnsigned					"No"
 		$TreatWCHAR_TAsBuiltInType				"Yes (/Zc:wchar_t)"
@@ -178,7 +179,7 @@ $Configuration "Release"
 		$HeapCommitSize
 		$StackReserveSize
 		$StackCommitSize
-		$EnableLargeAddresses
+		$EnableLargeAddresses		"Support Addresses Larger Than 2 Gigabytes (/LARGEADDRESSAWARE)"
 		$TerminalServer
 		$SwapRunFromCD
 		$SwapRunFromNetwork

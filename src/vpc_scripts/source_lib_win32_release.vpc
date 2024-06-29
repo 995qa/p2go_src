@@ -83,11 +83,12 @@ $Configuration "Release"
 		$StructMemberAlignment
 		$BufferSecurityCheck 				"No" [$WINDOWS]
 		$EnableFunctionLevelLinking			"Yes (/Gy)"
-		$EnableEnhancedInstructionSet
+		$EnableEnhancedInstructionSet "Streaming SIMD Extensions 2 (/arch:SSE2)" [$WIN32]
 		$FloatingPointModel					"Fast (/fp:fast)"
 		$EnableFloatingPointExceptions
 
 		// Language
+		$LanguageStandard					"ISO C++14 Standard (/std:c++14)"
 		$DisableLanguageExtensions
 		$DefaultCharUnsigned
 		$TreatWCHAR_TAsBuiltInType			"Yes (/Zc:wchar_t)"
