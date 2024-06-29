@@ -24,6 +24,7 @@
 #include "player_resource.h"
 #include "engine/IEngineSound.h"
 #include "player.h"
+#include "paint/paint_database.h" // PORTAL2
 
 #include "tier0/vprof.h"
 
@@ -35,6 +36,8 @@ void Host_Say( edict_t *pEdict, bool teamonly );
 //extern CBaseEntity*	FindPickerEntityClass( /*CBasePlayer* pPlayer,*/ char* classname);
 extern bool			g_fGameOver;
 
+
+
 /*
 ===========
 ClientPutInServer
@@ -42,7 +45,7 @@ ClientPutInServer
 called each time a player is spawned into the game
 ============
 */
-void ClientPutInServer( edict_t *pEdict, const char *playername )
+void ClientPutInServer( edict_t *pEdict, const char *playername ) // Line 48
 {
 	// Allocate a CBasePlayer for pev, and call spawn
 	CPortal_Player *pPlayer = CPortal_Player::CreatePlayer( "player", pEdict );
@@ -50,8 +53,7 @@ void ClientPutInServer( edict_t *pEdict, const char *playername )
 	pPlayer->SetPlayerName(playername);
 }
 
-
-void ClientActive( edict_t *pEdict, bool bLoadGame )
+void ClientActive( edict_t *pEdict, bool bLoadGame ) // Line 56
 {
 	CPortal_Player *pPlayer = dynamic_cast< CPortal_Player* >( CBaseEntity::Instance( pEdict ) );
 	Assert( pPlayer );
@@ -64,10 +66,19 @@ void ClientActive( edict_t *pEdict, bool bLoadGame )
 	}
 }
 
-void ClientFullyConnect(edict_t *pEntity)
-{
-}
 
+
+void ClientFullyConnect( edict_t *pEntity ) // Line 71
+{
+	CPortal_Player *pPlayer = dynamic_cast<CPortal_Player *>( CBaseEntity::Instance( pEntity ) );
+	Assert( pPlayer );
+
+	if( pPlayer && pPlayer->IsPlayer() ) // k... ???
+	{
+		PaintDatabase.SendPaintDataTo( pPlayer );
+		pPlayer->OnFullyConnected();
+	}
+}
 
 /*
 ===============
@@ -76,22 +87,21 @@ const char *GetGameDescription()
 Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 ===============
 */
-const char *GetGameDescription()
+const char *GetGameDescription() // Line 89
 {
 	if ( g_pGameRules ) // this function may be called before the world has spawned, and the game rules initialized
 		return g_pGameRules->GetGameDescription();
 	else
-		return "PORTAL 2";
+		return "Half-Life 2";
 }
+
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Given a player and optional name returns the entity of that 
 //			classname that the player is nearest facing
-//			
-// Input  :
-// Output :
 //-----------------------------------------------------------------------------
-CBaseEntity* FindEntity(edict_t* pEdict, char* classname)
+CBaseEntity* FindEntity(edict_t* pEdict, char* classname) // Line 104
 {
 	// If no name was given set bits based on the picked
 	if (FStrEq(classname, ""))
@@ -105,33 +115,21 @@ CBaseEntity* FindEntity(edict_t* pEdict, char* classname)
 	return NULL;
 }
 
+
+
+
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Precache game-specific models & sounds
 //-----------------------------------------------------------------------------
-void ClientGamePrecache( void )
+void ClientGamePrecache( void ) // Line 126
 {
-	CBaseEntity::PrecacheModel("models/player.mdl");
-	CBaseEntity::PrecacheModel( "models/gibs/agibs.mdl" );
-	CBaseEntity::PrecacheModel("models/weapons/v_hands.mdl");
-
-	CBaseEntity::PrecacheScriptSound( "HUDQuickInfo.LowAmmo" );
-	CBaseEntity::PrecacheScriptSound( "HUDQuickInfo.LowHealth" );
-
-	CBaseEntity::PrecacheScriptSound( "Missile.ShotDown" );
-	CBaseEntity::PrecacheScriptSound( "Bullets.DefaultNearmiss" );
-	CBaseEntity::PrecacheScriptSound( "Bullets.GunshipNearmiss" );
-	CBaseEntity::PrecacheScriptSound( "Bullets.StriderNearmiss" );
-	
-	CBaseEntity::PrecacheScriptSound( "Geiger.BeepHigh" );
-	CBaseEntity::PrecacheScriptSound( "Geiger.BeepLow" );
-
-	CBaseEntity::PrecacheModel( "models/portals/portal1.mdl" );
-	CBaseEntity::PrecacheModel( "models/portals/portal2.mdl" );
 }
 
 
 // called by ClientKill and DeadThink
-void respawn( CBaseEntity *pEdict, bool fCopyCorpse )
+void respawn( CBaseEntity *pEdict, bool fCopyCorpse ) // Line 132
 {
 	if (gpGlobals->coop || gpGlobals->deathmatch)
 	{
@@ -150,7 +148,7 @@ void respawn( CBaseEntity *pEdict, bool fCopyCorpse )
 	}
 }
 
-void GameStartFrame( void )
+void GameStartFrame( void ) // Line 151
 {
 	VPROF("GameStartFrame()");
 	if ( g_fGameOver )
@@ -159,14 +157,16 @@ void GameStartFrame( void )
 	gpGlobals->teamplay = (teamplay.GetInt() != 0);
 }
 
+
+
+
 //=========================================================
 // instantiate the proper game rules object
 //=========================================================
-void InstallGameRules()
+void InstallGameRules() // Line 166
 {
-	if (gpGlobals->maxClients == 1)
-		CreateGameRulesObject( "CPortalGameRules" );
-	else
+	if( IsGameRulesMultiplayer() )
 		CreateGameRulesObject( "CPortalMPGameRules" );
+	else
+		CreateGameRulesObject( "CPortalGameRules" );
 }
-

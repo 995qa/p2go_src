@@ -616,8 +616,8 @@ void CPaintDatabase::PreClientUpdate()
 	for ( int i=1; i<=gpGlobals->maxClients; ++i )
 	{
 		CPortal_Player *pPortalPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
-		// FIXME: OnFullyConnected() for CPortal_Player never gets called!!
-		if ( pPortalPlayer /*&& pPortalPlayer->IsFullyConnected()*/ )
+		// FIXME: OnFullyConnected() for CPortal_Player never gets called!! // SanyaSho: i don't even know why
+		if ( pPortalPlayer && pPortalPlayer->IsFullyConnected() )
 		{
 			filter.AddRecipient( pPortalPlayer );
 		}

@@ -26,10 +26,10 @@
 
 	#include "c_portal_player.h"
 	#include "c_user_message_register.h"
-	// TODO: Add these files! - Wonderland_War
-/*
 	#include "c_keyvalue_saver.h"
-	#include "radialmenu_taunt.h"
+
+	// TODO: Add these files! - Wonderland_War
+	/*#include "radialmenu_taunt.h"
 	#include "c_portal_mp_stats.h"
 	*/
 #else
@@ -549,8 +549,7 @@ bool CPortalMPGameRules::IsChallengeMode()
 CPortalMPGameRules::~CPortalMPGameRules( void )
 {
 #ifdef CLIENT_DLL
-	// TODO: ADD C_KeyValueSaver
-	//KeyValueSaver().WriteDirtyKeyValues( PORTAL2_MP_SAVE_FILE );
+	KeyValueSaver().WriteDirtyKeyValues( PORTAL2_MP_SAVE_FILE );
 #endif
 
 	g_pPortalMPGameRules = NULL;
@@ -2473,8 +2472,6 @@ USER_MESSAGE_REGISTER( MPMapCompletedData );
 
 void CPortalMPGameRules::LoadMapCompleteData( void )
 {
-	// FIXME: - Wonderland_War
-//#if 0
 	if ( !m_bMapNamesLoaded )
 		return;
 
@@ -2536,7 +2533,6 @@ void CPortalMPGameRules::LoadMapCompleteData( void )
 
 	// Let the server know that we loaded completion data on the client for this player
 	engine->ClientCmd( szCommand );
-//#endif
 }
 
 bool __MsgFunc_MPTauntEarned( const CUsrMsg_MPTauntEarned &msg )

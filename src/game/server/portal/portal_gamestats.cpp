@@ -819,15 +819,8 @@ void CPortalStatsController::LevelStart( float flDisplayTime )
 		ReadLeaderboard();
 	m_flLeaderboardSpawnTime = LEADERBOARD_DELAY_SECONDS;
 	SetNextThink( gpGlobals->curtime + 0.1 );
-	if ( !PortalGameRules()->IsSavingAllowed() )
+	if ( PortalGameRules() && !PortalGameRules()->IsSavingAllowed() )
 	{
-#if 0
-		if ((_S12_34 & 1) == 0)
-		{
-			_S12_34 |= 1u;
-			ConVarRef::ConVarRef(&map_wants_save_disable_1, "map_wants_save_disable");
-		}
-#endif
 		ConVarRef map_wants_save_disable( "map_wants_save_disable" );
 		map_wants_save_disable.SetValue( 0 );
 	}
@@ -859,7 +852,6 @@ void CPortalStatsController::LevelEnd( float flDisplayTime )
 //				UserMessageBegin(filter, "ChallengeModeCheatSession");
 //				MessageEnd();
 				CUsrMsg_ChallengeModeCheatSession msg;
-				msg.set_dummy(1);
 				SendUserMessage(filter, UM_ChallengeModeCheatSession, msg);
 				goto EndSpot;
 			}
@@ -883,22 +875,12 @@ void CPortalStatsController::OnLevelStart( inputdata_t &inputdata )
 			pTransitionEnt->RunScript( "TransitionReady ()", " TransitionReady" );
 	}
 
-	if (inputdata.value.FieldType() == FIELD_FLOAT)
-	{
-		CPortalStatsController::LevelStart( inputdata.value.Float() );
-	}
-	else
-	{
-		LevelStart( 0.0 );
-	}
+	LevelStart( ( inputdata.value.FieldType() == FIELD_FLOAT ) ? inputdata.value.Float() : 0.f );
 }
 
 void CPortalStatsController::OnLevelEnd( inputdata_t &inputdata )
 {
-	if ( inputdata.value.FieldType() == FIELD_FLOAT )
-		CPortalStatsController::LevelEnd( inputdata.value.Float() );
-	else
-		CPortalStatsController::LevelEnd( 0.0 );
+	LevelEnd( ( inputdata.value.FieldType() == FIELD_FLOAT ) ? inputdata.value.Float() : 0.f );
 }
 
 void CPortalStatsController::SetPlayersReady()
