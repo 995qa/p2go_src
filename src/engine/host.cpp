@@ -4904,6 +4904,15 @@ void Host_InitProcessor( void )
 		else					   Q_strncat(szFeatureString, "(MMX) ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
 	}
 
+	if( pi.m_bSSE3 ) Q_strncat( szFeatureString, "SSE3 ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bSSSE3 ) Q_strncat( szFeatureString, "SSSE3 ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bSSE4a ) Q_strncat( szFeatureString, "SSE4a ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bSSE41 ) Q_strncat( szFeatureString, "SSE4.1 ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bSSE42 ) Q_strncat( szFeatureString, "SSE4.2 ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bAVX ) Q_strncat( szFeatureString, "AVX ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bAVX2 ) Q_strncat( szFeatureString, "AVX2 ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+	if( pi.m_bAVX512F ) Q_strncat( szFeatureString, "AVX512F ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
+
 	if( pi.m_bRDTSC )	Q_strncat(szFeatureString, "RDTSC ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
 	if( pi.m_bCMOV )	Q_strncat(szFeatureString, "CMOV ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );
 	if( pi.m_bFCMOV )	Q_strncat(szFeatureString, "FCMOV ", sizeof( szFeatureString ), COPY_ALL_CHARACTERS );

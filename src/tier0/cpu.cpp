@@ -810,9 +810,19 @@ const CPUInformation& GetCPUInformation()
 			CpuIdResult_t cpuid13 = cpuidex( 13, 0 );
 			if( cpuid13.eax >> 2 & 1 )
 			{
-				pi.m_bAVX	= ( cpuid1.ecx >> 28 ) & 1;
+				pi.m_bAVX = ( cpuid1.ecx >> 28 ) & 1;
+
+				CpuIdResult_t cpuid7 = cpuidex( 7, 0 );
+				pi.m_bAVX2 = ( cpuid7.ebx >> 5 ) & 1;
+
+				//NOTE: its checks 5,6,7 bits
+				if( ( cpuid13.eax >> 5 & 7 ) == 7 )
+				{
+					pi.m_bAVX512F = ( cpuid7.ecx >> 16 ) & 1;
+				}
 			}
 		}
+
 
 		pi.m_szProcessorID = ( tchar* )GetProcessorVendorId();
 		pi.m_szProcessorBrand = ( tchar* )GetProcessorBrand();

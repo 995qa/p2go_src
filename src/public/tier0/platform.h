@@ -1871,11 +1871,14 @@ struct CPUInformation
 
 
 	bool m_bSSE3 : 1,
-		 m_bSSSE3 : 1,
-		 m_bSSE4a : 1,
-		 m_bSSE41 : 1,
-		 m_bSSE42 : 1,
-		 m_bAVX   : 1;  // Is AVX supported?
+			m_bSSSE3 : 1,
+			m_bSSE4a : 1,
+			m_bSSE41 : 1,
+			m_bSSE42 : 1,
+			m_bAVX	 : 1,  // Is AVX supported?
+			m_bAVX2  : 1,  // Is AVX2 supported?
+			m_bAVX512F : 1; // Is AVX512F supported?
+
 
 	int64 m_Speed;						// In cycles per second.
 
