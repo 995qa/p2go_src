@@ -1099,7 +1099,11 @@ CLocatorPanel::CLocatorPanel( Panel *parent, const char *name ) : EditablePanel(
 	m_textureID_ArrowDown = -1;
 	m_textureID_SimpleArrow = -1;
 
+#if defined( PORTAL2 ) // SanyaSho: small CS:GO change
+	SetScheme( "basemodui_scheme" );
+#else
 	SetScheme( "clientscheme" );
+#endif
 }
 
 //-----------------------------------------------------------------------------
