@@ -628,10 +628,11 @@ void CBasePlayerAnimState::ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr )
 	
 	if ( m_AnimConfig.m_LegAnimType == LEGANIM_9WAY )
 	{
-#ifndef CLIENT_DLL
 		//Adrian: Make the model's angle match the legs so the hitboxes match on both sides.
+		//[msmith]: Since bounding box code uses the entities local angle, we need the local angle to match
+		//			the render angle on both the server AND the client.  The server for hit tests, the client
+		//			for proper visibility culling.
 		GetOuter()->SetLocalAngles( QAngle( 0, m_flCurrentFeetYaw, 0 ) );
-#endif
 
 		int iMoveX = GetOuter()->LookupPoseParameter( pStudioHdr, "move_x" );
 		int iMoveY = GetOuter()->LookupPoseParameter( pStudioHdr, "move_y" );
@@ -641,14 +642,96 @@ void CBasePlayerAnimState::ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr )
 		bool bIsMoving;
 		float flPlaybackRate = CalcMovementPlaybackRate( &bIsMoving );
 
+#ifdef CLIENT_DLL
+		Vector vel;
+		GetOuterAbsVelocity( vel );
+		bIsMoving = ( vel.Length2D() > 0 );
+#endif
+
 		// Setup the 9-way blend parameters based on our speed and direction.
 		Vector2D vCurMovePose( 0, 0 );
 
+		m_flPoseParamTargetDampenedScaleIdeal = Approach( flPlaybackRate, m_flPoseParamTargetDampenedScaleIdeal, gpGlobals->frametime * POSE_PARAM_DELTA_DAMPEN );
+
 		if ( bIsMoving )
 		{
-			vCurMovePose.x = cos( DEG2RAD( flYaw ) ) * flPlaybackRate;
-			vCurMovePose.y = -sin( DEG2RAD( flYaw ) ) * flPlaybackRate;
+			vCurMovePose.x = cos( DEG2RAD( flYaw ) );
+			vCurMovePose.y = -sin( DEG2RAD( flYaw ) );
+			// movement pose parameters on the diagonals are encoded at 1 instead of 0.707 (cos 45)
+			// scale to the outside of a box instead of the outside of a circle.
+			float scale = fabs( vCurMovePose.x );
+			float scale2 = fabs( vCurMovePose.y );
+			if ( scale2 > scale ) scale = scale2;
+			if ( scale > 0.01f )
+			{
+				scale = 1.0f / scale;
+				vCurMovePose.x *= scale;
+				vCurMovePose.y *= scale;
+			}
+
+#ifdef CLIENT_DLL
+			// find the max speed the animation will move in the current direction
+
+			//If these aren't applied here, the legs stutter. Even though they're re-applied in a sec
+			GetOuter()->SetPoseParameter( pStudioHdr, iMoveX, vCurMovePose.x );
+			GetOuter()->SetPoseParameter( pStudioHdr, iMoveY, vCurMovePose.y );
+
+			Vector vecAnimatedVel;
+			GetOuter()->GetBlendedLinearVelocity( &vecAnimatedVel );
+			float flAnimatedSpeed = vecAnimatedVel.Length2D();
+
+			// find how to scale the current animation down to the desired speed
+			Vector vel;
+			GetOuterAbsVelocity( vel );
+			float flMovementSpeed = vel.Length2D();
+
+#if !( defined( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
+			const float CS_PLAYER_SPEED_RUN = 260.0f;
+#endif
+
+			if ( flAnimatedSpeed > CS_PLAYER_SPEED_RUN )
+				flAnimatedSpeed = flMovementSpeed;
+
+			if ( flAnimatedSpeed < MOVEMENT_MINIMUM_ANIMATED_SPEED )
+			{
+				// we're moving so slowly (either just starting or just stopping) that current playback rate is almost nothing.
+				flPlaybackRate = flMovementSpeed / ( MOVEMENT_MINIMUM_ANIMATED_SPEED * 2.0f );
+			}
+			else
+			{
+				
+				flPlaybackRate = flMovementSpeed / flAnimatedSpeed;
+			}
+
+			// player is moving less than what's animated, scale pose parameters back towards 0,0
+			if ( flPlaybackRate < 1.0f )
+			{
+				if ( flPlaybackRate > 0.08f )
+				{
+					vCurMovePose.x *= flPlaybackRate;
+					vCurMovePose.y *= flPlaybackRate;
+					GetOuter()->SetPlaybackRate( flPlaybackRate );
+				}
+				else
+				{
+					vCurMovePose.x *= 0.08f;
+					vCurMovePose.y *= 0.08f;
+					GetOuter()->SetPlaybackRate( 1.0f );
+				}
+			}
+			else
+			{
+				// speed up the animation to match the needed motion, but only so far
+				flPlaybackRate = clamp( flPlaybackRate, 1.0f, MOVEMENT_MAXIMUM_PLAYBACK_RATE );
+				GetOuter()->SetPlaybackRate( flPlaybackRate );
+			}
+#endif
+			vCurMovePose.x *= m_flPoseParamTargetDampenedScaleIdeal;
+			vCurMovePose.y *= m_flPoseParamTargetDampenedScaleIdeal;
+
 		}
+
+
 
 		GetOuter()->SetPoseParameter( pStudioHdr, iMoveX, vCurMovePose.x );
 		GetOuter()->SetPoseParameter( pStudioHdr, iMoveY, vCurMovePose.y );

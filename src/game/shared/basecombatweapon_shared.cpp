@@ -3459,7 +3459,7 @@ int CBaseCombatWeapon::SetReserveAmmoCount( AmmoPosition_t nAmmoPosition, int nC
 			// use player ammo if a player entity was passed in or if there already is ammo in this position
 			if ( pPlayer->GetAmmoCount( nAmmoType ) || bForceSetAmmoOnPlayer )
 			{
-				int iMax = GetAmmoDef()->MaxCarry( nAmmoType );
+				int iMax = GetAmmoDef()->MaxCarry( nAmmoType, pPlayer );
 				iAdd = MIN( nCount, iMax - pPlayer->GetAmmoCount( nAmmoType ) );
 				int iTotal = MIN( nCount, iMax );
 
@@ -3523,7 +3523,7 @@ int CBaseCombatWeapon::GetReserveAmmoMax( AmmoPosition_t nAmmoPosition ) const
 			// use player ammo if there already is ammo in this position
 			if ( pPlayer->GetAmmoCount( nAmmoType ) )
 			{
-				return GetAmmoDef()->MaxCarry( nAmmoType );
+				return GetAmmoDef()->MaxCarry( nAmmoType, pPlayer );
 			}
 		}
 	}

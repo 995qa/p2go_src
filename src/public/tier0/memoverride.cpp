@@ -578,6 +578,11 @@ ALLOC_CALL void * __cdecl _recalloc ( void * memblock, size_t count, size_t size
 }
 
 #if ( defined ( _MSC_VER ) && _MSC_VER >= 1920 )
+
+#if !defined( _CRT_NOEXCEPT )
+#define _CRT_NOEXCEPT
+#endif
+
 size_t _msize_base( void *pMem ) _CRT_NOEXCEPT
 #else
 size_t _msize_base( void *pMem )

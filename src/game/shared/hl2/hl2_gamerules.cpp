@@ -1464,7 +1464,7 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 		int numGrenades = pRecipient->GetAmmoCount( grenadeIndex );
 
 		// If we're not maxed out on grenades and we've randomly okay'd it
-		if ( ( numGrenades < GetAmmoDef()->MaxCarry( grenadeIndex ) ) && ( random->RandomInt( 0, 2 ) == 0 ) )
+		if ( ( numGrenades < GetAmmoDef()->MaxCarry( grenadeIndex, pRecipient ) ) && ( random->RandomInt( 0, 2 ) == 0 ) )
 			return true;
 
 		return false;

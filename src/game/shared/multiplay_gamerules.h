@@ -111,8 +111,6 @@ public:
 	virtual int		Damage_GetNoPhysicsForce( void );
 	virtual int		Damage_GetShouldNotBleed( void );
 
-	static void DetermineMapCycleFilename(char *pszResult, int nSizeResult, bool bForceSpew);
-
 	CMultiplayRules();
 	virtual ~CMultiplayRules() {}
 
@@ -226,8 +224,6 @@ public:
 	virtual void GetTaggedConVarList( KeyValues *pCvarTagList );
 
 	void SkipNextMapInCycle();
-
-	virtual void	ClientCommandKeyValues(edict_t *pEntity, KeyValues *pKeyValues);
 
 	virtual float GetIntermissionStartTime() const { return m_flIntermissionStartTime; };
 	

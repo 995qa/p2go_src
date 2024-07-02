@@ -396,7 +396,7 @@ void CTriggerPortalCleanser::SearchThink( void )
 			if (pEntity)
 			{
 				vortexObjectInfo.m_flDistanceSq = CollisionProp()->CalcSqrDistanceFromPoint( pEntity->WorldSpaceCenter() );
-				vortexObjectInfo.m_hEnt = CHandle<CBaseEntity>::UnsafeFromIndex(pEntity->m_RefEHandle.GetEntryIndex());
+				vortexObjectInfo.m_hEnt = CHandle<CBaseEntity>::UnsafeFromIndex(pEntity->GetRefEHandle().GetEntryIndex());
 
 
 				vortexEntsSorted.InsertNoSort( vortexObjectInfo );

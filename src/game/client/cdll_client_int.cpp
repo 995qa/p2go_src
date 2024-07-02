@@ -3949,7 +3949,7 @@ int CHLClient::GetSpectatorTarget( ClientDLLObserverMode_t* pObserverMode )
 		*pObserverMode = CLIENT_DLL_OBSERVER_NONE;
 	}
 
-	C_BasePlayer *pPlayer = ToBasePlayer(pPlayer);
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer(); // TODO: GetLocalOrInEyeCSPlayer();
 
 	if ( pPlayer != NULL )
 	{
@@ -4415,16 +4415,18 @@ void CHLClient::OnCommandDuringPlayback( char const *cmd )
 
 void CHLClient::RetireAllPlayerDecals( bool bRenderContextValid )
 {
-	//extern void OnPlayerDecalsLevelShutdown();
-	//OnPlayerDecalsLevelShutdown();
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	extern void OnPlayerDecalsLevelShutdown();
+	OnPlayerDecalsLevelShutdown();
 
 	if ( bRenderContextValid )
 	{
 		// If the render context is valid (i.e. manual r_cleardecals)
 		// then we should immediately update and reapply to avoid flickers
-		//extern void OnPlayerDecalsUpdate();
-		//OnPlayerDecalsUpdate();
+		extern void OnPlayerDecalsUpdate();
+		OnPlayerDecalsUpdate();
 	}
+#endif
 }
 
 void CHLClient::EngineGotvSyncPacket( const CEngineGotvSyncPacket *pPkt )

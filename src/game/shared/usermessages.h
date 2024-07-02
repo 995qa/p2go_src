@@ -25,8 +25,8 @@
 
 #if defined ( PORTAL2 )
 #include "portal2_usermessages.pb.h"
-#elif defined ( HL2_DLL ) || defined ( HL2_CLIENT_DLL )
-#include "hl2/hl2_usermessages.pb.h"
+#else if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+#include "cstrike15_usermessages.pb.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -43,17 +43,17 @@ public:
 	CUserMessages();
 	~CUserMessages();
 
-	bool DispatchUserMessage(int msg_type, int32 nPassthroughFlags, int size, const void* msg);
-	void BindMessage(IUserMessageBinder* pMessageBinder);
-	bool UnbindMessage(IUserMessageBinder* pMessageBinder);
+	bool DispatchUserMessage( int msg_type, int32 nPassthroughFlags, int size, const void *msg );
+	void BindMessage( IUserMessageBinder *pMessageBinder );
+	bool UnbindMessage( IUserMessageBinder *pMessageBinder );
 
 private:
-	typedef CCopyableUtlVector< IUserMessageBinder* > UserMessageBinderVec_t;
+	typedef CCopyableUtlVector< IUserMessageBinder * > UserMessageBinderVec_t;
 	typedef CUtlMap< int, CCopyableUtlVectorFixed< UserMessageBinderVec_t, MAX_SPLITSCREEN_PLAYERS > > UserMessageHandlerMap_t;
 	UserMessageHandlerMap_t m_UserMessageBinderMap;
 };
 
-extern CUserMessages* UserMessages();
+extern CUserMessages *UserMessages();
 
 //-----------------------------------------------------------------------------
 class IUserMessageBinder
@@ -61,9 +61,9 @@ class IUserMessageBinder
 public:
 	virtual ~IUserMessageBinder() = 0;
 	virtual int GetType() const = 0;
-	virtual ::google::protobuf::Message* Parse(int32 nPassthroughFlags, const void* msg, int size, bool& bSilentIgnore) = 0;
-	virtual bool Invoke(::google::protobuf::Message const* msg) = 0;
-	virtual const CUtlAbstractDelegate& GetAbstractDelegate() = 0;
+	virtual ::google::protobuf::Message *Parse( int32 nPassthroughFlags, const void *msg, int size, bool &bSilentIgnore ) = 0;
+	virtual bool Invoke( ::google::protobuf::Message const *msg ) = 0;
+	virtual const CUtlAbstractDelegate &GetAbstractDelegate() = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class CUserMessageBinder
 {
 public:
 	CUserMessageBinder()
-		: m_pBind(NULL)
+		: m_pBind( NULL )
 	{
 	}
 
@@ -81,22 +81,22 @@ public:
 	}
 
 	template< int msgType, typename PB_OBJECT_TYPE >
-	void Bind(CUtlDelegate< bool(const PB_OBJECT_TYPE& obj) > handler)
+	void Bind( CUtlDelegate< bool ( const PB_OBJECT_TYPE & obj ) > handler )
 	{
 		delete m_pBind;
-		m_pBind = new BindParams< msgType, PB_OBJECT_TYPE, 0 >(handler);
+		m_pBind = new BindParams< msgType, PB_OBJECT_TYPE, 0 >( handler );
 	}
 
 	template< int msgType, typename PB_OBJECT_TYPE >
-	void BindRealtimePassthrough(CUtlDelegate< bool(const PB_OBJECT_TYPE& obj) > handler)
+	void BindRealtimePassthrough( CUtlDelegate< bool( const PB_OBJECT_TYPE & obj ) > handler )
 	{
 		delete m_pBind;
-		m_pBind = new BindParams< msgType, PB_OBJECT_TYPE, 1 >(handler);
+		m_pBind = new BindParams< msgType, PB_OBJECT_TYPE, 1 >( handler );
 	}
 
 	void Unbind()
 	{
-		if (m_pBind)
+		if ( m_pBind )
 		{
 			delete m_pBind;
 			m_pBind = NULL;
@@ -111,15 +111,15 @@ private:
 	template< int msgType, typename PB_OBJECT_TYPE, int32 nExpectedPassthroughInReplay >
 	struct BindParams : public IUserMessageBinder
 	{
-		BindParams(CUtlDelegate< bool(PB_OBJECT_TYPE const& msg) > handler)
-			: m_handler(handler)
+		BindParams( CUtlDelegate< bool ( PB_OBJECT_TYPE const &msg ) > handler )
+			: m_handler( handler )
 		{
-			UserMessages()->BindMessage(this);
+			UserMessages()->BindMessage( this );
 		}
 
 		virtual ~BindParams()
 		{
-			UserMessages()->UnbindMessage(this);
+			UserMessages()->UnbindMessage( this );
 		}
 
 		virtual int GetType() const
@@ -127,27 +127,27 @@ private:
 			return msgType;
 		}
 
-		virtual ::google::protobuf::Message* Parse(int32 nPassthroughFlags, const void* msg, int size, bool& bSilentIgnore) OVERRIDE
+		virtual ::google::protobuf::Message *Parse( int32 nPassthroughFlags, const void *msg, int size, bool &bSilentIgnore ) OVERRIDE
 		{
-			if (size < 0 || size > NET_MAX_PAYLOAD)
+			if ( size < 0 || size > NET_MAX_PAYLOAD )
 			{
 				return NULL;
 			}
 
-//			extern int CL_GetHltvReplayDelay();
-	//		if (CL_GetHltvReplayDelay())
-		//	{
-			//	if (nPassthroughFlags != nExpectedPassthroughInReplay)
-				//{
+			extern int CL_GetHltvReplayDelay();
+			if ( CL_GetHltvReplayDelay() )
+			{
+				if ( nPassthroughFlags != nExpectedPassthroughInReplay )
+				{
 					// this is a wrong timeline message. Ignore it.
-					//bSilentIgnore = true;
-					//return NULL;
-				//}
-			//}
+					bSilentIgnore = true;
+					return NULL;
+				}
+			}
 
-			::google::protobuf::Message* pMsg = new PB_OBJECT_TYPE();
+			::google::protobuf::Message *pMsg = new PB_OBJECT_TYPE();
 
-			if (!pMsg->ParseFromArray(msg, size))
+			if ( !pMsg->ParseFromArray( msg, size ) )
 			{
 				delete pMsg;
 				return NULL;
@@ -157,24 +157,24 @@ private:
 		}
 
 
-		virtual bool Invoke(::google::protobuf::Message const* msg)
+		virtual bool Invoke( ::google::protobuf::Message const *msg )
 		{
-			if (msg)
+			if ( msg )
 			{
-				return m_handler(static_cast<PB_OBJECT_TYPE const&>(*msg));
+				return m_handler( static_cast< PB_OBJECT_TYPE const & >( *msg ) );
 			}
 			return false;
 		}
 
-		virtual const CUtlAbstractDelegate& GetAbstractDelegate()
+		virtual const CUtlAbstractDelegate &GetAbstractDelegate()
 		{
 			return m_handler.GetAbstractDelegate();
 		}
 
-		CUtlDelegate< bool(PB_OBJECT_TYPE const& obj) > m_handler;
+		CUtlDelegate< bool ( PB_OBJECT_TYPE const &obj ) > m_handler;
 	};
 
-	IUserMessageBinder* m_pBind;
+	IUserMessageBinder *m_pBind;
 };
 
 #endif // USERMESSAGES_H

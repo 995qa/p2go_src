@@ -1686,7 +1686,11 @@ void CBaseEntity::PhysicsToss( void )
 		//extruded "line" is really a box for more visible thickness
 		debugoverlay->AddBoxOverlay( trace.startpos, vec3_GrTrajMin, vec3_GrTrajMax, angGrTrajAngles, 0, (bDotted ? 20 : 200), 0, 255, sv_grenade_trajectory_time.GetFloat() );
 
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		//per-bounce box
+		if (trace.fraction != 1.0f)
+			debugoverlay->AddBoxOverlay( trace.endpos, Vector( -GRENADE_DEFAULT_SIZE, -GRENADE_DEFAULT_SIZE, -GRENADE_DEFAULT_SIZE ), Vector( GRENADE_DEFAULT_SIZE, GRENADE_DEFAULT_SIZE, GRENADE_DEFAULT_SIZE ), QAngle( 0, 0, 0 ), 220, 0, 0, 190, sv_grenade_trajectory_time.GetFloat( ) );
+#endif
 	}	
 
 	if (trace.fraction != 1.0f)

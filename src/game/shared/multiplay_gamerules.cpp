@@ -1185,24 +1185,36 @@ CMultiplayRules::CMultiplayRules()
 			}
 			return;
 		}
+
 #if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 		const char* nextMapName = NULL;
-		if ( m_szNextLevelName && m_szNextLevelName[0] )
-		{
-			nextMapName = m_szNextLevelName;
-			Assert( 0 ); // Suspect this is a dead code path... remove me if possible
+		if ( bRandom )
+		{	
+			nextMapName = g_pGameTypes->GetRandomMap( mapGroupName );
+			if ( mp_verbose_changelevel_spew.GetBool() && nextMapName )
+			{
+				Msg( "CHANGELEVEL: Random map request, choosing '%s'\n", nextMapName );
+			}
 		}
 		else
 		{
-			const char* szPrevMap = STRING( gpGlobals->mapname );
-			nextMapName = g_pGameTypes->GetNextMap( mapGroupName, szPrevMap );
-			if ( mp_verbose_changelevel_spew.GetBool() )
+			if ( m_szNextLevelName && m_szNextLevelName[0] )
 			{
-				if ( nextMapName && szPrevMap )
-					Msg( "CHANGELEVEL: Choosing map '%s' (previous was %s)\n", nextMapName, szPrevMap );
-				else
-					Msg( "CHANGELEVEL: GetNextMap failed for mapgroup '%s', map group invalid or empty\n", mapGroupName );
+				nextMapName = m_szNextLevelName;
+				Assert( 0 ); // Suspect this is a dead code path... remove me if possible
 			}
+			else
+			{
+				const char* szPrevMap = STRING( gpGlobals->mapname );
+				nextMapName = g_pGameTypes->GetNextMap( mapGroupName, szPrevMap );
+				if ( mp_verbose_changelevel_spew.GetBool() )
+				{
+					if ( nextMapName && szPrevMap )
+						Msg( "CHANGELEVEL: Choosing map '%s' (previous was %s)\n", nextMapName, szPrevMap );
+					else
+						Msg( "CHANGELEVEL: GetNextMap failed for mapgroup '%s', map group invalid or empty\n", mapGroupName);
+				}
+			}		
 		}
 
 		if ( nextMapName )
@@ -1212,6 +1224,7 @@ CMultiplayRules::CMultiplayRules()
 			return;
 		}
 #endif
+
 		// we were not given a mapgroup name or we were given a mapname that was not in the mapgroup, so we fall back to the old method of cycling maps
 
 		const char *mapcfile = mapcyclefile.GetString();
@@ -1321,197 +1334,6 @@ CMultiplayRules::CMultiplayRules()
 		Q_strncpy( pszNextMap, m_MapList[m_nMapCycleindex], bufsize);
 	}
 
-	void CMultiplayRules::DetermineMapCycleFilename(char *pszResult, int nSizeResult, bool bForceSpew)
-	{
-		static char szLastResult[MAX_PATH];
-
-		const char *pszVar = mapcyclefile.GetString();
-		if (*pszVar == '\0')
-		{
-			if (bForceSpew || V_stricmp(szLastResult, "__novar"))
-			{
-				Msg("mapcyclefile convar not set.\n");
-				V_strcpy_safe(szLastResult, "__novar");
-			}
-			*pszResult = '\0';
-			return;
-		}
-
-		char szRecommendedName[MAX_PATH];
-		V_sprintf_safe(szRecommendedName, "cfg/%s", pszVar);
-
-		// First, look for a mapcycle file in the cfg directory, which is preferred
-		V_strncpy(pszResult, szRecommendedName, nSizeResult);
-		if (filesystem->FileExists(pszResult, "GAME"))
-		{
-			if (bForceSpew || V_stricmp(szLastResult, pszResult))
-			{
-				Msg("Using map cycle file '%s'.\n", pszResult);
-				V_strcpy_safe(szLastResult, pszResult);
-			}
-			return;
-		}
-
-		// Nope?  Try the root.
-		V_strncpy(pszResult, pszVar, nSizeResult);
-		if (filesystem->FileExists(pszResult, "GAME"))
-		{
-			if (bForceSpew || V_stricmp(szLastResult, pszResult))
-			{
-				Msg("Using map cycle file '%s'.  ('%s' was not found.)\n", pszResult, szRecommendedName);
-				V_strcpy_safe(szLastResult, pszResult);
-			}
-			return;
-		}
-
-		// Nope?  Use the default.
-		if (!V_stricmp(pszVar, "mapcycle.txt"))
-		{
-			V_strncpy(pszResult, "cfg/mapcycle_default.txt", nSizeResult);
-			if (filesystem->FileExists(pszResult, "GAME"))
-			{
-				if (bForceSpew || V_stricmp(szLastResult, pszResult))
-				{
-					Msg("Using map cycle file '%s'.  ('%s' was not found.)\n", pszResult, szRecommendedName);
-					V_strcpy_safe(szLastResult, pszResult);
-				}
-				return;
-			}
-		}
-
-		// Failed
-		*pszResult = '\0';
-		if (bForceSpew || V_stricmp(szLastResult, "__notfound"))
-		{
-			Msg("Map cycle file '%s' was not found.\n", szRecommendedName);
-			V_strcpy_safe(szLastResult, "__notfound");
-		}
-	}
-	/*
-	void CMultiplayRules::LoadMapCycleFile( void )
-	{
-		int nOldCycleIndex = m_nMapCycleindex;
-		m_nMapCycleindex = 0;
-
-		char mapcfile[MAX_PATH];
-		DetermineMapCycleFilename( mapcfile, sizeof( mapcfile ), false );
-
-		FreeMapCycleFileVector( m_MapList );
-
-		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "GAME" );
-		m_nMapCycleTimeStamp = nMapCycleTimeStamp;
-
-		// Repopulate map list from mapcycle file
-		LoadMapCycleFileIntoVector( mapcfile, m_MapList );
-
-		// Load server's mapcycle into network string table for client-side voting
-		if ( g_pStringTableServerMapCycle )
-		{
-			CUtlString sFileList;
-			for ( int i = 0; i < m_MapList.Count(); i++ )
-			{
-				sFileList += m_MapList[i];
-				sFileList += '\n';
-			}
-
-			g_pStringTableServerMapCycle->AddString( CBaseEntity::IsServer(), "ServerMapCycle", sFileList.Length() + 1, sFileList.String() );
-		}
-
-#if defined ( TF_DLL ) || defined ( TF_CLIENT_DLL )
-		if ( g_pStringTableServerPopFiles )
-		{
-			// Search for all pop files that are prefixed with the current map name
-			CUtlString sFileList;
-
-			CUtlVector< CUtlString > defaultPopFiles;
-			CPopulationManager::FindDefaultPopulationFileShortNames( defaultPopFiles );
-
-			FOR_EACH_VEC( defaultPopFiles, idx )
-			{
-				sFileList += defaultPopFiles[idx];
-				sFileList += "\n";
-			}
-
-			if ( sFileList.Length() > 0 )
-			{
-				g_pStringTableServerPopFiles->AddString( CBaseEntity::IsServer(), "ServerPopFiles", sFileList.Length() + 1, sFileList.String() );
-			}
-		}
-
-		if ( g_pStringTableServerMapCycleMvM )
-		{
-			ConVarRef tf_mvm_missioncyclefile( "tf_mvm_missioncyclefile" );
-			KeyValues* pKV = new KeyValues( tf_mvm_missioncyclefile.GetString() );
-			if ( pKV->LoadFromFile( g_pFullFileSystem, tf_mvm_missioncyclefile.GetString(), "MOD" ) )
-			{
-				CUtlVector<CUtlString> mapList;
-
-				// Parse the maps and send a list to each client for vote options
-				int iMaxCat = pKV->GetInt( "categories", 0 );
-				for ( int iCat = 1; iCat <= iMaxCat; iCat++ )
-				{
-					KeyValues* pCategory = pKV->FindKey( UTIL_VarArgs( "%d", iCat ), false );
-					if ( pCategory )
-					{
-						int iMapCount = pCategory->GetInt( "count", 0 );
-						for ( int iMap = 1; iMap <= iMapCount; ++iMap )
-						{
-							KeyValues* pMission = pCategory->FindKey( UTIL_VarArgs( "%d", iMap ), false );
-							if ( pMission )
-							{
-								const char* pszMap = pMission->GetString( "map", "" );
-								int iIdx = mapList.Find( pszMap );
-								if ( !mapList.IsValidIndex( iIdx ) )
-								{
-									mapList.AddToTail( pszMap );
-								}
-							}
-						}
-					}
-				}
-
-				if ( mapList.Count() )
-				{
-					CUtlString sFileList;
-					for ( int i = 0; i < mapList.Count(); i++ )
-					{
-						sFileList += mapList[i];
-						sFileList += '\n';
-					}
-
-					g_pStringTableServerMapCycleMvM->AddString( CBaseEntity::IsServer(), "ServerMapCycleMvM", sFileList.Length() + 1, sFileList.String() );
-				}
-
-				pKV->deleteThis();
-			}
-		}
-#endif
-
-		// If the current map is in the same location in the new map cycle, keep that index. This gives better behavior
-		// when reloading a map cycle that has the current map in it multiple times.
-		int nOldPreviousMap = (nOldCycleIndex == 0) ? (m_MapList.Count() - 1) : (nOldCycleIndex - 1);
-		if ( nOldCycleIndex >= 0 && nOldCycleIndex < m_MapList.Count() &&
-			nOldPreviousMap >= 0 && nOldPreviousMap < m_MapList.Count() &&
-			V_strcmp( STRING( gpGlobals->mapname ), m_MapList[nOldPreviousMap] ) == 0 )
-		{
-			// The old index is still valid, and falls after our current map in the new cycle, use it
-			m_nMapCycleindex = nOldCycleIndex;
-		}
-		else
-		{
-			// Otherwise, if the current map selection is in the list, set m_nMapCycleindex to the map that follows it.
-			for ( int i = 0; i < m_MapList.Count(); i++ )
-			{
-				if ( V_strcmp( STRING( gpGlobals->mapname ), m_MapList[i] ) == 0 )
-				{
-					m_nMapCycleindex = i;
-					IncrementMapCycleIndex();
-					break;
-				}
-			}
-		}
-	}
-	*/
 	void CMultiplayRules::ChangeLevel( void )
 	{
 		char szNextMap[MAX_PATH];
@@ -1670,36 +1492,6 @@ CMultiplayRules::CMultiplayRules()
 
 		return BaseClass::ClientCommand( pEdict, args );
 
-	}
-
-	void CMultiplayRules::ClientCommandKeyValues(edict_t *pEntity, KeyValues *pKeyValues)
-	{
-		CBaseMultiplayerPlayer *pPlayer = dynamic_cast< CBaseMultiplayerPlayer * >(CBaseEntity::Instance(pEntity));
-
-		if (!pPlayer)
-			return;
-
-		char const *pszCommand = pKeyValues->GetName();
-		if (pszCommand && pszCommand[0])
-		{
-			if (FStrEq(pszCommand, "AchievementEarned"))
-			{
-				if (pPlayer->ShouldAnnounceAchievement())
-				{
-					int nAchievementID = pKeyValues->GetInt("achievementID");
-
-					IGameEvent * event = gameeventmanager->CreateEvent("achievement_earned");
-					if (event)
-					{
-						event->SetInt("player", pPlayer->entindex());
-						event->SetInt("achievement", nAchievementID);
-						gameeventmanager->FireEvent(event);
-					}
-
-					pPlayer->OnAchievementEarned(nAchievementID);
-				}
-			}
-		}
 	}
 
 	VoiceCommandMenuItem_t *CMultiplayRules::VoiceCommand( CBaseMultiplayerPlayer *pPlayer, int iMenu, int iItem )

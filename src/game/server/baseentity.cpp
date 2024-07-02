@@ -822,11 +822,6 @@ CBaseEntity::~CBaseEntity( )
 	}
 }
 
-void CBaseEntity::IncrementInterpolationFrame()
-{
-	m_ubInterpolationFrame = (m_ubInterpolationFrame + 1) % NOINTERP_PARITY_MAX;
-}
-
 void CBaseEntity::PostConstructor( const char *szClassname )
 {
 	NetworkProp()->CacheServerClass();

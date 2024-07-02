@@ -337,7 +337,7 @@ private:
 // to ease fragmentation due to streaming
 //-----------------------------------------------------------------------------
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && !defined( PORTAL2 )
 
 // CS:GO currently loads 518 anim blocks (most of which are in the 24-32K size range), I've made this 530 to allow for some additional animations that are coming soon.
 #define MAX_ANIMBLOCKS 530
@@ -1245,8 +1245,10 @@ InitReturnVal_t CMDLCache::Init()
 
 	if ( IsPC() )
 	{
-		//UNDONE: This opens up a whole fun realm of cheating for multiplayer games!
-		//m_ModelSwapper.LoadSubstitutionFile( MODEL_SUBSTITUTION_FILENAME );
+		// [CS:GO] UNDONE: This opens up a whole fun realm of cheating for multiplayer games!
+#if defined( PORTAL2 )
+		m_ModelSwapper.LoadSubstitutionFile( MODEL_SUBSTITUTION_FILENAME );
+#endif
 	}
 
 	return INIT_OK;

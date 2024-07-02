@@ -451,12 +451,14 @@ void CBaseCombatCharacter::ResetVisibilityCache( CBaseCombatCharacter *pBCC )
 }
 
 #ifdef PORTAL
+extern bool IsPlayerNearTargetPortal( CPortal_Base2D *pPortal ); // TODO: MOVEME!
+
 bool CBaseCombatCharacter::FVisibleThroughPortal( const CPortal_Base2D *pPortal, CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker )
 {
 	VPROF( "CBaseCombatCharacter::FVisible" );
 
-//	if ( pPortal && IsPlayerNearTargetPortal( pPortal->m_hLinkedPortal.Get() ) == false )
-//		return false;
+	if ( pPortal && IsPlayerNearTargetPortal( pPortal->m_hLinkedPortal.Get() ) == false )
+		return false;
 
 	if ( pEntity->GetFlags() & FL_NOTARGET )
 		return false;
@@ -3239,7 +3241,7 @@ int CBaseCombatCharacter::GiveAmmo( int iCount, int iAmmoIndex, bool bSuppressSo
 	if ( iAmmoIndex < 0 || iAmmoIndex >= MAX_AMMO_SLOTS )
 		return 0;
 
-	int iMax = GetAmmoDef()->MaxCarry(iAmmoIndex);
+	int iMax = GetAmmoDef()->MaxCarry(iAmmoIndex, this);
 	int iAdd = MIN( iCount, iMax - m_iAmmo[iAmmoIndex] );
 	if ( iAdd < 1 )
 		return 0;

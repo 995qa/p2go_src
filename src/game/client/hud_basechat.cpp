@@ -286,7 +286,6 @@ wchar_t* ReadChatTextString( const char *szString, wchar_t *pOut, int outSize, b
 	pOut[0] = 0;
 	if ( const char *pszEntIndex = StringAfterPrefix( szString, "#ENTNAME[" ) )
 	{
-		//int iEntIndex = V_atoi( pszEntIndex );
 		if ( !pOut[0] )
 		{
 			if ( const char *pszCloseBracket = V_strnchr( pszEntIndex, ']', 64 ) )

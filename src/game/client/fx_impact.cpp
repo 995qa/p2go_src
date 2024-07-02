@@ -360,12 +360,14 @@ static void PerformNewCustomEffects( const Vector &vecOrigin, trace_t &tr, const
 	SetImpactControlPoint( pEffect.GetObject(), 1, vecImpactPoint, vecReflect,		tr.m_pEnt ); 
 	SetImpactControlPoint( pEffect.GetObject(), 2, vecImpactPoint, vecShotBackward,	tr.m_pEnt ); 
 	pEffect->SetControlPoint( 3, Vector( iScale, iScale, iScale ) );
+
 	if ( pEffect->m_pDef->ReadsControlPoint( 4 ) )
 	{
 		Vector vecColor;
 		GetColorForSurface( &tr, &vecColor );
 		pEffect->SetControlPoint( 4, vecColor );
 	}
+
 }
 
 void PerformCustomEffects( const Vector &vecOrigin, trace_t &tr, const Vector &shotDir, int iMaterial, int iScale, int nFlags )
@@ -384,9 +386,6 @@ void PerformCustomEffects( const Vector &vecOrigin, trace_t &tr, const Vector &s
 //-----------------------------------------------------------------------------
 void PlayImpactSound( CBaseEntity *pEntity, trace_t &tr, Vector &vecServerOrigin, int nServerSurfaceProp )
 {
-	if (!pEntity)
-		return;
-
 	VPROF( "PlayImpactSound" );
 	surfacedata_t *pdata;
 	Vector vecOrigin;

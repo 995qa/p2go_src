@@ -569,9 +569,9 @@ void CAnimationLayer::DispatchAnimEvents( CBaseAnimating *eventHandler, CBaseAni
 
 
 
-void CBaseAnimatingOverlay::GetSkeleton(CStudioHdr *pStudioHdr, BoneVector pos[], BoneQuaternionAligned q[], int boneMask)
+void CBaseAnimatingOverlay::GetSkeleton( CStudioHdr *pStudioHdr, BoneVector pos[], BoneQuaternionAligned q[], int boneMask )
 {
-	if (!pStudioHdr)
+	if(!pStudioHdr)
 	{
 		Assert(!"CBaseAnimating::GetSkeleton() without a model");
 		return;
@@ -582,47 +582,143 @@ void CBaseAnimatingOverlay::GetSkeleton(CStudioHdr *pStudioHdr, BoneVector pos[]
 		return;
 	}
 
-	IBoneSetup boneSetup(pStudioHdr, boneMask, GetPoseParameterArray());
-	boneSetup.InitPose(pos, q);
+	IBoneSetup boneSetup( pStudioHdr, boneMask, GetPoseParameterArray() );
+	boneSetup.InitPose( pos, q );
 
-	boneSetup.AccumulatePose(pos, q, GetSequence(), GetCycle(), 1.0, gpGlobals->curtime, m_pIk);
+	if ( !m_pIk )
+	{
+		EnableServerIK();
+		m_pIk->Init( pStudioHdr, GetAbsAngles(), GetAbsOrigin(), gpGlobals->curtime, 0, BONE_USED_BY_BONE_MERGE );
+	}
+
+	boneSetup.AccumulatePose( pos, q, GetSequence(), GetCycle(), 1.0, gpGlobals->curtime, m_pIk );
 
 	// sort the layers
 	int layer[MAX_OVERLAYS] = {};
-	int i;
-	for (i = 0; i < m_AnimOverlay.Count(); i++)
+	for (int i = 0; i < m_AnimOverlay.Count(); i++)
 	{
 		layer[i] = MAX_OVERLAYS;
 	}
-	for (i = 0; i < m_AnimOverlay.Count(); i++)
+	for (int i = 0; i < m_AnimOverlay.Count(); i++)
 	{
 		CAnimationLayer &pLayer = m_AnimOverlay[i];
-		if ((pLayer.m_flWeight > 0) && pLayer.IsActive() && pLayer.m_nOrder >= 0 && pLayer.m_nOrder < m_AnimOverlay.Count())
+		if( (pLayer.m_flWeight > 0) && pLayer.IsActive() && pLayer.m_nOrder >= 0 && pLayer.m_nOrder < m_AnimOverlay.Count())
 		{
 			layer[pLayer.m_nOrder] = i;
 		}
 	}
-	for (i = 0; i < m_AnimOverlay.Count(); i++)
+
+	// check if this is a player with a valid weapon
+	// look for weapon, pull layer animations from it if/when they exist
+	CBaseCombatWeapon *pWeapon = NULL;
+	CBaseWeaponWorldModel *pWeaponWorldModel = NULL;
+
+	bool bDoWeaponSetup = false;
+
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
+	if ( this->IsPlayer() )
 	{
-		if (layer[i] >= 0 && layer[i] < m_AnimOverlay.Count())
+		CCSPlayer *pPlayer = ToCSPlayer(this);
+		if ( pPlayer && pPlayer->m_bUseNewAnimstate )
 		{
-			CAnimationLayer &pLayer = m_AnimOverlay[layer[i]];
-			// UNDONE: Is it correct to use overlay weight for IK too?
-			boneSetup.AccumulatePose(pos, q, pLayer.m_nSequence, pLayer.m_flCycle, pLayer.m_flWeight, gpGlobals->curtime, m_pIk);
+			pWeapon = pPlayer->GetActiveWeapon();
+			if ( pWeapon )
+			{
+				pWeaponWorldModel = pWeapon->m_hWeaponWorldModel.Get();
+				if ( pWeaponWorldModel && 
+					 pWeaponWorldModel->GetModelPtr() && 
+					 pWeaponWorldModel->HoldsPlayerAnimations() )
+				{
+
+					if ( !pWeaponWorldModel->m_pBoneMergeCache )
+					{
+						pWeaponWorldModel->m_pBoneMergeCache = new CBoneMergeCache;
+						pWeaponWorldModel->m_pBoneMergeCache->Init( pWeaponWorldModel );
+					}
+
+					if ( pWeaponWorldModel->m_pBoneMergeCache )
+						bDoWeaponSetup = true;
+				}
+			}
 		}
 	}
-
-	if (m_pIk)
+#endif
+	
+	if ( bDoWeaponSetup )
 	{
-		CIKContext auto_ik;
-		auto_ik.Init(pStudioHdr, GetAbsAngles(), GetAbsOrigin(), gpGlobals->curtime, 0, boneMask);
-		boneSetup.CalcAutoplaySequences(pos, q, gpGlobals->curtime, &auto_ik);
+		CStudioHdr *pWeaponStudioHdr = pWeaponWorldModel->GetModelPtr();
+
+		// copy matching player pose params to weapon pose params
+		pWeaponWorldModel->m_pBoneMergeCache->MergeMatchingPoseParams();
+		
+		// build a temporary setup for the weapon
+		CIKContext weaponIK;
+		weaponIK.Init( pWeaponStudioHdr, GetAbsAngles(), GetAbsOrigin(), gpGlobals->curtime, 0, BONE_USED_BY_BONE_MERGE );
+
+		IBoneSetup weaponSetup( pWeaponStudioHdr, BONE_USED_BY_BONE_MERGE, pWeaponWorldModel->GetPoseParameterArray() );
+		BoneVector weaponPos[MAXSTUDIOBONES];
+		BoneQuaternionAligned weaponQ[MAXSTUDIOBONES];
+
+		weaponSetup.InitPose( weaponPos, weaponQ );
+
+		for ( int i=0; i < GetNumAnimOverlays(); i++ )
+		{
+			CAnimationLayer *pLayer = GetAnimOverlay( i );
+			if ( pLayer->GetSequence() <= 1 || pLayer->GetWeight() <= 0.0f )
+				continue;
+
+			UpdateDispatchLayer( pLayer, pWeaponStudioHdr, pLayer->GetSequence() );
+
+			if ( pLayer->m_nDispatchedDst > 0 && pLayer->m_nDispatchedDst < pWeaponStudioHdr->GetNumSeq() )
+			{
+				// copy player bones to weapon setup bones
+				pWeaponWorldModel->m_pBoneMergeCache->CopyFromFollow( pos, q, BONE_USED_BY_BONE_MERGE, weaponPos, weaponQ );
+
+				// respect ik rules on archetypal sequence, even if we're not playing it
+				if ( m_pIk )
+				{
+					mstudioseqdesc_t &seqdesc = pStudioHdr->pSeqdesc( pLayer->GetSequence() );
+					m_pIk->AddDependencies( seqdesc, pLayer->GetSequence(), pLayer->GetCycle(), GetPoseParameterArray(), pLayer->GetWeight() );
+				}
+
+				weaponSetup.AccumulatePose( weaponPos, weaponQ, pLayer->m_nDispatchedDst, pLayer->GetCycle(), pLayer->GetWeight(), gpGlobals->curtime, &weaponIK );
+				pWeaponWorldModel->m_pBoneMergeCache->CopyToFollow( weaponPos, weaponQ, BONE_USED_BY_BONE_MERGE, pos, q );
+
+				weaponIK.CopyTo( m_pIk, pWeaponWorldModel->m_pBoneMergeCache->GetRawIndexMapping() );
+			}
+			else
+			{
+				boneSetup.AccumulatePose( pos, q, pLayer->GetSequence(), pLayer->GetCycle(), pLayer->GetWeight(), gpGlobals->curtime, m_pIk );
+			}
+		}
 	}
 	else
 	{
-		boneSetup.CalcAutoplaySequences(pos, q, gpGlobals->curtime, NULL);
+		for (int i = 0; i < m_AnimOverlay.Count(); i++)
+		{
+			if (layer[i] >= 0 && layer[i] < m_AnimOverlay.Count())
+			{
+				CAnimationLayer &pLayer = m_AnimOverlay[layer[i]];
+				// UNDONE: Is it correct to use overlay weight for IK too?
+				boneSetup.AccumulatePose( pos, q, pLayer.m_nSequence, pLayer.m_flCycle, pLayer.m_flWeight, gpGlobals->curtime, m_pIk );
+			}
+		}
 	}
-	boneSetup.CalcBoneAdj(pos, q, GetEncodedControllerArray());
+
+	if ( m_pIk )
+	{
+		CIKContext auto_ik;
+		auto_ik.Init( pStudioHdr, GetAbsAngles(), GetAbsOrigin(), gpGlobals->curtime, 0, boneMask );
+		boneSetup.CalcAutoplaySequences( pos, q, gpGlobals->curtime, &auto_ik );
+	}
+	else
+	{
+		boneSetup.CalcAutoplaySequences( pos, q, gpGlobals->curtime, NULL );
+	}
+	boneSetup.CalcBoneAdj( pos, q, GetEncodedControllerArray() );
+
+	// Do we care about local weapon bones on the server? They don't drive hitboxes... so I don't think we do.
+	//RegenerateDispatchedLayers( boneSetup, pos, q, gpGlobals->curtime );
 }
 
 

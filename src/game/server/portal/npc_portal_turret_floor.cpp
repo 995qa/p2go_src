@@ -126,6 +126,29 @@ IMPLEMENT_SERVERCLASS_ST(CNPC_Portal_FloorTurret, DT_NPC_Portal_FloorTurret)
 
 END_SEND_TABLE()
 
+bool IsPlayerNearTargetPortal( CPortal_Base2D *pPortal ) // Line 123
+{
+	if( sv_portal_turret_shoot_through_portals_proximity.GetFloat() >= 0.f ) // bug?
+	{
+		for( int i = 1; i < gpGlobals->maxClients; i++ )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+			if( pPlayer )
+			{
+				Vector vecPlayerOrigin = pPlayer->GetAbsOrigin();
+				Vector vecPortalOrigin = pPortal->GetAbsOrigin();
+				return sv_portal_turret_shoot_through_portals_proximity.GetFloat() > ( (
+					( ( vecPlayerOrigin.x - vecPortalOrigin.x ) * ( vecPlayerOrigin.x - vecPortalOrigin.x ) ) +
+					( ( vecPlayerOrigin.y - vecPortalOrigin.y ) * ( vecPlayerOrigin.y - vecPortalOrigin.y ) ) ) +
+					( ( vecPlayerOrigin.z - vecPortalOrigin.z ) * ( vecPlayerOrigin.z - vecPortalOrigin.z ) ) ); // TODO: replace with fabs()
+			}
+		}
+
+		return false;
+	}
+
+	return true;
+}
 
 CNPC_Portal_FloorTurret::CNPC_Portal_FloorTurret( void )
 {

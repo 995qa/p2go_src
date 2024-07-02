@@ -363,11 +363,11 @@ void CBasePlayer::ItemPostFrame()
 		{
 			int iPrimaryAmmoType = pWeapon->GetPrimaryAmmoType();
 			if ( iPrimaryAmmoType >= 0 )
-				SetAmmoCount( GetAmmoDef()->MaxCarry( iPrimaryAmmoType), iPrimaryAmmoType );
+				SetAmmoCount( GetAmmoDef()->MaxCarry( iPrimaryAmmoType, this ), iPrimaryAmmoType );
 
 			int iSecondaryAmmoType = pWeapon->GetSecondaryAmmoType();
 			if ( iSecondaryAmmoType >= 0 )
-				SetAmmoCount( GetAmmoDef()->MaxCarry( iSecondaryAmmoType), iSecondaryAmmoType );
+				SetAmmoCount( GetAmmoDef()->MaxCarry( iSecondaryAmmoType, this ), iSecondaryAmmoType );
 		}
 		else
 		{

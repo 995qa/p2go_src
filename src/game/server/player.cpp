@@ -217,7 +217,7 @@ void CC_GiveCurrentAmmo( void )
 				if( ammoIndex != -1 )
 				{
 					int giveAmount;
-					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex);
+					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex, pPlayer);
 					pPlayer->GiveAmmo( giveAmount, GetAmmoDef()->GetAmmoOfIndex(ammoIndex)->pName );
 				}
 			}
@@ -232,7 +232,7 @@ void CC_GiveCurrentAmmo( void )
 				if( ammoIndex != -1 )
 				{
 					int giveAmount;
-					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex);
+					giveAmount = GetAmmoDef()->MaxCarry(ammoIndex, pPlayer);
 					pPlayer->GiveAmmo( giveAmount, GetAmmoDef()->GetAmmoOfIndex(ammoIndex)->pName );
 				}
 			}
@@ -5082,7 +5082,7 @@ void CBasePlayer::InitialSpawn( void )
 {
 	m_iConnected = PlayerConnected;
 	m_flInitialSpawnTime = gpGlobals->curtime;
-	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
+	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	gamestats->Event_PlayerConnected( this );
 	#endif
 }
@@ -5731,7 +5731,7 @@ bool CBasePlayer::GetInVehicle( IServerVehicle *pVehicle, int nRole )
 	SetMoveType( MOVETYPE_NOCLIP );
 
 	// This is a hack to fixup the player's stats since they really didn't "cheat" and enter noclip from the console
-	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
+	#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 	gamestats->Event_DecrementPlayerEnteredNoClip( this );
 	#endif
 
@@ -9510,7 +9510,7 @@ void CBasePlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo
 	BaseClass::Event_KilledOther( pVictim, info );
 	if ( pVictim != this )
 	{
-		#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15_REAL ) && defined( CSTRIKE_DLL ) )
+		#if !defined( _GAMECONSOLE ) || ( defined ( CSTRIKE15 ) && defined( CSTRIKE_DLL ) )
 		gamestats->Event_PlayerKilledOther( this, pVictim, info );
 		#endif
 	}
@@ -9815,6 +9815,13 @@ CVoteController* CBasePlayer::GetTeamVoteController()
 {
 	switch ( GetAssociatedTeamNumber( ) )
 	{
+	case TEAM_CT:
+		return g_voteControllerCT;
+
+	case TEAM_TERRORIST:
+		return g_voteControllerT;
+
+	// SPECTATOR or other
 	default:
 		return g_voteControllerGlobal;
 	}
