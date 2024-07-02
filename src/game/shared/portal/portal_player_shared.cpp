@@ -5124,7 +5124,6 @@ void CPortalPlayerShared::ConditionGameRulesThink( void )
 #ifndef NO_TRACTOR_BEAM
 void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 {
-	// TODO:
 	if ( !pTractorBeam )
 		return;
 
@@ -5160,8 +5159,7 @@ void CPortal_Player::SetInTractorBeam( CTrigger_TractorBeam *pTractorBeam )
 	m_Local.m_fTBeamEndTime = 0.0f;
 	SetGravity( FLT_MIN );
 
-	// TODO:
-#if defined ( GAME_DLL ) && 1
+#ifdef GAME_DLL
 	triggerevent_t event;
 	if ( PhysGetTriggerEvent( &event, pTractorBeam ) && event.pObject )
 	{

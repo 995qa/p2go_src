@@ -2685,7 +2685,6 @@ void CC_LockAllTaunts( const CCommand &args )
 //	UserMessageBegin( player, "MPAllTauntsLocked" );
 //	MessageEnd();
 	CUsrMsg_MPAllTauntsLocked msg;
-	msg.set_dummy(1);
 	SendUserMessage(player, UM_MPAllTauntsLocked, msg);
 }
 ConCommand mp_lock_all_taunts( "mp_lock_all_taunts", CC_LockAllTaunts, "Locks all available taunts and removes them from the gesture wheel.", 0 );

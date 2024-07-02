@@ -8190,7 +8190,7 @@ Activity CAI_BaseNPC::GetCoverActivity( CAI_Hint *pHint )
 //=========================================================
 float CAI_BaseNPC::CalcIdealYaw( const Vector &vecTarget )
 {
-	Vector	vecProjection;
+	Vector	vecProjection = vec3_origin;
 
 	// strafing npc needs to face 90 degrees away from its goal
 	if ( GetNavigator()->GetMovementActivity() == ACT_STRAFE_LEFT )

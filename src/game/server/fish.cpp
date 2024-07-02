@@ -561,8 +561,10 @@ CFishPool::CFishPool( void )
 	ListenForGameEvent( "hegrenade_detonate" );
 	ListenForGameEvent( "flashbang_detonate" );
 	ListenForGameEvent( "smokegrenade_detonate" );
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	ListenForGameEvent( "molotov_detonate" );
 	ListenForGameEvent( "decoy_detonate" );
+#endif
 	ListenForGameEvent( "bomb_exploded" );
 }
 

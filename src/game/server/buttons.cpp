@@ -243,8 +243,8 @@ void CBaseButton::Press( CBaseEntity *pActivator, BUTTON_CODE eCode )
 	// Temporarily disable the touch function, until movement is finished.
 	SetTouch( NULL );
 
-	if ( ( eCode == BUTTON_PRESS ) && ( m_toggle_state == TS_AT_TOP ) ||
-		 ( ( eCode == BUTTON_RETURN ) && ( m_toggle_state == TS_AT_TOP || m_toggle_state == TS_GOING_UP ) ) )
+	if ( (( eCode == BUTTON_PRESS ) && ( m_toggle_state == TS_AT_TOP )) ||
+		 ( ( eCode == BUTTON_RETURN ) && (( m_toggle_state == TS_AT_TOP || m_toggle_state == TS_GOING_UP )) ) )
 	{
 		if ( m_sNoise != NULL_STRING )
 		{
