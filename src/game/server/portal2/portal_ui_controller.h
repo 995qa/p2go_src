@@ -5,12 +5,12 @@
 #pragma once
 #endif
 
+#include "igamesystem.h"
+
 extern void ResetAllPlayersStats();
 
 class CPortal_UI_Controller : public CAutoGameSystem
 {
-	DECLARE_CLASS( CPortal_UI_Controller, CAutoGameSystem );
-
 public:
 	CPortal_UI_Controller();
 	virtual ~CPortal_UI_Controller();

@@ -8,7 +8,7 @@
 
 CPortal_UI_Controller g_portal_ui_controller;
 
-CPortal_UI_Controller::CPortal_UI_Controller() : BaseClass( "Portal_UI_Controller" ) // Line 367
+CPortal_UI_Controller::CPortal_UI_Controller() : CAutoGameSystem( "Portal_UI_Controller" ) // Line 367
 {
 }
 
@@ -21,10 +21,9 @@ void ResetAllPlayersStats() // Line 378
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
 		CPortal_Player *pPlayer = ToPortalPlayer( UTIL_PlayerByIndex( i ) );
-		if( pPlayer )
+		if( pPlayer && pPlayer->IsPlayer() )
 		{
-			if( pPlayer->IsPlayer() )
-				pPlayer->ResetThisLevelStats();
+			pPlayer->ResetThisLevelStats();
 		}
 	}
 }

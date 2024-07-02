@@ -4535,9 +4535,13 @@ void NET_TerminateConnection( int sock, const ns_address &peer )
 #define bswap_32 __bswap_32
 #define bswap_64 __bswap_64
 
+#include "tier0/memdbgoff.h"
+
 #include "cryptlib.h"
 #include "rsa.h"
 #include "osrng.h"
+
+#include "tier0/memdbgon.h"
 
 using namespace CryptoPP;
 typedef AutoSeededX917RNG<AES> CAutoSeededRNG;
@@ -4899,7 +4903,7 @@ bool NET_CryptGetNetworkCertificate( ENetworkCertificate_t eType, const byte **p
 	return true;
 }
 
-#ifdef _DEBUG
+#if 0 //def _DEBUG // Man, my dogs are barking.
 CON_COMMAND( net_encrypt_key_generate, "Generate a public/private keypair" )
 {
 	if ( args.ArgC() <= 2 )

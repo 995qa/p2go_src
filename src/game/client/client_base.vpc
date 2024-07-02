@@ -1269,7 +1269,7 @@ $Project
 			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
 		}
 
-		$Libexternal	$LIBPUBLIC\2015\debug\libprotobuf [$VS2015]
+		$Libexternal	$LIBPUBLIC\2015\debug\libprotobufd [$VS2015]
 		{
 			$Configuration "Release" { $ExcludedFromBuild "Yes" }
 		}
@@ -1279,7 +1279,7 @@ $Project
 			$Configuration "Debug" { $ExcludedFromBuild "Yes" }
 		}
 
-		$Libexternal	$LIBPUBLIC\2019\debug\libprotobuf [$VS2019]
+		$Libexternal	$LIBPUBLIC\2019\debug\libprotobufd [$VS2019]
 		{
 			$Configuration "Release" { $ExcludedFromBuild "Yes" }
 		}
