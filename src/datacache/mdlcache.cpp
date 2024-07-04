@@ -4005,6 +4005,8 @@ int CMDLCache::ProcessPendingAsync( intp iAsync )
 	pInfo = &info;
 	ClearAsync( pInfo->hModel, pInfo->type, pInfo->iAnimBlock );
 
+	// tyabus: it spams the shit out of filesystem if we have empty phy file or if it dosent exist
+#if !defined( PORTAL2 )
 	if( m_bFileNotFoundAllowed && status == FSASYNC_ERR_FILEOPEN )
 	{
 		// file not found here is valid so return complete
@@ -4016,6 +4018,7 @@ int CMDLCache::ProcessPendingAsync( intp iAsync )
 	{
 		return 1;
 	}
+#endif
 
 	switch ( pInfo->type )
 	{
