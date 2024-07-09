@@ -1416,16 +1416,11 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 	int numIgnore = ARRAYSIZE( s_pszRadialMenuIgnoreActions );
 	for ( int i=0; i<numIgnore; ++i )
 	{
-		// Removing the loop code for Swarm, it works fine the way it is now and fixes a "crash".
-		//int count = 0;
+		int count = 0;
 		ButtonCode_t key;
-		//do 
-		//{
-#if 1
-			key = gameuifuncs->GetButtonCodeForBind( s_pszRadialMenuIgnoreActions[i], nSlot );
-#else
-			key = (ButtonCode_t)engine->Key_CodeForBinding( s_pszRadialMenuIgnoreActions[i], nSlot, count, -1 );
-#endif
+		do 
+		{
+			key = (ButtonCode_t)engine->Key_CodeForBinding( s_pszRadialMenuIgnoreActions[i], nSlot, count, BINDINGLOOKUP_ALL );
 			if ( IsJoystickCode( key ) )
 			{
 				key = GetBaseButtonCode( key );
@@ -1435,9 +1430,8 @@ int	CRadialMenu::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrent
 			{
 				return 0;
 			}
-			
-		//	++count;
-		//} while ( key != BUTTON_CODE_INVALID );
+			++count;
+		} while ( key != BUTTON_CODE_INVALID );
 	}
 
 	return 1;
@@ -2573,7 +2567,7 @@ public:
 				CLocatorTarget *pLocator = Locator_GetTargetFromHandle( m_Signifiers[itr].m_nLocatorIndex );
 				if ( pLocator )
 				{
-					/*if (m_Signifiers[itr].m_nPlayerIndex == nPlayerIndex && FStrEq(pLocator->GetOnscreenIconTextureName(), lpszIconName))
+					if (m_Signifiers[itr].m_nPlayerIndex == nPlayerIndex && FStrEq(pLocator->GetOnscreenIconTextureName(), lpszIconName))
 					{
 						// Remove the glow
 						if ( m_Signifiers[itr].m_nGlowIndex != -1 )
@@ -2584,7 +2578,7 @@ public:
 						// Kill it
 						Locator_RemoveTarget( m_Signifiers[itr].m_nLocatorIndex );
 						m_Signifiers.FastRemove( itr );
-					}*/ // TODO: No gameinstructor yet...
+					}
 				}
 			}
 		}
