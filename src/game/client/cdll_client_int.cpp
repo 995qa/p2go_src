@@ -981,7 +981,7 @@ public:
 
 	virtual void			GetStatus( char *buffer, int bufsize );
 
-#if defined ( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 	virtual bool			IsChatRaised( void );
 	virtual bool			IsRadioPanelRaised( void );
 	virtual bool			IsBindMenuRaised( void );
@@ -4139,7 +4139,7 @@ void CHLClient::Hud_SaveStarted()
 
 void CHLClient::ShutdownMovies()
 {
-	//VGui_StopAllVideoPanels();
+	VGui_StopAllVideoPanels();
 }
 
 void CHLClient::GetStatus( char *buffer, int bufsize )
@@ -4147,7 +4147,7 @@ void CHLClient::GetStatus( char *buffer, int bufsize )
 	UTIL_GetClientStatusText( buffer, bufsize );
 }
 
-#if defined( CSTRIKE15 )
+#if defined( CSTRIKE15 ) && defined( CSTRIKE_DLL )
 bool CHLClient::IsChatRaised( void )
 {
 #if defined( INCLUDE_SCALEFORM )
