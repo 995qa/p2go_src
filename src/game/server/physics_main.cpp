@@ -1296,7 +1296,7 @@ int CBaseEntity::PhysicsTryMove( float flTime, trace_t *steptrace )
 		if (!trace.m_pEnt)
 		{
 			SetAbsVelocity( vecAbsVelocity );
-			Warning( "PhysicsTryMove: !trace.u.ent" );
+			Warning( "PhysicsTryMove: !trace.u.ent\n" );
 			Assert(0);
 			return 4;
 		}

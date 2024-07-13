@@ -49,16 +49,16 @@ class CHUDQuickInfo : public CHudElement, public vgui::Panel
 {
 	DECLARE_CLASS_SIMPLE( CHUDQuickInfo, vgui::Panel );
 
-public:    
+public:
 	CHUDQuickInfo( const char *pElementName );
-    ~CHUDQuickInfo();
+	virtual ~CHUDQuickInfo();
 
 	virtual void ApplySchemeSettings( IScheme *scheme );
 	virtual void Init( void );
 	virtual void VidInit( void );
 	virtual bool ShouldDraw( void );
 	virtual void Paint();
-		
+
 private:
 	void DrawCrosshair( Color color, float flApparentZ );
 
@@ -69,7 +69,7 @@ private:
 	//void DrawWarning();
 
 	//bool EventTimeElapsed();
-	
+
 	//float m_flLastEventTime;
 	// SanyaSho: end of unused code
 
@@ -146,7 +146,7 @@ void CHUDQuickInfo::Init( void )
 void CHUDQuickInfo::VidInit( void )
 {
 	Init();
-	
+
 	m_icon_rb = HudIcons().GetIcon( "portal_crosshair_right_valid" );
 	m_icon_lb = HudIcons().GetIcon( "portal_crosshair_left_valid" );
 	m_icon_rbn = HudIcons().GetIcon( "portal_crosshair_right_invalid" );
@@ -173,7 +173,7 @@ bool CHUDQuickInfo::ShouldDraw( void )
 
 	if ( !crosshair.GetBool() )
 		return false;
-	
+
 	if( IsRadialMenuOpen() )
 		return false;
 
@@ -193,7 +193,7 @@ void CHUDQuickInfo::Paint()
 	byte color[4];
 	bool blend;
 	GetViewEffects()->GetFadeParams( &color[0], &color[1], &color[2], &color[3], &blend );
-	
+
 	Vector pos, fwd, right, up;
 	pPlayer->EyePositionAndVectors( &pos, &fwd, &right, &up );
 
