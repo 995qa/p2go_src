@@ -11,7 +11,6 @@
 #include <vgui_controls/ImagePanel.h>
 //#include "asw_hudelement.h"
 #include "hudelement.h"
-#include "portal2_vgui_ingame_panel.h"
 #include "polygonbutton.h"
 
 #ifndef PANEL_RADIAL_MENU

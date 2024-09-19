@@ -134,6 +134,8 @@ $Project "Client (Portal 2)"
 
 	$Folder	"Source Files"
 	{
+		$File	"hud_chat.cpp"
+
 		// Not in P2ASW
 		-$File	"$SRCDIR\game\shared\achievement_saverestore.cpp"
 		-$File	"$SRCDIR\game\shared\achievement_saverestore.h"
@@ -260,6 +262,9 @@ $Project "Client (Portal 2)"
 			
 			$File "portal2/radialmenu.cpp"
 			$File "portal2/radialmenu.h"
+			$File	"portal2\radialmenu_taunt.cpp"
+			$File	"portal2\radialmenu_taunt.h"
+			
 			$File "portal2/polygonbutton.cpp"
 			$File "portal2/polygonbutton.h"
 			$File "portal2/radialbutton.cpp"
@@ -274,19 +279,38 @@ $Project "Client (Portal 2)"
 			
 			$File "portal2\c_trigger_tractorbeam.h"
 			$File "portal2\c_trigger_tractorbeam.cpp"
+
+			$File	"portal2\hud_coop_ping_indicator.cpp"
+			$File	"portal2\hud_indicator.cpp"
+			$File	"portal2\hud_multiplayerbasicinfo.cpp"
+			$File	"portal2\hud_taunt_earned.cpp"
+			$File	"portal2\hud_taunt_earned.h"
+			$File	"portal2\hud_viewfinder.cpp"
+			//$File	"portal2\hud_vs_score_panel.cpp"
+			//$File	"portal2\hud_challenge_stats_panel.cpp"
+			//$File	"portal2\hud_puzzlemaker_map_out_of_date.cpp"
+			//$File	"portal2\hud_puzzlemaker_saving.cpp"
 			
 			$File	"$SRCDIR\game\shared\portal\trigger_tractorbeam_shared.cpp" // NOTE: Portal 2's Server VPC doesn't have this.
 		
 			$Folder	"VGUI"
 			{
-				$File	"hud_chat.cpp"
-
+				//$File	"portal2\vgui\portalclientscoreboard.cpp"
+				//$File	"portal2\vgui\portalclientscoreboard.h"
+				//$File	"portal2\vgui\surveypanel.cpp"
+				//$File	"portal2\vgui\surveypanel.h"
+				//$File	"portal2\vgui\splinegraphpanel.cpp"
+				//$File	"portal2\vgui\splinegraphpanel.h"
 				$File	"portal2\vgui\vgui_indicator_panel.cpp"
-
-				// SanyaSho: WIP
-				//$File	"portal2\vgui\vgui_base_progress_screen.h"
-				//$File	"portal2\vgui\vgui_base_progress_screen.cpp"
-				//$File	"portal2\vgui\vgui_sp_progress_screen.cpp"
+				//$File	"portal2\vgui\vgui_level_placard.cpp"
+				$File	"portal2\vgui\vgui_base_progress_screen.h"
+				$File	"portal2\vgui\vgui_base_progress_screen.cpp"
+				$File	"portal2\vgui\vgui_mp_lobby_screen.cpp"
+				//$File	"portal2\vgui\vgui_mp_credits_screen.cpp"
+				$File	"portal2\vgui\vgui_sp_progress_screen.cpp"
+				$File	"portal2\vgui\vgui_mp_progress_screen.cpp"
+				//$File	"portal2\vgui\portal_leaderboard_graph_panel.h"
+				//$File	"portal2\vgui\portal_leaderboard_graph_panel.cpp"
 			}
 
 			$Folder "GameUI - Embedded"

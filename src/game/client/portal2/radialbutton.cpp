@@ -1,4 +1,3 @@
-
 #include "cbase.h"
 #include <string.h>
 #include <stdio.h>
@@ -18,7 +17,6 @@
 #include "vgui/ISurface.h"
 #include "iclientmode.h"
 #include "portal_gamerules.h"
-//#include "asw_vgui_ingame_panel.h"
 #include "input.h"
 #include "c_portal_player.h"
 
@@ -37,7 +35,7 @@ extern ConVar RadialMenuDebug;
 
 // todo??
 
-CRadialButton::CRadialButton( vgui::Panel *parent, const char *panelName )
+CRadialButton::CRadialButton( vgui::Panel *parent, const char *panelName ) // Line 22 (identical)
 	: CPolygonButton( parent, panelName )
 {
 	SetCursor( vgui::dc_blank );
@@ -66,12 +64,12 @@ CRadialButton::CRadialButton( vgui::Panel *parent, const char *panelName )
 	m_pIcon->SetSize( 128, 128 );
 }
 
-void CRadialButton::ShowSubmenuIndicator( bool state )
+void CRadialButton::ShowSubmenuIndicator( bool state ) // Line 78 (identical)
 {
 	m_hasSubmenu = state;
 }
 
-void CRadialButton::SetPassthru( CRadialButton *button )
+void CRadialButton::SetPassthru( CRadialButton *button ) // Line 84 (identical)
 {
 	m_passthru = button;
 	if ( button )
@@ -84,12 +82,12 @@ void CRadialButton::SetPassthru( CRadialButton *button )
 	}
 }
 
-CRadialButton *CRadialButton::GetPassthru( void )
+CRadialButton *CRadialButton::GetPassthru( void ) // Line 118 (identical)
 {
 	return m_passthru;
 }
 
-void CRadialButton::UpdateHotspots( KeyValues *data )
+void CRadialButton::UpdateHotspots( KeyValues *data ) // Line 124 (identical)
 {
 	BaseClass::UpdateHotspots( data );
 
@@ -123,7 +121,7 @@ void CRadialButton::UpdateHotspots( KeyValues *data )
 		InvalidateLayout( false, true );
 	}
 }
-void CRadialButton::PerformLayout( void )
+void CRadialButton::PerformLayout( void ) // Line 
 {
 	int wide, tall;
 	GetSize( wide, tall );
@@ -156,9 +154,11 @@ void CRadialButton::PerformLayout( void )
 	}
 
 	BaseClass::PerformLayout();
+
+	// PORTAL2 BUTTON PULSE CODE HERE
 }
 
-Color CRadialButton::GetRadialFgColor( void )
+Color CRadialButton::GetRadialFgColor( void ) // Line 160 (identical)
 {
 	Color c = BaseClass::GetButtonFgColor();
 	if ( !IsEnabled() || GetPassthru() )
@@ -177,7 +177,7 @@ Color CRadialButton::GetRadialFgColor( void )
 	return c;
 }
 
-Color CRadialButton::GetRadialBgColor( void )
+Color CRadialButton::GetRadialBgColor( void ) // Line 249 (identical)
 {
 	Color c = BaseClass::GetButtonBgColor();
 	if ( GetPassthru() )
@@ -209,7 +209,7 @@ Color CRadialButton::GetRadialBgColor( void )
 	return c;
 }
 
-void CRadialButton::GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY )
+void CRadialButton::GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY ) // Line 299 (identical)
 {
 	if ( minX )
 	{
@@ -232,7 +232,7 @@ void CRadialButton::GetHotspotBounds( int *minX, int *minY, int *maxX, int *maxY
 	}
 }
 
-void CRadialButton::PaintBackground( void )
+void CRadialButton::PaintBackground( void ) // Line 326 (identical)
 {
 	if ( RadialMenuDebug.GetBool() && (IsArmed() || m_fakeArmed) )
 	{
@@ -259,7 +259,7 @@ void CRadialButton::PaintBackground( void )
 		vgui::surface()->DrawTexturedPolygon( m_numSubmenuPoints, m_submenuPoints );
 	}
 }
-void CRadialButton::PaintBorder( void )
+void CRadialButton::PaintBorder( void ) // Line 358 (identical)
 {
 	if ( !m_hasBorders )
 		return;
@@ -282,26 +282,16 @@ void CRadialButton::PaintBorder( void )
 		vgui::surface()->DrawTexturedPolyLine( m_submenuPoints, m_numSubmenuPoints );
 	}
 }
-void CRadialButton::Paint( void )
+void CRadialButton::Paint( void ) // Line 383
 {
 	BaseClass::Paint();
-		// FIXME: What is this gibberish???		
-	if ((//(*(unsigned __int8(__cdecl **)(CRadialButton *const))(*(_DWORD *)this->baseclass_0 + 1008))(this) ||
-		m_fakeArmed)
-		&& m_pIcon->GetNumFrames() > 1)
+
+	if( ( IsArmed() || m_fakeArmed ) && m_pIcon->GetNumFrames() > 1 )
 	{
-		int nFrame; // eax
-		float v2 = sinf(gpGlobals->curtime * 7.5);
-		float v3 = (float)((float)(v2 + 1.0) * 0.5) * (float)m_pIcon->GetNumFrames();
-		if ((float)(m_pIcon->GetNumFrames() - 1) <= v3)
-		{
-			nFrame = (int)(float)(m_pIcon->GetNumFrames() - 1);
-		}
-		else
-		{
-			float v4 = sinf(7.5 * gpGlobals->curtime);
-			nFrame = (int)(float)((float)((float)(v4 + 1.0) * 0.5) * (float)m_pIcon->GetNumFrames());
-		}
+		float sineValue = sinf( gpGlobals->curtime * 7.5f );
+		float frameIndex = ( sineValue + 1.0f ) * 0.5f * m_pIcon->GetNumFrames();
+		int nFrame = MIN( (int)frameIndex, m_pIcon->GetNumFrames() - 1 );
+
 		m_pIcon->SetFrame( nFrame );
 	}
 	else
@@ -311,29 +301,29 @@ void CRadialButton::Paint( void )
 }
 
 
-void CRadialButton::ApplySchemeSettings( vgui::IScheme *scheme )
+void CRadialButton::ApplySchemeSettings( vgui::IScheme *scheme ) // Line 402
 {
 	BaseClass::ApplySchemeSettings( scheme );
 	MEM_ALLOC_CREDIT();
-	SetDefaultColor( scheme->GetColor( "Rosetta.DefaultFgColor", Color( 255, 176, 0, 255 ) ), scheme->GetColor( "Rosetta.DefaultBgColor", Color( 0, 0, 0, 128 ) ) );
-	m_armedFgColor = scheme->GetColor( "Rosetta.DefaultFgColor", Color( 255, 176, 0, 255 ) );
-	m_armedBgColor = scheme->GetColor( "Rosetta.ArmedBgColor", Color( 0, 28, 192, 128 ) );
+	SetDefaultColor( scheme->GetColor( "rosette.DefaultFgColor", Color( 255, 176, 0, 255 ) ), scheme->GetColor( "rosette.DefaultBgColor", Color( 0, 0, 0, 128 ) ) );
+	m_armedFgColor = scheme->GetColor( "rosette.DefaultFgColor", Color( 255, 176, 0, 255 ) );
+	m_armedBgColor = scheme->GetColor( "rosette.ArmedBgColor", Color( 0, 28, 192, 128 ) );
 	SetArmedColor( m_armedFgColor, m_armedBgColor );
-	m_disabledBgColor = scheme->GetColor( "Rosetta.DisabledBgColor", Color( 0, 0, 0, 128 ) );
-	m_disabledFgColor = scheme->GetColor( "Rosetta.DisabledFgColor", Color( 0, 0, 0, 128 ) );
-	m_chosenFgColor = scheme->GetColor( "Rosetta.DefaultFgColor", Color( 255, 176, 0, 255 ) );
-	m_chosenBgColor = scheme->GetColor( "Rosetta.ArmedBgColor", Color( 0, 28, 192, 128 ) );
+	m_disabledBgColor = scheme->GetColor( "rosette.DisabledBgColor", Color( 0, 0, 0, 128 ) );
+	m_disabledFgColor = scheme->GetColor( "rosette.DisabledFgColor", Color( 0, 0, 0, 128 ) );
+	m_chosenFgColor = scheme->GetColor( "rosette.DefaultFgColor", Color( 255, 176, 0, 255 ) );
+	m_chosenBgColor = scheme->GetColor( "rosette.ArmedBgColor", Color( 0, 28, 192, 128 ) );
 	SetMouseClickEnabled( MOUSE_RIGHT, true );
 	SetButtonActivationType( ACTIVATE_ONPRESSED );
 
 	m_hasBorders = false;
-	const char *borderStr = scheme->GetResourceString( "Rosetta.DrawBorder" );
+	const char *borderStr = scheme->GetResourceString( "rosette.DrawBorder" );
 	if ( borderStr && atoi( borderStr ) )
 	{
 		m_hasBorders = true;
 	}
 
-	const char *fontStr = scheme->GetResourceString( "Rosetta.DefaultFont" );
+	const char *fontStr = scheme->GetResourceString( "rosette.DefaultFont" );
 	if ( fontStr )
 	{
 		m_defaultFont = scheme->GetFont( fontStr, true );
@@ -343,7 +333,7 @@ void CRadialButton::ApplySchemeSettings( vgui::IScheme *scheme )
 		m_defaultFont = scheme->GetFont( "Default", true );
 	}
 
-	fontStr = scheme->GetResourceString( "Rosetta.ArmedFont" );
+	fontStr = scheme->GetResourceString( "rosette.ArmedFont" );
 	if ( fontStr )
 	{
 		m_armedFont = scheme->GetFont( fontStr, true );
