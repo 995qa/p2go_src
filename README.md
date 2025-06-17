@@ -8,6 +8,7 @@ What is P2ASW? Check it out here: https://github.com/EpicSentry/P2ASW/<br>
 # Using and building P2GO:
 ## Windows
 - Generate the project using `createportal2projects.bat` and build with VS2019 (2022 with 2019 build tools will work).<br>
+- You must install MFC and ATL for V142 (Available under "Individual Components" in the Visual Studio Installer) to build successfully.
 - **VS 2022 users:** Do NOT upgrade the solution if prompted to! Hit cancel on the upgrade dialog box.<br>
 - Clone the [required game assets repo](https://github.com/CSGOPorts/p2go_game) into `game`.<br>
 - Copy over all of your Portal 2 folder to the `game` folder, excluding any `bin` folders.<br>
