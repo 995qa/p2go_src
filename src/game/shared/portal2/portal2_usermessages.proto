@@ -374,7 +374,8 @@ message CUsrMsg_InventoryFlash
 
 message CUsrMsg_IndicatorFlash
 {
-	optional int32 dummy = 1;
+	optional int32 indicator_type = 1;
+	optional float fadetime = 2;
 }
 
 message CUsrMsg_ControlHelperAnimate
